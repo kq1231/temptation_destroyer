@@ -1,0 +1,13 @@
+{
+  "name": "temptation-destroyer-design-system",
+  "version": "1.0.0",
+  "description": "Design System for Temptation Destroyer with SSI support",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-ssi": "^0.3.2"
+  }
+} 

@@ -1,0 +1,194 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:565911162749560298",
+      "lastPropertyId": "10:1245832919544223211",
+      "name": "EmergencySessionModel",
+      "properties": [
+        {
+          "id": "1:1615750766328326112",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5571737721030089582",
+          "name": "sessionId",
+          "type": 9,
+          "flags": 2080,
+          "indexId": "1:3548844010489133431"
+        },
+        {
+          "id": "3:3154935104438855566",
+          "name": "startTime",
+          "type": 10
+        },
+        {
+          "id": "4:4231261392579040681",
+          "name": "endTime",
+          "type": 10
+        },
+        {
+          "id": "5:2681554415396974063",
+          "name": "activeTriggerIds",
+          "type": 9
+        },
+        {
+          "id": "6:767168598278742911",
+          "name": "wasAIGuidanceShown",
+          "type": 1
+        },
+        {
+          "id": "7:1422745122981706590",
+          "name": "notes",
+          "type": 9
+        },
+        {
+          "id": "8:6815928807855179292",
+          "name": "intensity",
+          "type": 6
+        },
+        {
+          "id": "9:1579482186747108307",
+          "name": "wasSuccessful",
+          "type": 1
+        },
+        {
+          "id": "10:1245832919544223211",
+          "name": "helpfulStrategies",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:8755138201011373113",
+      "lastPropertyId": "11:8278726151384783726",
+      "name": "TriggerModel",
+      "properties": [
+        {
+          "id": "1:2167728151839681866",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7620108606640191335",
+          "name": "triggerId",
+          "type": 9,
+          "flags": 2080,
+          "indexId": "2:3841213203514361365"
+        },
+        {
+          "id": "3:8262529195314612134",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "4:7646292331246731586",
+          "name": "triggerTypeValue",
+          "type": 6
+        },
+        {
+          "id": "5:2588605991265152809",
+          "name": "intensity",
+          "type": 6
+        },
+        {
+          "id": "6:8245590564100759391",
+          "name": "createdAt",
+          "type": 10
+        },
+        {
+          "id": "7:2270421302834360664",
+          "name": "notes",
+          "type": 9
+        },
+        {
+          "id": "8:3322285039199958135",
+          "name": "activeTimes",
+          "type": 9
+        },
+        {
+          "id": "9:162608734531038007",
+          "name": "activeDays",
+          "type": 9
+        },
+        {
+          "id": "10:5317087322181146925",
+          "name": "activeTimesList",
+          "type": 30
+        },
+        {
+          "id": "11:8278726151384783726",
+          "name": "activeDaysList",
+          "type": 27
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:4857296881808942799",
+      "lastPropertyId": "8:5491796628158094474",
+      "name": "UserModel",
+      "properties": [
+        {
+          "id": "1:1024703197263590431",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8702117622623828049",
+          "name": "hashedPassword",
+          "type": 9
+        },
+        {
+          "id": "3:4135519897461469362",
+          "name": "passwordSalt",
+          "type": 9
+        },
+        {
+          "id": "4:3324290692423908662",
+          "name": "lastLoginDate",
+          "type": 10
+        },
+        {
+          "id": "5:2411309932995274532",
+          "name": "securityQuestions",
+          "type": 9
+        },
+        {
+          "id": "6:4795934497715024907",
+          "name": "customApiKey",
+          "type": 9
+        },
+        {
+          "id": "7:8137783214183318794",
+          "name": "apiServiceType",
+          "type": 9
+        },
+        {
+          "id": "8:5491796628158094474",
+          "name": "isFirstLogin",
+          "type": 1
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "3:4857296881808942799",
+  "lastIndexId": "2:3841213203514361365",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

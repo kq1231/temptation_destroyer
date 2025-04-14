@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temptation Destroyer - Design System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#6750A4',
+                            dark: '#D0BCFF'
+                        },
+                        secondary: {
+                            DEFAULT: '#E8DEF8',
+                            dark: '#4F378B'
+                        },
+                        surface: {
+                            DEFAULT: '#FFFBFE',
+                            dark: '#1C1B1F'
+                        },
+                        error: {
+                            DEFAULT: '#B3261E',
+                            dark: '#F2B8B5'
+                        },
+                        'on-primary': {
+                            DEFAULT: '#FFFFFF',
+                            dark: '#381E72'
+                        },
+                        'on-secondary': {
+                            DEFAULT: '#1D192B',
+                            dark: '#E8DEF8'
+                        },
+                        'on-surface': {
+                            DEFAULT: '#1C1B1F',
+                            dark: '#E6E1E5'
+                        },
+                        'on-error': {
+                            DEFAULT: '#FFFFFF',
+                            dark: '#601410'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F5F5F5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .dark body {
+            background-color: #121212;
+            color: #E6E1E5;
+        }
+        .component-preview {
+            background: repeating-conic-gradient(#E0E0E0 0% 25%, transparent 0% 50%) 
+                        50% / 20px 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .dark .component-preview {
+            background: repeating-conic-gradient(#333333 0% 25%, transparent 0% 50%) 
+                        50% / 20px 20px;
+        }
+        
+        /* Dark mode toggle button */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: #FFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .dark .dark-mode-toggle {
+            background: #2D3748;
+            border-color: #4A5568;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <!-- Dark Mode Toggle Button -->
+    <div id="dark-mode-toggle-container"></div>
+
+    <!-- Header -->
+    <div id="header-container"></div>
+
+    <main class="max-w-7xl mx-auto">
+        <!-- Figma-like scrollable container for viewing all screens -->
+        <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg mb-8 overflow-x-auto">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Scroll horizontally to view all screens side-by-side</p>
+            <div class="flex space-x-6 pb-4 min-w-max">
+                <!-- Screens will be placed here in a horizontal row -->
+            </div>
+        </div>
+
+        <!-- Color Palette -->
+        <div id="color-palette-container"></div>
+
+        <!-- Typography -->
+        <div id="typography-container"></div>
+
+        <!-- Core Components Section -->
+        <section id="core-components" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Core Components</h2>
+            
+            <!-- Buttons -->
+            <div id="buttons-container"></div>
+
+            <!-- Input Fields -->
+            <div id="input-fields-container"></div>
+        </section>
+
+        <!-- Authentication Screen -->
+        <div id="auth-screen-container"></div>
+
+        <!-- Dashboard Screen -->
+        <div id="dashboard-screen-container"></div>
+
+        <!-- Journal Entry Screen -->
+        <div id="journal-entry-screen-container"></div>
+
+        <!-- Statistics Screen -->
+        <div id="statistics-screen-container"></div>
+
+        <!-- Onboarding - Triggers Screen -->
+        <div id="onboarding-triggers-container"></div>
+
+        <!-- Onboarding - Aspirations Screen -->
+        <div id="onboarding-aspirations-container"></div>
+
+        <!-- Onboarding - Hobbies Screen -->
+        <div id="onboarding-hobbies-container"></div>
+
+        <!-- AI Response Screen -->
+        <div id="ai-response-container"></div>
+
+        <!-- Emergency Response Screen -->
+        <div id="emergency-response-container"></div>
+
+        <!-- Achievement System Components Section -->
+        <section id="achievements" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Achievement System Components</h2>
+            
+            <!-- Achievement Card -->
+            <div id="achievement-card-container"></div>
+        </section>
+    </main>
+
+    <footer class="max-w-7xl mx-auto mt-12 py-6 border-t border-gray-200 dark:border-gray-700">
+        <p class="text-center text-gray-500 dark:text-gray-400">Temptation Destroyer - Design System</p>
+    </footer>
+
+    <script>
+        // Function to load component HTML into a container
+        async function loadComponent(containerID, componentPath) {
+            try {
+                const response = await fetch(componentPath);
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${componentPath}`);
+                }
+                const html = await response.text();
+                document.getElementById(containerID).innerHTML = html;
+                
+                // Execute any scripts in the loaded content
+                const scripts = document.getElementById(containerID).querySelectorAll('script');
+                scripts.forEach(script => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = script.textContent;
+                    document.body.appendChild(newScript);
+                });
+            } catch (error) {
+                console.error(error);
+                document.getElementById(containerID).innerHTML = `<p class="text-error dark:text-error-dark">Failed to load component: ${componentPath}</p>`;
+            }
+        }
+
+        // Load all components
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load shared components
+            loadComponent('dark-mode-toggle-container', 'components/dark-mode-toggle.html');
+            loadComponent('header-container', 'components/header.html');
+            
+            // Load UI components
+            loadComponent('color-palette-container', 'components/color-palette.html');
+            loadComponent('typography-container', 'components/typography.html');
+            loadComponent('buttons-container', 'components/buttons.html');
+            loadComponent('input-fields-container', 'components/input-fields.html');
+            loadComponent('achievement-card-container', 'components/achievement-card.html');
+            
+            // Load screen components
+            loadComponent('auth-screen-container', 'screens/auth-screen.html');
+            loadComponent('dashboard-screen-container', 'screens/dashboard-screen.html');
+            loadComponent('journal-entry-screen-container', 'screens/journal-entry-screen.html');
+            loadComponent('statistics-screen-container', 'screens/statistics-screen.html');
+            loadComponent('onboarding-triggers-container', 'screens/onboarding-triggers.html');
+            loadComponent('onboarding-aspirations-container', 'screens/onboarding-aspirations.html');
+            loadComponent('onboarding-hobbies-container', 'screens/onboarding-hobbies.html');
+            loadComponent('ai-response-container', 'screens/ai-response.html');
+            loadComponent('emergency-response-container', 'screens/emergency-response.html');
+        });
+
+        // Dark mode toggle functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#darkModeToggle')) {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('darkMode', 
+                    document.documentElement.classList.contains('dark') ? 'enabled' : 'disabled'
+                );
+            }
+        });
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>

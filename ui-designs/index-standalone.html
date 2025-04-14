@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temptation Destroyer - Design System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#6750A4',
+                            dark: '#D0BCFF'
+                        },
+                        secondary: {
+                            DEFAULT: '#E8DEF8',
+                            dark: '#4F378B'
+                        },
+                        surface: {
+                            DEFAULT: '#FFFBFE',
+                            dark: '#1C1B1F'
+                        },
+                        error: {
+                            DEFAULT: '#B3261E',
+                            dark: '#F2B8B5'
+                        },
+                        'on-primary': {
+                            DEFAULT: '#FFFFFF',
+                            dark: '#381E72'
+                        },
+                        'on-secondary': {
+                            DEFAULT: '#1D192B',
+                            dark: '#E8DEF8'
+                        },
+                        'on-surface': {
+                            DEFAULT: '#1C1B1F',
+                            dark: '#E6E1E5'
+                        },
+                        'on-error': {
+                            DEFAULT: '#FFFFFF',
+                            dark: '#601410'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F5F5F5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .dark body {
+            background-color: #121212;
+            color: #E6E1E5;
+        }
+        .component-preview {
+            background: repeating-conic-gradient(#E0E0E0 0% 25%, transparent 0% 50%) 
+                        50% / 20px 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .dark .component-preview {
+            background: repeating-conic-gradient(#333333 0% 25%, transparent 0% 50%) 
+                        50% / 20px 20px;
+        }
+        
+        /* Dark mode toggle button */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: #FFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .dark .dark-mode-toggle {
+            background: #2D3748;
+            border-color: #4A5568;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <!-- Dark Mode Toggle Button -->
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark/light mode">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700 dark:text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" class="dark:hidden" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" class="hidden dark:block" />
+        </svg>
+    </button>
+
+    <header class="max-w-7xl mx-auto mb-12">
+        <h1 class="text-4xl font-bold text-on-surface dark:text-on-surface-dark mb-4">Temptation Destroyer</h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300">Design System & Component Library</p>
+        <div class="flex mt-4 space-x-4">
+            <a href="#colors" class="text-primary dark:text-primary-dark">Colors</a>
+            <a href="#typography" class="text-primary dark:text-primary-dark">Typography</a>
+            <a href="#core-components" class="text-primary dark:text-primary-dark">Core Components</a>
+            <a href="#screens" class="text-primary dark:text-primary-dark">Screens</a>
+            <a href="#achievements" class="text-primary dark:text-primary-dark">Achievements</a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto">
+        <!-- Figma-like View -->
+        <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg mb-8 overflow-x-auto">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Scroll horizontally to view all screens side-by-side</p>
+            <div class="flex space-x-6 pb-4 min-w-max">
+                <!-- Auth Screen Preview -->
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="text-center mb-6">
+                        <span class="text-4xl">🔒</span>
+                        <h1 class="text-xl font-bold mt-2 text-on-surface dark:text-on-surface-dark">Temptation Destroyer</h1>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h2 class="text-lg font-medium mb-4 text-on-surface dark:text-on-surface-dark">Welcome Back</h2>
+                        <div class="mb-4">
+                            <input type="password" placeholder="Enter Password" 
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none">
+                        </div>
+                        <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full hover:bg-opacity-90 transition-colors font-medium">
+                            Unlock App
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Screen Preview -->
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <div class="h-10 w-10 bg-primary dark:bg-primary-dark rounded-full flex items-center justify-center text-white dark:text-on-primary-dark">
+                                <span class="text-lg font-medium">TD</span>
+                            </div>
+                            <h1 class="text-lg font-medium ml-2 text-on-surface dark:text-on-surface-dark">Dashboard</h1>
+                        </div>
+                        <button class="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zm0 1a6 6 0 100 12 6 6 0 000-12zm0 2a1 1 0 011 1v2h2a1 1 0 110 2h-2v2a1 1 0 11-2 0v-2H7a1 1 0 110-2h2V7a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mb-6">
+                        <div class="p-4 bg-green-50 dark:bg-green-900 rounded-lg border border-green-200 dark:border-green-800">
+                            <p class="text-green-700 dark:text-green-300 font-medium">7 day streak! 🔥</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Journal Entry Screen Preview -->
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-lg font-medium text-on-surface dark:text-on-surface-dark">Journal Entry</h1>
+                        <button class="text-primary dark:text-primary-dark">Save</button>
+                    </div>
+                    <textarea placeholder="What are you feeling right now?" 
+                              class="w-full h-40 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none mb-4">
+                    </textarea>
+                    <div class="flex justify-between">
+                        <button class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-7.536 5.879a1 1 0 001.415 0 3 3 0 014.242 0 1 1 0 001.415-1.415 5 5 0 00-7.072 0 1 1 0 000 1.415z" clip-rule="evenodd" />
+                            </svg>
+                            Mood
+                        </button>
+                        <button class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                            Save
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics Screen Preview -->
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-lg font-medium text-on-surface dark:text-on-surface-dark">Statistics</h1>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 rounded-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark text-sm">Week</button>
+                            <button class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm">Month</button>
+                            <button class="px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm">Year</button>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <div class="h-[200px] bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                            <p class="text-gray-500 dark:text-gray-400">Weekly Progress Chart</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Response Screen Preview -->
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-lg font-medium text-on-surface dark:text-on-surface-dark">AI Assistant</h1>
+                        <button class="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a7 7 0 100 14 7 7 0 000-14zm0 1a6 6 0 100 12 6 6 0 000-12zm-1 9a1 1 0 112 0v2a1 1 0 11-2 0v-2zm2-7a1 1 0 11-2 0v4a1 1 0 112 0V6z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mb-6">
+                        <div class="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+                            <p class="text-blue-700 dark:text-blue-300">I'm here to help you overcome your temptations. What's on your mind today?</p>
+                        </div>
+                        <input type="text" placeholder="Type your message..." 
+                               class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Palette -->
+        <section id="colors" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Color Palette</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="p-4 rounded-lg dark:bg-gray-800">
+                    <div class="h-20 bg-primary dark:bg-primary-dark rounded-lg mb-2"></div>
+                    <p class="text-sm font-medium dark:text-white">Primary</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Light: #6750A4 / Dark: #D0BCFF</p>
+                </div>
+                <div class="p-4 rounded-lg dark:bg-gray-800">
+                    <div class="h-20 bg-secondary dark:bg-secondary-dark rounded-lg mb-2"></div>
+                    <p class="text-sm font-medium dark:text-white">Secondary</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Light: #E8DEF8 / Dark: #4F378B</p>
+                </div>
+                <div class="p-4 rounded-lg dark:bg-gray-800">
+                    <div class="h-20 bg-surface dark:bg-surface-dark rounded-lg mb-2 border border-gray-200 dark:border-gray-700"></div>
+                    <p class="text-sm font-medium dark:text-white">Surface</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Light: #FFFBFE / Dark: #1C1B1F</p>
+                </div>
+                <div class="p-4 rounded-lg dark:bg-gray-800">
+                    <div class="h-20 bg-error dark:bg-error-dark rounded-lg mb-2"></div>
+                    <p class="text-sm font-medium dark:text-white">Error</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Light: #B3261E / Dark: #F2B8B5</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography -->
+        <section id="typography" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Typography</h2>
+            <div class="space-y-4 bg-white dark:bg-gray-800 p-6 rounded-lg">
+                <div>
+                    <h1 class="text-2xl font-bold dark:text-white">Heading 1</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Font: Roboto Bold, 24px</p>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold dark:text-white">Heading 2</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Font: Roboto Bold, 20px</p>
+                </div>
+                <div>
+                    <p class="text-base dark:text-gray-300">Body Text</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Font: Roboto Regular, 16px</p>
+                </div>
+                <div>
+                    <p class="text-sm dark:text-gray-300">Small Text</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Font: Roboto Regular, 14px</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Components -->
+        <section id="core-components" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Core Components</h2>
+            
+            <!-- Buttons -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4 dark:text-white">Buttons</h3>
+                <div class="flex flex-wrap gap-4">
+                    <button class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark px-6 py-3 rounded-full hover:bg-opacity-90 transition-colors">
+                        Primary Button
+                    </button>
+                    <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark px-6 py-3 rounded-full hover:bg-opacity-90 transition-colors">
+                        Secondary Button
+                    </button>
+                    <button class="border border-primary dark:border-primary-dark text-primary dark:text-primary-dark px-6 py-3 rounded-full hover:bg-primary hover:text-white dark:hover:bg-primary-dark dark:hover:text-on-primary-dark transition-colors">
+                        Outline Button
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input Fields -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4 dark:text-white">Input Fields</h3>
+                <div class="space-y-4 max-w-sm">
+                    <input type="text" placeholder="Text Input" 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none transition-colors">
+                    
+                    <input type="password" placeholder="Password Input" 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none transition-colors">
+                    
+                    <textarea placeholder="Text Area" 
+                              class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none transition-colors"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievement System Components Section -->
+        <section id="achievements" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Achievement System Components</h2>
+            
+            <!-- Achievement Cards -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4 dark:text-white">Achievement Cards</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Unlocked Achievement -->
+                    <div class="p-4 bg-surface dark:bg-surface-dark rounded-lg border border-gray-200 dark:border-gray-700 flex items-center">
+                        <div class="h-12 w-12 bg-primary dark:bg-primary-dark rounded-full flex items-center justify-center mr-4">
+                            <span class="text-white dark:text-on-primary-dark text-xl">🏆</span>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-on-surface dark:text-on-surface-dark">7 Day Streak</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">You've been temptation-free for a week!</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Locked Achievement -->
+                    <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center opacity-70">
+                        <div class="h-12 w-12 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-gray-600 dark:text-gray-400 text-xl">🔒</span>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-on-surface dark:text-on-surface-dark">30 Day Champion</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Complete a 30-day streak</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="max-w-7xl mx-auto mt-12 py-6 border-t border-gray-200 dark:border-gray-700">
+        <p class="text-center text-gray-500 dark:text-gray-400">Temptation Destroyer - Design System</p>
+    </footer>
+
+    <script>
+        // Dark mode toggle functionality
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Check for saved theme preference or use user's system preference
+        if (localStorage.getItem('dark-mode') === 'true' || 
+            (localStorage.getItem('dark-mode') === null && 
+             window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        // Toggle dark mode on button click
+        darkModeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            // Save preference to localStorage
+            localStorage.setItem('dark-mode', document.documentElement.classList.contains('dark'));
+        });
+    </script>
+</body>
+</html> 

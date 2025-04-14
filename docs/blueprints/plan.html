@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>plan.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="temptation-destroyer---app-development-plan">Temptation Destroyer - App Development Plan</h1>
+<h2 id="overview">Overview</h2>
+<p>Temptation Destroyer is a privacy-focused Flutter application designed to help users overcome sinful behaviors and build positive streaks. The app emphasizes local data storage, encryption, and AI-powered guidance while maintaining user privacy.</p>
+<h2 id="tech-stack">Tech Stack</h2>
+<ul>
+<li><strong>Frontend</strong>: Flutter with Riverpod for state management</li>
+<li><strong>Local Database</strong>: ObjectBox with encryption</li>
+<li><strong>AI Integration</strong>: Claude 3.5 Sonnet via Replicate API</li>
+<li><strong>Security</strong>: Local encryption for data protection</li>
+<li><strong>State Management</strong>: Riverpod for dependency injection and state management</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<h3 id="core-layer-architecture">Core Layer Architecture</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    A[User Interface Layer] --> B[State Management Layer]
+    B --> C[Service Layer]
+    C --> D[Repository Layer]
+    D --> E[Local Storage Layer]
+    C --> F[AI Service Layer]
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#bfb,stroke:#333,stroke-width:2px
+    style D fill:#fbb,stroke:#333,stroke-width:2px
+    style E fill:#fbf,stroke:#333,stroke-width:2px
+    style F fill:#bff,stroke:#333,stroke-width:2px
+</div></code></pre>
+<h3 id="ui-components-architecture">UI Components Architecture</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph UI[User Interface Components]
+        A1[Auth Screen]
+        A2[Dashboard]
+        A3[Journal Entry]
+        A4[Statistics View]
+        A5[Settings]
+    end
+
+    A1 --> B[UI Layer]
+    A2 --> B
+    A3 --> B
+    A4 --> B
+    A5 --> B
+
+    style A1 fill:#f9f,stroke:#333,stroke-width:2px
+    style A2 fill:#f9f,stroke:#333,stroke-width:2px
+    style A3 fill:#f9f,stroke:#333,stroke-width:2px
+    style A4 fill:#f9f,stroke:#333,stroke-width:2px
+    style A5 fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+</div></code></pre>
+<h3 id="state-management-architecture">State Management Architecture</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph State[State Management]
+        B1[Auth State]
+        B2[Journal State]
+        B3[Stats State]
+        B4[Settings State]
+    end
+
+    B1 --> C[State Layer]
+    B2 --> C
+    B3 --> C
+    B4 --> C
+
+    style B1 fill:#bbf,stroke:#333,stroke-width:2px
+    style B2 fill:#bbf,stroke:#333,stroke-width:2px
+    style B3 fill:#bbf,stroke:#333,stroke-width:2px
+    style B4 fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#bfb,stroke:#333,stroke-width:2px
+</div></code></pre>
+<h3 id="service-layer-architecture">Service Layer Architecture</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph Services[Core Services]
+        C1[Auth Service]
+        C2[Journal Service]
+        C3[Stats Service]
+        C4[AI Service]
+    end
+
+    C1 --> D[Service Layer]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+
+    style C1 fill:#bfb,stroke:#333,stroke-width:2px
+    style C2 fill:#bfb,stroke:#333,stroke-width:2px
+    style C3 fill:#bfb,stroke:#333,stroke-width:2px
+    style C4 fill:#bfb,stroke:#333,stroke-width:2px
+    style D fill:#fbb,stroke:#333,stroke-width:2px
+</div></code></pre>
+<h3 id="data-layer-architecture">Data Layer Architecture</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph Data[Data Layer]
+        D1[Auth Repository]
+        D2[Journal Repository]
+        D3[Stats Repository]
+    end
+
+    D1 --> E[Repository Layer]
+    D2 --> E
+    D3 --> E
+
+    style D1 fill:#fbb,stroke:#333,stroke-width:2px
+    style D2 fill:#fbb,stroke:#333,stroke-width:2px
+    style D3 fill:#fbb,stroke:#333,stroke-width:2px
+    style E fill:#fbf,stroke:#333,stroke-width:2px
+</div></code></pre>
+<h3 id="storage-layer-architecture">Storage Layer Architecture</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph Storage[Encrypted Storage]
+        E1[ObjectBox]
+        E2[Secure Storage]
+    end
+
+    E1 --> F[Storage Layer]
+    E2 --> F
+
+    style E1 fill:#fbf,stroke:#333,stroke-width:2px
+    style E2 fill:#fbf,stroke:#333,stroke-width:2px
+    style F fill:#bff,stroke:#333,stroke-width:2px
+</div></code></pre>
+<h3 id="ai-integration-architecture">AI Integration Architecture</h3>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    subgraph AI[AI Integration]
+        F1[Replicate API]
+        F2[Response Processing]
+    end
+
+    F1 --> G[AI Layer]
+    F2 --> G
+
+    style F1 fill:#bff,stroke:#333,stroke-width:2px
+    style F2 fill:#bff,stroke:#333,stroke-width:2px
+    style G fill:#ff9,stroke:#333,stroke-width:2px
+</div></code></pre>
+<h2 id="data-models">Data Models</h2>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+    User "1" -- "*" Trigger : has
+    User "1" -- "*" Aspiration : has
+    User "1" -- "*" JournalEntry : has
+    User "1" -- "1" Streak : has
+    User "1" -- "1" Statistics : has
+    User "1" -- "*" Achievement : has
+    User "1" -- "*" Hobby : has
+    JournalEntry "*" -- "*" Trigger : references
+
+    class User {
+        +int id
+        +String hashedPassword
+        +DateTime createdAt
+        +List~Achievement~ achievements
+        +List~Trigger~ triggers
+        +List~Aspiration~ aspirations
+        +List~Hobby~ hobbies
+        +Map~TimeOfDay, int~ vulnerableTimeSlots
+    }
+
+    class Trigger {
+        +int id
+        +String description
+        +TriggerType type
+        +int intensity
+        +DateTime createdAt
+    }
+
+    class Aspiration {
+        +int id
+        +String dua
+        +String category
+        +DateTime createdAt
+        +bool isAchieved
+    }
+
+    class JournalEntry {
+        +int id
+        +DateTime timestamp
+        +String content
+        +int intensityLevel
+        +Duration duration
+        +String aiResponse
+        +bool isSlipUp
+        +List~Trigger~ activeTriggersAtTime
+    }
+
+    class Streak {
+        +int id
+        +DateTime startDate
+        +int currentCount
+        +int bestCount
+    }
+
+    class Statistics {
+        +int id
+        +Map~DateTime, int~ intensityByDay
+        +Map~DateTime, Duration~ durationByDay
+        +List~DateTime~ slipUpDates
+    }
+
+    class Achievement {
+        +int id
+        +String title
+        +String description
+        +DateTime unlockedAt
+    }
+
+    class Hobby {
+        +int id
+        +String name
+        +String description
+        +HobbyCategory category
+        +int enjoymentLevel
+        +bool requiresCompany
+        +DateTime lastEngaged
+        +int minutesRequired
+    }
+</div></code></pre>
+<h2 id="feature-implementation-plan">Feature Implementation Plan</h2>
+<h3 id="phase-1-foundation-week-1-2">Phase 1: Foundation (Week 1-2)</h3>
+<ol>
+<li>Project setup with Flutter and Riverpod</li>
+<li>ObjectBox integration with encryption</li>
+<li>Basic UI implementation</li>
+<li>Authentication system with local password protection</li>
+</ol>
+<h3 id="phase-2-core-features-week-3-4">Phase 2: Core Features (Week 3-4)</h3>
+<ol>
+<li>Journal entry system</li>
+<li>Basic statistics tracking</li>
+<li>Streak monitoring</li>
+<li>Local data encryption/decryption</li>
+</ol>
+<h3 id="phase-3-ai-integration-week-5-6">Phase 3: AI Integration (Week 5-6)</h3>
+<ol>
+<li>Replicate API integration</li>
+<li>AI response processing</li>
+<li>Personalized guidance implementation</li>
+<li>Response caching for offline use</li>
+</ol>
+<h3 id="phase-4-advanced-features-week-7-8">Phase 4: Advanced Features (Week 7-8)</h3>
+<ol>
+<li>Advanced statistics and insights</li>
+<li>Achievement system</li>
+<li>Data visualization</li>
+<li>Export/backup functionality</li>
+</ol>
+<h2 id="security-considerations">Security Considerations</h2>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    A[User Input] --> B{Password Check}
+    B -->|Success| C[Decrypt Data]
+    B -->|Failure| D[Stay Locked]
+    C --> E[Access App]
+    E --> F{Data Operations}
+    F -->|Read| G[Decrypt on Read]
+    F -->|Write| H[Encrypt on Write]
+</div></code></pre>
+<h2 id="data-flow">Data Flow</h2>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant U as User
+    participant UI as UI Layer
+    participant S as State Management
+    participant AI as AI Service
+    participant DB as ObjectBox
+    
+    U->>UI: Input Journal Entry
+    UI->>S: Update State
+    S->>AI: Request Guidance
+    AI-->>S: Return AI Response
+    S->>DB: Encrypt & Store
+    DB-->>S: Confirm Storage
+    S->>UI: Update View
+    UI->>U: Show Confirmation
+</div></code></pre>
+<h2 id="clean-architecture-overview">Clean Architecture Overview</h2>
+<pre><code class="language-mermaid"><div class="mermaid">graph TD
+    A[Presentation Layer] --> B[Domain Layer]
+    B --> C[Data Layer]
+    
+    subgraph Presentation[Presentation Layer]
+        A1[Views/Pages] --> A2[Controllers]
+        A2 --> A3[Providers]
+    end
+    
+    subgraph Domain[Domain Layer]
+        B1[Entities] --> B2[Use Cases]
+        B2 --> B3[Repository Interfaces]
+    end
+    
+    subgraph Data[Data Layer]
+        C1[Repository Implementations] --> C2[Data Sources]
+        C2 --> C3[ObjectBox Models]
+    end
+
+    style Presentation fill:#f9f,stroke:#333,stroke-width:2px
+    style Domain fill:#bbf,stroke:#333,stroke-width:2px
+    style Data fill:#bfb,stroke:#333,stroke-width:2px
+</div></code></pre>
+<h2 id="updated-folder-structure">Updated Folder Structure</h2>
+<pre class="hljs"><code><div>lib/
+├── main.dart
+├── core/
+│   ├── constants/
+│   │   ├── app_constants.dart
+│   │   └── error_messages.dart
+│   ├── errors/
+│   │   ├── exceptions.dart
+│   │   └── failures.dart
+│   ├── utils/
+│   │   ├── encryption_utils.dart
+│   │   └── validators.dart
+│   └── themes/
+│       └── app_theme.dart
+├── data/
+│   ├── datasources/
+│   │   ├── local/
+│   │   │   ├── objectbox.dart
+│   │   │   └── secure_storage.dart
+│   │   └── remote/
+│   │       └── replicate_api.dart
+│   ├── models/
+│   │   ├── user_model.dart
+│   │   ├── journal_model.dart
+│   │   ├── streak_model.dart
+│   │   └── statistics_model.dart
+│   └── repositories/
+│       ├── auth_repository_impl.dart
+│       ├── journal_repository_impl.dart
+│       └── stats_repository_impl.dart
+├── domain/
+│   ├── entities/
+│   │   ├── user.dart
+│   │   ├── journal_entry.dart
+│   │   ├── streak.dart
+│   │   └── statistics.dart
+│   ├── repositories/
+│   │   ├── auth_repository.dart
+│   │   ├── journal_repository.dart
+│   │   └── stats_repository.dart
+│   └── usecases/
+│       ├── auth/
+│       │   ├── login_usecase.dart
+│       │   └── verify_password_usecase.dart
+│       ├── journal/
+│       │   ├── add_entry_usecase.dart
+│       │   └── get_entries_usecase.dart
+│       └── stats/
+│           ├── calculate_streak_usecase.dart
+│           └── generate_insights_usecase.dart
+└── presentation/
+    ├── providers/
+    │   ├── auth_provider.dart
+    │   ├── journal_provider.dart
+    │   └── stats_provider.dart
+    ├── controllers/
+    │   ├── auth_controller.dart
+    │   ├── journal_controller.dart
+    │   └── stats_controller.dart
+    └── views/
+        ├── auth/
+        │   ├── login_page.dart
+        │   └── widgets/
+        ├── journal/
+        │   ├── journal_page.dart
+        │   └── widgets/
+        ├── stats/
+        │   ├── stats_page.dart
+        │   └── widgets/
+        └── shared/
+            └── widgets/
+</div></code></pre>
+<h2 id="layer-responsibilities">Layer Responsibilities</h2>
+<h3 id="presentation-layer">Presentation Layer</h3>
+<ul>
+<li><strong>Views</strong>: Flutter widgets and pages</li>
+<li><strong>Controllers</strong>: Handle UI logic and state management</li>
+<li><strong>Providers</strong>: Riverpod providers for dependency injection and state</li>
+</ul>
+<h3 id="domain-layer">Domain Layer</h3>
+<ul>
+<li><strong>Entities</strong>: Core business objects</li>
+<li><strong>Repository Interfaces</strong>: Abstract definitions of data operations</li>
+<li><strong>Use Cases</strong>: Single-responsibility business logic units</li>
+</ul>
+<h3 id="data-layer">Data Layer</h3>
+<ul>
+<li><strong>Models</strong>: Data objects that implement entities</li>
+<li><strong>Repository Implementations</strong>: Concrete implementations of repository interfaces</li>
+<li><strong>Data Sources</strong>: ObjectBox and API implementations</li>
+</ul>
+<h2 id="implementation-flow">Implementation Flow</h2>
+<ol>
+<li>
+<p><strong>Domain Layer First</strong></p>
+<ul>
+<li>Define entities</li>
+<li>Create repository interfaces</li>
+<li>Implement use cases</li>
+</ul>
+</li>
+<li>
+<p><strong>Data Layer Second</strong></p>
+<ul>
+<li>Implement ObjectBox models</li>
+<li>Create repository implementations</li>
+<li>Set up data sources</li>
+</ul>
+</li>
+<li>
+<p><strong>Presentation Layer Last</strong></p>
+<ul>
+<li>Implement providers</li>
+<li>Create controllers</li>
+<li>Build UI components</li>
+</ul>
+</li>
+</ol>
+<h2 id="next-steps">Next Steps</h2>
+<ol>
+<li>Set up the Flutter project with the required dependencies</li>
+<li>Implement the basic project structure</li>
+<li>Set up ObjectBox with encryption</li>
+<li>Create the authentication system</li>
+<li>Begin implementing the core features</li>
+</ol>
+<h2 id="dependencies-to-add">Dependencies to Add</h2>
+<pre class="hljs"><code><div><span class="hljs-attr">dependencies:</span>
+  <span class="hljs-attr">flutter:</span>
+    <span class="hljs-attr">sdk:</span> <span class="hljs-string">flutter</span>
+  <span class="hljs-attr">riverpod:</span> <span class="hljs-string">^2.4.9</span>
+  <span class="hljs-attr">flutter_riverpod:</span> <span class="hljs-string">^2.4.9</span>
+  <span class="hljs-attr">objectbox:</span> <span class="hljs-string">^2.5.0</span>
+  <span class="hljs-attr">objectbox_flutter_libs:</span> <span class="hljs-string">^2.5.0</span>
+  <span class="hljs-attr">http:</span> <span class="hljs-string">^1.1.0</span>
+  <span class="hljs-attr">encrypt:</span> <span class="hljs-string">^5.0.3</span>
+  <span class="hljs-attr">shared_preferences:</span> <span class="hljs-string">^2.2.2</span>
+  <span class="hljs-attr">fl_chart:</span> <span class="hljs-string">^0.66.0</span>
+  <span class="hljs-attr">intl:</span> <span class="hljs-string">^0.19.0</span>
+</div></code></pre>
+<h2 id="additional-dependencies-for-clean-architecture">Additional Dependencies for Clean Architecture</h2>
+<pre class="hljs"><code><div><span class="hljs-attr">dependencies:</span>
+  <span class="hljs-comment"># Previously listed dependencies remain...</span>
+  <span class="hljs-attr">dartz:</span> <span class="hljs-string">^0.10.1</span>  <span class="hljs-comment"># For functional programming and error handling</span>
+  <span class="hljs-attr">equatable:</span> <span class="hljs-string">^2.0.5</span>  <span class="hljs-comment"># For value equality</span>
+  <span class="hljs-attr">freezed:</span> <span class="hljs-string">^2.4.7</span>  <span class="hljs-comment"># For immutable models</span>
+  <span class="hljs-attr">freezed_annotation:</span> <span class="hljs-string">^2.4.1</span>
+  <span class="hljs-attr">json_annotation:</span> <span class="hljs-string">^4.8.1</span>
+
+<span class="hljs-attr">dev_dependencies:</span>
+  <span class="hljs-attr">build_runner:</span> <span class="hljs-string">^2.4.8</span>
+  <span class="hljs-attr">freezed_generator:</span> <span class="hljs-string">^2.4.7</span>
+  <span class="hljs-attr">json_serializable:</span> <span class="hljs-string">^6.7.1</span>
+  <span class="hljs-attr">objectbox_generator:</span> <span class="hljs-string">^2.5.0</span>
+</div></code></pre>
+<h2 id="implementation-details">Implementation Details</h2>
+<h3 id="trigger-management">Trigger Management</h3>
+<pre class="hljs"><code><div><span class="hljs-keyword">enum</span> TriggerType {
+  timePattern,
+  emotional,
+  situational,
+  custom
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TriggerManager</span> </span>{
+  <span class="hljs-comment">// Track vulnerable time slots</span>
+  <span class="hljs-built_in">Map</span>&lt;TimeOfDay, <span class="hljs-built_in">int</span>&gt; vulnerableTimeSlots;
+  
+  <span class="hljs-comment">// Track emotional triggers</span>
+  <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; emotionalTriggers;
+  
+  <span class="hljs-comment">// Calculate risk level based on current time</span>
+  <span class="hljs-built_in">double</span> calculateCurrentRiskLevel();
+  
+  <span class="hljs-comment">// Suggest preventive actions based on triggers</span>
+  <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; suggestPreventiveActions();
+}
+</div></code></pre>
+<h3 id="aspiration-system">Aspiration System</h3>
+<pre class="hljs"><code><div><span class="hljs-keyword">enum</span> AspirationCategory {
+  personalGrowth,
+  career,
+  spiritual,
+  family,
+  social,
+  custom
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AspirationManager</span> </span>{
+  <span class="hljs-comment">// Store and categorize aspirations</span>
+  <span class="hljs-built_in">Map</span>&lt;AspirationCategory, <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt;&gt; aspirations;
+  
+  <span class="hljs-comment">// Get relevant aspirations for motivation</span>
+  <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; getRelevantAspirations(TriggerType trigger);
+  
+  <span class="hljs-comment">// Track progress towards aspirations</span>
+  <span class="hljs-keyword">void</span> updateAspirationProgress(<span class="hljs-built_in">String</span> aspiration, <span class="hljs-built_in">double</span> progress);
+}
+</div></code></pre>
+<h3 id="ai-context-builder">AI Context Builder</h3>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">AIContextBuilder</span> </span>{
+  <span class="hljs-built_in">String</span> buildContext({
+    required <span class="hljs-built_in">List</span>&lt;Trigger&gt; activeTriggers,
+    required <span class="hljs-built_in">List</span>&lt;Aspiration&gt; relevantAspirations,
+    required <span class="hljs-built_in">List</span>&lt;Hobby&gt; availableHobbies,
+    required <span class="hljs-built_in">int</span> currentStreak,
+  }) {
+    <span class="hljs-comment">// Build personalized context for AI response</span>
+    <span class="hljs-comment">// Include active triggers, relevant aspirations,</span>
+    <span class="hljs-comment">// suggested hobbies, and current progress</span>
+  }
+}
+</div></code></pre>
+<h3 id="hobby-management">Hobby Management</h3>
+<pre class="hljs"><code><div><span class="hljs-keyword">enum</span> HobbyCategory {
+  physical,    <span class="hljs-comment">// walking, sports</span>
+  creative,    <span class="hljs-comment">// coding, art</span>
+  social,      <span class="hljs-comment">// meeting friends</span>
+  relaxing,    <span class="hljs-comment">// reading, meditation</span>
+  caregiving,  <span class="hljs-comment">// feeding pets</span>
+  custom
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">HobbyManager</span> </span>{
+  <span class="hljs-comment">// Store and categorize hobbies</span>
+  <span class="hljs-built_in">Map</span>&lt;HobbyCategory, <span class="hljs-built_in">List</span>&lt;Hobby&gt;&gt; hobbies;
+  
+  <span class="hljs-comment">// Get suitable hobbies based on current context</span>
+  <span class="hljs-built_in">List</span>&lt;Hobby&gt; getSuggestedHobbies({
+    required <span class="hljs-built_in">int</span> availableMinutes,
+    required <span class="hljs-built_in">bool</span> isAlone,
+    required TimeOfDay currentTime,
+  });
+  
+  <span class="hljs-comment">// Track hobby engagement</span>
+  <span class="hljs-keyword">void</span> recordHobbyEngagement(Hobby hobby, <span class="hljs-built_in">Duration</span> duration);
+  
+  <span class="hljs-comment">// Get most effective distracting hobbies</span>
+  <span class="hljs-built_in">List</span>&lt;Hobby&gt; getMostEffectiveHobbies();
+}
+</div></code></pre>
+<h2 id="trigger-response-flow">Trigger Response Flow</h2>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant U as User
+    participant A as App
+    participant AI as AI System
+    participant S as Stats System
+
+    Note over U: Experiences Trigger
+    U->>A: Taps "I Need Help" Button
+    A->>U: Quick Response Options
+    
+    alt Immediate Help Needed
+        U->>A: Selects "Help Me Now"
+        A->>AI: Request Emergency Guidance
+        AI->>A: Returns Personalized Response
+        A->>U: Shows AI Guidance + Activities
+        Note over A: Starts Timer
+    else Record Only
+        U->>A: Selects "Record Trigger"
+        A->>U: Shows Trigger Form
+    end
+
+    Note over U: After Episode
+    U->>A: Completes Resolution Form
+    A->>S: Records Statistics
+    S->>A: Updates Dashboard
+    A->>U: Shows Success Message
+</div></code></pre>
+<h3 id="trigger-response-components">Trigger Response Components</h3>
+<ol>
+<li>
+<p><strong>&quot;I Need Help&quot; Button</strong></p>
+<ul>
+<li>Prominent floating action button always visible in the app</li>
+<li>Quick access from notification shade widget</li>
+<li>Haptic feedback on press for grounding</li>
+</ul>
+</li>
+<li>
+<p><strong>Quick Response Dialog</strong></p>
+<pre class="hljs"><code><div>┌─────────────────────────┐
+│    How can we help?     │
+├─────────────────────────┤
+│ ⚡️ Help Me Now          │
+│ 📝 Record Trigger Only  │
+└─────────────────────────┘
+</div></code></pre>
+</li>
+<li>
+<p><strong>Emergency Response Screen</strong></p>
+<ul>
+<li>Immediate AI guidance</li>
+<li>Quick access to:
+<ul>
+<li>Your aspirations</li>
+<li>Suggested hobbies</li>
+<li>Emergency contacts</li>
+<li>Grounding exercises</li>
+</ul>
+</li>
+<li>Timer to track episode duration</li>
+<li>&quot;I'm Better Now&quot; button</li>
+</ul>
+</li>
+<li>
+<p><strong>Resolution Form</strong></p>
+<pre class="hljs"><code><div>┌─────────────────────────┐
+│   Episode Resolution    │
+├─────────────────────────┤
+│ Duration: [Auto/Manual] │
+│ Intensity: [1-5 Scale] │
+│ Success?: [Yes/No]     │
+│ Notes: [Optional]      │
+└─────────────────────────┘
+</div></code></pre>
+</li>
+</ol>
+<h3 id="statistics-recording">Statistics Recording</h3>
+<ol>
+<li>
+<p><strong>Automatic Tracking</strong></p>
+<ul>
+<li>Episode start time (when help button pressed)</li>
+<li>Duration (if using emergency help)</li>
+<li>Time of day patterns</li>
+<li>Response time to triggers</li>
+</ul>
+</li>
+<li>
+<p><strong>Manual Input</strong></p>
+<ul>
+<li>Intensity level (1-5)</li>
+<li>Success/failure in resisting</li>
+<li>Trigger categories involved</li>
+<li>Effective countermeasures</li>
+</ul>
+</li>
+<li>
+<p><strong>Metrics Stored</strong></p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TriggerEpisode</span> </span>{
+  <span class="hljs-built_in">DateTime</span> startTime;
+  <span class="hljs-built_in">DateTime</span> endTime;
+  <span class="hljs-built_in">Duration</span> duration;
+  <span class="hljs-built_in">int</span> intensityLevel;
+  <span class="hljs-built_in">bool</span> wasResisted;
+  <span class="hljs-built_in">List</span>&lt;Trigger&gt; activeTriggers;
+  <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; effectiveStrategies;
+  <span class="hljs-built_in">String</span>? notes;
+}
+</div></code></pre>
+</li>
+</ol>
+<h3 id="dashboard-integration">Dashboard Integration</h3>
+<ol>
+<li>
+<p><strong>Real-time Stats</strong></p>
+<ul>
+<li>Current streak</li>
+<li>Success rate</li>
+<li>Average intensity</li>
+<li>Common triggers</li>
+</ul>
+</li>
+<li>
+<p><strong>Progress Indicators</strong></p>
+<ul>
+<li>Weekly strength trend</li>
+<li>Most vulnerable times</li>
+<li>Most effective strategies</li>
+<li>Streak milestones</li>
+</ul>
+</li>
+</ol>
+<h3 id="implementation-details">Implementation Details</h3>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ActiveEmergencySession</span> </span>{
+  <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span> id;
+  <span class="hljs-keyword">final</span> <span class="hljs-built_in">DateTime</span> startTime;
+  <span class="hljs-keyword">final</span> <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt; activeTriggerIds;
+  <span class="hljs-keyword">final</span> <span class="hljs-built_in">String</span>? initialNotes;
+  <span class="hljs-keyword">final</span> <span class="hljs-built_in">bool</span> wasAIGuidanceShown;
+  
+  <span class="hljs-keyword">const</span> ActiveEmergencySession({
+    required <span class="hljs-keyword">this</span>.id,
+    required <span class="hljs-keyword">this</span>.startTime,
+    required <span class="hljs-keyword">this</span>.activeTriggerIds,
+    <span class="hljs-keyword">this</span>.initialNotes,
+    <span class="hljs-keyword">this</span>.wasAIGuidanceShown = <span class="hljs-keyword">false</span>,
+  });
+
+  <span class="hljs-comment">// Convert to/from JSON for SharedPreferences</span>
+  <span class="hljs-built_in">Map</span>&lt;<span class="hljs-built_in">String</span>, <span class="hljs-built_in">dynamic</span>&gt; toJson() =&gt; {
+    <span class="hljs-string">'id'</span>: id,
+    <span class="hljs-string">'startTime'</span>: startTime.toIso8601String(),
+    <span class="hljs-string">'activeTriggerIds'</span>: activeTriggerIds,
+    <span class="hljs-string">'initialNotes'</span>: initialNotes,
+    <span class="hljs-string">'wasAIGuidanceShown'</span>: wasAIGuidanceShown,
+  };
+
+  <span class="hljs-keyword">factory</span> ActiveEmergencySession.fromJson(<span class="hljs-built_in">Map</span>&lt;<span class="hljs-built_in">String</span>, <span class="hljs-built_in">dynamic</span>&gt; json) {
+    <span class="hljs-keyword">return</span> ActiveEmergencySession(
+      id: json[<span class="hljs-string">'id'</span>],
+      startTime: <span class="hljs-built_in">DateTime</span>.parse(json[<span class="hljs-string">'startTime'</span>]),
+      activeTriggerIds: <span class="hljs-built_in">List</span>&lt;<span class="hljs-built_in">String</span>&gt;.from(json[<span class="hljs-string">'activeTriggerIds'</span>]),
+      initialNotes: json[<span class="hljs-string">'initialNotes'</span>],
+      wasAIGuidanceShown: json[<span class="hljs-string">'wasAIGuidanceShown'</span>] ?? <span class="hljs-keyword">false</span>,
+    );
+  }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">EmergencySessionManager</span> </span>{
+  <span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">String</span> _activeSessionKey = <span class="hljs-string">'active_emergency_session'</span>;
+  <span class="hljs-keyword">final</span> SharedPreferences _prefs;
+  
+  <span class="hljs-comment">// Check if there's an active emergency session</span>
+  Future&lt;ActiveEmergencySession?&gt; getActiveSession() <span class="hljs-keyword">async</span> {
+    <span class="hljs-keyword">final</span> sessionJson = _prefs.getString(_activeSessionKey);
+    <span class="hljs-keyword">if</span> (sessionJson == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+    
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">return</span> ActiveEmergencySession.fromJson(
+        jsonDecode(sessionJson)
+      );
+    } <span class="hljs-keyword">catch</span> (e) {
+      <span class="hljs-comment">// If there's an error parsing, clear the invalid session</span>
+      <span class="hljs-keyword">await</span> _prefs.remove(_activeSessionKey);
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">null</span>;
+    }
+  }
+  
+  <span class="hljs-comment">// Start a new emergency session</span>
+  Future&lt;<span class="hljs-keyword">void</span>&gt; startSession(ActiveEmergencySession session) <span class="hljs-keyword">async</span> {
+    <span class="hljs-keyword">await</span> _prefs.setString(
+      _activeSessionKey,
+      jsonEncode(session.toJson())
+    );
+  }
+  
+  <span class="hljs-comment">// Update AI guidance shown status</span>
+  Future&lt;<span class="hljs-keyword">void</span>&gt; markAIGuidanceShown() <span class="hljs-keyword">async</span> {
+    <span class="hljs-keyword">final</span> current = <span class="hljs-keyword">await</span> getActiveSession();
+    <span class="hljs-keyword">if</span> (current == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span>;
+    
+    <span class="hljs-keyword">final</span> updated = ActiveEmergencySession(
+      id: current.id,
+      startTime: current.startTime,
+      activeTriggerIds: current.activeTriggerIds,
+      initialNotes: current.initialNotes,
+      wasAIGuidanceShown: <span class="hljs-keyword">true</span>,
+    );
+    
+    <span class="hljs-keyword">await</span> startSession(updated);
+  }
+  
+  <span class="hljs-comment">// Clear the active session</span>
+  Future&lt;<span class="hljs-keyword">void</span>&gt; endSession() <span class="hljs-keyword">async</span> {
+    <span class="hljs-keyword">await</span> _prefs.remove(_activeSessionKey);
+  }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TriggerResponseManager</span> </span>{
+  <span class="hljs-keyword">final</span> EmergencySessionManager _sessionManager;
+  <span class="hljs-keyword">final</span> AIGuidanceManager _aiManager;
+  <span class="hljs-keyword">final</span> StatisticsManager _statsManager;
+  
+  <span class="hljs-comment">// Check for active session on app start</span>
+  Future&lt;<span class="hljs-keyword">void</span>&gt; checkForActiveSession() <span class="hljs-keyword">async</span> {
+    <span class="hljs-keyword">final</span> activeSession = <span class="hljs-keyword">await</span> _sessionManager.getActiveSession();
+    <span class="hljs-keyword">if</span> (activeSession == <span class="hljs-keyword">null</span>) <span class="hljs-keyword">return</span>;
+    
+    <span class="hljs-comment">// Calculate elapsed duration</span>
+    <span class="hljs-keyword">final</span> elapsedDuration = <span class="hljs-built_in">DateTime</span>.now().difference(activeSession.startTime);
+    
+    <span class="hljs-comment">// Show emergency screen with elapsed time</span>
+    _showEmergencyScreen(
+      sessionId: activeSession.id,
+      elapsedDuration: elapsedDuration,
+      wasAIGuidanceShown: activeSession.wasAIGuidanceShown,
+    );
+  }
+
+  <span class="hljs-comment">// Start a new trigger episode</span>
+  Future&lt;<span class="hljs-keyword">void</span>&gt; startEpisode() <span class="hljs-keyword">async</span> {
+    <span class="hljs-keyword">final</span> sessionId = <span class="hljs-keyword">const</span> Uuid().v4();
+    <span class="hljs-keyword">final</span> activeTriggers = <span class="hljs-keyword">await</span> _getCurrentTriggers();
+    
+    <span class="hljs-comment">// Create and persist session</span>
+    <span class="hljs-keyword">final</span> session = ActiveEmergencySession(
+      id: sessionId,
+      startTime: <span class="hljs-built_in">DateTime</span>.now(),
+      activeTriggerIds: activeTriggers.map((t) =&gt; t.id.toString()).toList(),
+    );
+    
+    <span class="hljs-keyword">await</span> _sessionManager.startSession(session);
+    
+    <span class="hljs-comment">// Get immediate AI help</span>
+    <span class="hljs-keyword">final</span> guidance = <span class="hljs-keyword">await</span> _aiManager.getGuidance(activeTriggers);
+    
+    <span class="hljs-comment">// Show response screen</span>
+    _showEmergencyScreen(
+      sessionId: sessionId,
+      elapsedDuration: <span class="hljs-built_in">Duration</span>.zero,
+      wasAIGuidanceShown: <span class="hljs-keyword">false</span>,
+    );
+    
+    <span class="hljs-comment">// Mark AI guidance as shown</span>
+    <span class="hljs-keyword">await</span> _sessionManager.markAIGuidanceShown();
+  }
+  
+  <span class="hljs-comment">// Record episode resolution</span>
+  Future&lt;<span class="hljs-keyword">void</span>&gt; resolveEpisode({
+    required <span class="hljs-built_in">String</span> sessionId,
+    required <span class="hljs-built_in">int</span> intensity,
+    required <span class="hljs-built_in">bool</span> wasResisted,
+    <span class="hljs-built_in">String</span>? notes,
+  }) <span class="hljs-keyword">async</span> {
+    <span class="hljs-keyword">final</span> session = <span class="hljs-keyword">await</span> _sessionManager.getActiveSession();
+    <span class="hljs-keyword">if</span> (session == <span class="hljs-keyword">null</span> || session.id != sessionId) {
+      <span class="hljs-keyword">throw</span> Exception(<span class="hljs-string">'No matching session found'</span>);
+    }
+    
+    <span class="hljs-keyword">final</span> episode = TriggerEpisode(
+      startTime: session.startTime,
+      endTime: <span class="hljs-built_in">DateTime</span>.now(),
+      duration: <span class="hljs-built_in">DateTime</span>.now().difference(session.startTime),
+      intensityLevel: intensity,
+      wasResisted: wasResisted,
+      activeTriggers: <span class="hljs-keyword">await</span> _getTriggersFromIds(session.activeTriggerIds),
+      notes: notes,
+    );
+    
+    <span class="hljs-comment">// Update statistics</span>
+    <span class="hljs-keyword">await</span> _statsManager.recordEpisode(episode);
+    
+    <span class="hljs-comment">// Update streak</span>
+    <span class="hljs-keyword">if</span> (wasResisted) {
+      <span class="hljs-keyword">await</span> _streakManager.incrementStreak();
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">await</span> _streakManager.resetStreak();
+    }
+    
+    <span class="hljs-comment">// Clear the active session</span>
+    <span class="hljs-keyword">await</span> _sessionManager.endSession();
+    
+    <span class="hljs-comment">// Show appropriate feedback</span>
+    _showResolutionFeedback(wasResisted);
+  }
+}
+
+### Session Persistence Flow
+
+```mermaid
+sequenceDiagram
+    participant U <span class="hljs-keyword">as</span> User
+    participant A <span class="hljs-keyword">as</span> App
+    participant SP <span class="hljs-keyword">as</span> SharedPreferences
+    participant AI <span class="hljs-keyword">as</span> AI System
+
+    Note over U: Opens App
+    U-&gt;&gt;A: Launch Application
+    A-&gt;&gt;SP: Check <span class="hljs-keyword">for</span> Active Session
+    
+    alt Has Active Session
+        SP--&gt;&gt;A: Return Session Details
+        A-&gt;&gt;A: Calculate Elapsed Time
+        A-&gt;&gt;U: Show Emergency Screen
+        A-&gt;&gt;AI: Request AI Guidance
+        Note over A: Resume Timer
+    <span class="hljs-keyword">else</span> No Active Session
+        SP--&gt;&gt;A: Return <span class="hljs-keyword">null</span>
+        A-&gt;&gt;U: Show Normal Flow
+    end
+
+    Note over U: During Emergency
+    U-&gt;&gt;A: Tap <span class="hljs-string">"Help Me Now"</span>
+    A-&gt;&gt;SP: Store Session Details
+    A-&gt;&gt;AI: Get AI Guidance
+    AI--&gt;&gt;A: Return Guidance
+    A-&gt;&gt;SP: Mark Guidance Shown
+    A-&gt;&gt;U: Show Emergency Screen
+
+    Note over U: App Closed/Crashed
+    U-&gt;&gt;A: Reopen App
+    A-&gt;&gt;SP: Check <span class="hljs-keyword">for</span> Active Session
+    SP--&gt;&gt;A: Return Session Details
+    A-&gt;&gt;U: Resume Emergency Screen
+</div></code></pre>
+<p>This approach ensures:</p>
+<ol>
+<li>No emergency session is lost if the app is closed</li>
+<li>Timer continues from the original start time</li>
+<li>AI guidance state is preserved</li>
+<li>Session can be properly resolved even after app restarts</li>
+</ol>
+
+</body>
+</html>

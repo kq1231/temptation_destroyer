@@ -1,0 +1,55 @@
+<!-- Achievement Card Component -->
+<div class="bg-white dark:bg-gray-800 p-6 rounded-lg mb-6">
+    <h3 class="text-lg font-medium mb-4 dark:text-white">Achievement Cards</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Unlocked Achievement -->
+        <div class="p-4 bg-surface dark:bg-surface-dark rounded-lg border border-gray-200 dark:border-gray-700 flex items-center">
+            <div class="h-12 w-12 bg-primary dark:bg-primary-dark rounded-full flex items-center justify-center mr-4">
+                <span class="text-white dark:text-on-primary-dark text-xl">🏆</span>
+            </div>
+            <div>
+                <h4 class="font-medium text-on-surface dark:text-on-surface-dark">7 Day Streak</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">You've been temptation-free for a week!</p>
+            </div>
+        </div>
+        
+        <!-- Locked Achievement -->
+        <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center opacity-70">
+            <div class="h-12 w-12 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center mr-4">
+                <span class="text-gray-600 dark:text-gray-400 text-xl">🔒</span>
+            </div>
+            <div>
+                <h4 class="font-medium text-on-surface dark:text-on-surface-dark">30 Day Champion</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Complete a 30-day streak</p>
+            </div>
+        </div>
+        
+        <!-- Progress Achievement -->
+        <div class="p-4 bg-surface dark:bg-surface-dark rounded-lg border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center mb-2">
+                <div class="h-12 w-12 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mr-4">
+                    <span class="text-yellow-600 dark:text-yellow-300 text-xl">⭐</span>
+                </div>
+                <div>
+                    <h4 class="font-medium text-on-surface dark:text-on-surface-dark">Journal Master</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Complete 10 journal entries</p>
+                </div>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2.5">
+                <div class="bg-yellow-400 dark:bg-yellow-500 h-2.5 rounded-full" style="width: 70%"></div>
+            </div>
+            <p class="text-xs text-right mt-1 text-gray-500 dark:text-gray-400">7/10 entries</p>
+        </div>
+        
+        <!-- Badge Achievement -->
+        <div class="p-4 bg-surface dark:bg-surface-dark rounded-lg border border-gray-200 dark:border-gray-700 flex items-center">
+            <div class="h-12 w-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-4">
+                <span class="text-blue-600 dark:text-blue-300 text-xl">🏅</span>
+            </div>
+            <div>
+                <h4 class="font-medium text-on-surface dark:text-on-surface-dark">Resilience Badge</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Used emergency response 3 times</p>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temptation Destroyer - Design System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#6750A4',
+                            dark: '#D0BCFF'
+                        },
+                        secondary: {
+                            DEFAULT: '#E8DEF8',
+                            dark: '#4F378B'
+                        },
+                        surface: {
+                            DEFAULT: '#FFFBFE',
+                            dark: '#1C1B1F'
+                        },
+                        error: {
+                            DEFAULT: '#B3261E',
+                            dark: '#F2B8B5'
+                        },
+                        'on-primary': {
+                            DEFAULT: '#FFFFFF',
+                            dark: '#381E72'
+                        },
+                        'on-secondary': {
+                            DEFAULT: '#1D192B',
+                            dark: '#E8DEF8'
+                        },
+                        'on-surface': {
+                            DEFAULT: '#1C1B1F',
+                            dark: '#E6E1E5'
+                        },
+                        'on-error': {
+                            DEFAULT: '#FFFFFF',
+                            dark: '#601410'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #F5F5F5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .dark body {
+            background-color: #121212;
+            color: #E6E1E5;
+        }
+        .component-preview {
+            background: repeating-conic-gradient(#E0E0E0 0% 25%, transparent 0% 50%) 
+                        50% / 20px 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+        }
+        .dark .component-preview {
+            background: repeating-conic-gradient(#333333 0% 25%, transparent 0% 50%) 
+                        50% / 20px 20px;
+        }
+        
+        /* Dark mode toggle button */
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: #FFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .dark .dark-mode-toggle {
+            background: #2D3748;
+            border-color: #4A5568;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <!-- Dark Mode Toggle Button -->
+    <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark/light mode">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700 dark:text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" class="dark:hidden" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" class="hidden dark:block" />
+        </svg>
+    </button>
+
+    <header class="max-w-7xl mx-auto mb-12">
+        <h1 class="text-4xl font-bold text-on-surface dark:text-on-surface-dark mb-4">Temptation Destroyer</h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300">Design System & Component Library</p>
+        <div class="flex mt-4 space-x-4">
+            <a href="#colors" class="text-primary dark:text-primary-dark">Colors</a>
+            <a href="#typography" class="text-primary dark:text-primary-dark">Typography</a>
+            <a href="#core-components" class="text-primary dark:text-primary-dark">Core Components</a>
+            <a href="#screens" class="text-primary dark:text-primary-dark">Screens</a>
+            <a href="#achievements" class="text-primary dark:text-primary-dark">Achievements</a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto">
+        <!-- Figma-like scrollable container for viewing all screens -->
+        <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg mb-8 overflow-x-auto">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Scroll horizontally to view all screens side-by-side</p>
+            <div class="flex space-x-6 pb-4 min-w-max">
+                <!-- Screens will be placed here in a horizontal row -->
+            </div>
+        </div>
+
+        <!-- Color Palette -->
+        <section id="colors" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Color Palette</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="p-4 rounded-lg dark:bg-gray-800">
+                    <div class="h-20 bg-primary dark:bg-primary-dark rounded-lg mb-2"></div>
+                    <p class="text-sm font-medium dark:text-white">Primary</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Light: #6750A4 / Dark: #D0BCFF</p>
+                </div>
+                <div class="p-4 rounded-lg dark:bg-gray-800">
+                    <div class="h-20 bg-secondary dark:bg-secondary-dark rounded-lg mb-2"></div>
+                    <p class="text-sm font-medium dark:text-white">Secondary</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Light: #E8DEF8 / Dark: #4F378B</p>
+                </div>
+                <div class="p-4 rounded-lg dark:bg-gray-800">
+                    <div class="h-20 bg-surface dark:bg-surface-dark rounded-lg mb-2 border border-gray-200 dark:border-gray-700"></div>
+                    <p class="text-sm font-medium dark:text-white">Surface</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Light: #FFFBFE / Dark: #1C1B1F</p>
+                </div>
+                <div class="p-4 rounded-lg dark:bg-gray-800">
+                    <div class="h-20 bg-error dark:bg-error-dark rounded-lg mb-2"></div>
+                    <p class="text-sm font-medium dark:text-white">Error</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Light: #B3261E / Dark: #F2B8B5</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Typography -->
+        <section id="typography" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Typography</h2>
+            <div class="space-y-4 bg-white dark:bg-gray-800 p-6 rounded-lg">
+                <div>
+                    <h1 class="text-2xl font-bold dark:text-white">Heading 1</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Font: Roboto Bold, 24px</p>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold dark:text-white">Heading 2</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Font: Roboto Bold, 20px</p>
+                </div>
+                <div>
+                    <p class="text-base dark:text-gray-300">Body Text</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Font: Roboto Regular, 16px</p>
+                </div>
+                <div>
+                    <p class="text-sm dark:text-gray-300">Small Text</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Font: Roboto Regular, 14px</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Components -->
+        <section id="core-components" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Core Components</h2>
+            
+            <!-- Buttons -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4 dark:text-white">Buttons</h3>
+                <div class="flex flex-wrap gap-4">
+                    <button class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark px-6 py-3 rounded-full hover:bg-opacity-90 transition-colors">
+                        Primary Button
+                    </button>
+                    <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark px-6 py-3 rounded-full hover:bg-opacity-90 transition-colors">
+                        Secondary Button
+                    </button>
+                    <button class="border border-primary dark:border-primary-dark text-primary dark:text-primary-dark px-6 py-3 rounded-full hover:bg-primary hover:text-white dark:hover:bg-primary-dark dark:hover:text-on-primary-dark transition-colors">
+                        Outline Button
+                    </button>
+                </div>
+            </div>
+
+            <!-- Input Fields -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4 dark:text-white">Input Fields</h3>
+                <div class="space-y-4 max-w-sm">
+                    <input type="text" placeholder="Text Input" 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none transition-colors">
+                    
+                    <input type="password" placeholder="Password Input" 
+                           class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none transition-colors">
+                    
+                    <textarea placeholder="Text Area" 
+                              class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none transition-colors"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Authentication Screen -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Authentication Screen</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="text-center mb-6">
+                        <span class="text-4xl">🔒</span>
+                        <h1 class="text-xl font-bold mt-2 text-on-surface dark:text-on-surface-dark">Temptation Destroyer</h1>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h2 class="text-lg font-medium mb-4 text-on-surface dark:text-on-surface-dark">Welcome Back</h2>
+                        <div class="mb-4">
+                            <input type="password" placeholder="Enter Password" 
+                                   class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none">
+                        </div>
+                        <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full hover:bg-opacity-90 transition-colors font-medium">
+                            Unlock App
+                        </button>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="#" class="text-primary dark:text-primary-dark text-sm hover:underline">Need help? Reset Password</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Screen -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Dashboard Screen</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <span class="text-2xl">📊</span>
+                            <span class="ml-2 text-xl font-medium dark:text-white">Dashboard</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button class="text-2xl">🔔</button>
+                            <button class="text-2xl">⚙️</button>
+                        </div>
+                    </div>
+
+                    <!-- Streak Card -->
+                    <div class="bg-secondary dark:bg-secondary-dark rounded-xl p-4 mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-on-secondary dark:text-on-secondary-dark">Current Streak</span>
+                            <span class="font-medium text-on-secondary dark:text-on-secondary-dark">7 days 🔥</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-on-secondary dark:text-on-secondary-dark">Best Streak</span>
+                            <span class="font-medium text-on-secondary dark:text-on-secondary-dark">21 days 🏆</span>
+                        </div>
+                    </div>
+
+                    <!-- Today's Overview -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Today's Overview</h3>
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <div class="mb-2 dark:text-gray-300">Mood: 😊</div>
+                            <div class="mb-2 dark:text-gray-300">Intensity: Low</div>
+                            <div class="dark:text-gray-300">Progress: Great!</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <button class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 px-4 rounded-full text-sm">New Entry</button>
+                        <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 px-4 rounded-full text-sm">View Stats</button>
+                        <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 px-4 rounded-full text-sm">AI Help</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Journal Entry Screen -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Journal Entry Screen</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <span class="text-2xl">✏️</span>
+                            <span class="ml-2 text-xl font-medium dark:text-white">New Entry</span>
+                        </div>
+                        <button class="text-2xl dark:text-gray-300">✕</button>
+                    </div>
+
+                    <!-- Thoughts Input -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">How are you feeling?</h3>
+                        <textarea 
+                            class="w-full h-24 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none resize-none"
+                            placeholder="Share your thoughts..."></textarea>
+                    </div>
+
+                    <!-- Intensity Slider -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Intensity Level</h3>
+                        <input type="range" min="1" max="5" value="2" 
+                               class="w-full h-2 bg-secondary dark:bg-secondary-dark rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            <span>Low</span>
+                            <span>Mid</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+
+                    <!-- Duration Input -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Duration</h3>
+                        <input type="number" placeholder="Minutes" 
+                               class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none">
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 rounded-full">Get AI Guidance</button>
+                        <button class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full">Save Entry</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Screen -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Statistics Screen</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <span class="text-2xl">📈</span>
+                            <span class="ml-2 text-xl font-medium dark:text-white">Statistics</span>
+                        </div>
+                        <button class="text-2xl dark:text-gray-300">⚡️</button>
+                    </div>
+
+                    <!-- Weekly Overview -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Weekly Overview</h3>
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <!-- Bar Chart -->
+                            <div class="h-40 flex items-end justify-between mb-2">
+                                <div class="w-[12%] h-[60%] bg-primary dark:bg-primary-dark rounded"></div>
+                                <div class="w-[12%] h-[80%] bg-primary dark:bg-primary-dark rounded"></div>
+                                <div class="w-[12%] h-[40%] bg-primary dark:bg-primary-dark rounded"></div>
+                                <div class="w-[12%] h-[90%] bg-primary dark:bg-primary-dark rounded"></div>
+                                <div class="w-[12%] h-[30%] bg-primary dark:bg-primary-dark rounded"></div>
+                                <div class="w-[12%] h-[20%] bg-primary dark:bg-primary-dark rounded"></div>
+                                <div class="w-[12%] h-[50%] bg-primary dark:bg-primary-dark rounded"></div>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                                <span>M</span>
+                                <span>T</span>
+                                <span>W</span>
+                                <span>T</span>
+                                <span>F</span>
+                                <span>S</span>
+                                <span>S</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insights -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Insights</h3>
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <div class="mb-2 dark:text-gray-300">• Most challenging: Evenings</div>
+                            <div class="mb-2 dark:text-gray-300">• Progress: 23% improvement</div>
+                            <div class="dark:text-gray-300">• Streak: Growing strong!</div>
+                        </div>
+                    </div>
+
+                    <!-- Common Triggers -->
+                    <div>
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Common Triggers</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark px-4 py-2 rounded-full text-sm">Stress</span>
+                            <span class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark px-4 py-2 rounded-full text-sm">Loneliness</span>
+                            <span class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark px-4 py-2 rounded-full text-sm">Tired</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Onboarding - Triggers Screen -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Onboarding - Triggers Screen</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <span class="text-2xl">🎯</span>
+                        <span class="ml-2 text-xl font-medium dark:text-white">Your Triggers (1/4)</span>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-2 dark:text-white">What triggers these feelings?</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Understanding your triggers helps us protect you better.</p>
+                    </div>
+
+                    <!-- Time Patterns -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Time Patterns</h3>
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="dark:text-gray-300">11:00 AM - 1:00 PM</span>
+                                <button class="text-primary dark:text-primary-dark">✓</button>
+                            </div>
+                            <button class="w-full border border-dashed border-gray-400 dark:border-gray-600 text-primary dark:text-primary-dark py-2 rounded-lg text-sm">
+                                + Add another time slot
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Emotional Triggers -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Emotional Triggers</h3>
+                        <div class="space-y-3">
+                            <label class="flex items-center gap-3">
+                                <input type="checkbox" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary dark:text-primary-dark focus:ring-primary dark:focus:ring-primary-dark">
+                                <span class="dark:text-gray-300">Loneliness</span>
+                            </label>
+                            <label class="flex items-center gap-3">
+                                <input type="checkbox" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary dark:text-primary-dark focus:ring-primary dark:focus:ring-primary-dark">
+                                <span class="dark:text-gray-300">Anger</span>
+                            </label>
+                            <label class="flex items-center gap-3">
+                                <input type="checkbox" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-primary dark:text-primary-dark focus:ring-primary dark:focus:ring-primary-dark">
+                                <span class="dark:text-gray-300">Hopelessness</span>
+                            </label>
+                        </div>
+                        <button class="w-full border border-dashed border-gray-400 dark:border-gray-600 text-primary dark:text-primary-dark py-2 rounded-lg text-sm mt-3">
+                            + Add custom trigger
+                        </button>
+                    </div>
+
+                    <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full">Continue →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Onboarding - Aspirations Screen -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Onboarding - Aspirations Screen</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <span class="text-2xl">🌟</span>
+                        <span class="ml-2 text-xl font-medium dark:text-white">Your Aspirations (2/4)</span>
+                    </div>
+
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-2 dark:text-white">What do you seek from Allah?</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">Your duas and goals will remind you of what's truly important.</p>
+                    </div>
+
+                    <!-- Personal Growth -->
+                    <div class="mb-4">
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <h4 class="text-gray-600 dark:text-gray-400 mb-3">Personal Growth</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="dark:text-gray-300">• Become best Flutter dev</span>
+                                    <button class="text-error dark:text-error-dark">✕</button>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="dark:text-gray-300">• Build beautiful portfolio</span>
+                                    <button class="text-error dark:text-error-dark">✕</button>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="dark:text-gray-300">• Land great jobs</span>
+                                    <button class="text-error dark:text-error-dark">✕</button>
+                                </div>
+                            </div>
+                            <button class="w-full border border-dashed border-gray-400 dark:border-gray-600 text-primary dark:text-primary-dark py-2 rounded-lg text-sm mt-3">
+                                + Add more
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Life Goals -->
+                    <div class="mb-4">
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <h4 class="text-gray-600 dark:text-gray-400 mb-3">Life Goals</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="dark:text-gray-300">• Beautiful house in Bahria</span>
+                                    <button class="text-error dark:text-error-dark">✕</button>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="dark:text-gray-300">• Start own businesses</span>
+                                    <button class="text-error dark:text-error-dark">✕</button>
+                                </div>
+                            </div>
+                            <button class="w-full border border-dashed border-gray-400 dark:border-gray-600 text-primary dark:text-primary-dark py-2 rounded-lg text-sm mt-3">
+                                + Add more
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Higher Purpose -->
+                    <div class="mb-6">
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <h4 class="text-gray-600 dark:text-gray-400 mb-3">Higher Purpose</h4>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="dark:text-gray-300">• Help Palestinian brothers</span>
+                                    <button class="text-error dark:text-error-dark">✕</button>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="dark:text-gray-300">• Free Muslims from oppression</span>
+                                    <button class="text-error dark:text-error-dark">✕</button>
+                                </div>
+                            </div>
+                            <button class="w-full border border-dashed border-gray-400 dark:border-gray-600 text-primary dark:text-primary-dark py-2 rounded-lg text-sm mt-3">
+                                + Add more
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 rounded-full">← Back</button>
+                        <button class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full">Continue →</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Response Screen -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">AI Response Screen</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <span class="text-2xl">🤝</span>
+                        <span class="ml-2 text-xl font-medium dark:text-white">AI Support (4/4)</span>
+                    </div>
+
+                    <!-- Context Cards -->
+                    <div class="mb-6">
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4 mb-4">
+                            <!-- Active Trigger -->
+                            <div class="flex gap-3 mb-4">
+                                <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                    🎯
+                                </div>
+                                <div>
+                                    <h4 class="text-sm text-gray-600 dark:text-gray-400 mb-1">Active Trigger</h4>
+                                    <p class="text-base dark:text-gray-300">Feeling lonely after work (11:00 AM - 1:00 PM)</p>
+                                </div>
+                            </div>
+
+                            <!-- Aspirations -->
+                            <div class="flex gap-3 mb-4">
+                                <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                    🌟
+                                </div>
+                                <div>
+                                    <h4 class="text-sm text-gray-600 dark:text-gray-400 mb-1">Your Aspirations</h4>
+                                    <p class="text-base dark:text-gray-300">Remember your goal: Become the best Flutter developer</p>
+                                </div>
+                            </div>
+
+                            <!-- Suggested Activities -->
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                    🎨
+                                </div>
+                                <div>
+                                    <h4 class="text-sm text-gray-600 dark:text-gray-400 mb-1">Suggested Activities</h4>
+                                    <p class="text-base dark:text-gray-300">• Work on coding projects (120 mins)<br>• Take a walk in the park (30 mins)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Guidance -->
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                    💡
+                                </div>
+                                <div>
+                                    <h4 class="text-sm text-gray-600 dark:text-gray-400 mb-2">AI Guidance</h4>
+                                    <p class="text-base dark:text-gray-300 mb-2">I notice you're feeling lonely during your work break. Instead of giving in to temptation, why not use this time to work on your Flutter skills? This aligns perfectly with your goal of becoming the best developer.</p>
+                                    <p class="text-base dark:text-gray-300">Alternatively, a quick walk in the park can refresh your mind and lift your spirits. Remember, every time you choose a positive activity, you're one step closer to your dreams.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 rounded-full">← Back</button>
+                        <button class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full">Finish</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Help Dialog -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Quick Help Dialog</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[300px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xl font-medium mb-2 dark:text-white">How can we help?</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">We're here for you</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-4 rounded-xl hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2">
+                            <span class="text-xl">⚡️</span>
+                            <span class="font-medium">Help Me Now</span>
+                        </button>
+                        
+                        <button class="w-full bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-4 rounded-xl hover:bg-opacity-90 transition-colors flex items-center justify-center gap-2">
+                            <span class="text-xl">📝</span>
+                            <span class="font-medium">Record Trigger Only</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Emergency Response Screen -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Emergency Response Screen</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <!-- Header with Timer -->
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center">
+                            <span class="text-2xl">⚡️</span>
+                            <span class="ml-2 text-xl font-medium dark:text-white">Stay Strong</span>
+                        </div>
+                        <div class="bg-secondary dark:bg-secondary-dark px-4 py-2 rounded-full">
+                            <span class="font-medium text-primary dark:text-primary-dark">00:03:45</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Guidance Card -->
+                    <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4 mb-6">
+                        <div class="flex gap-3 mb-4">
+                            <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                💡
+                            </div>
+                            <div>
+                                <h4 class="font-medium mb-2 dark:text-white">AI Guidance</h4>
+                                <p class="text-gray-600 dark:text-gray-300">I understand you're feeling triggered. Let's focus on your goal of becoming a top Flutter developer. Remember, every moment of resistance makes you stronger.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Grid -->
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark p-4 rounded-xl hover:bg-secondary hover:dark:bg-secondary-dark transition-colors">
+                            <div class="text-2xl mb-2">🎯</div>
+                            <div class="font-medium dark:text-white">Your Goals</div>
+                        </button>
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark p-4 rounded-xl hover:bg-secondary hover:dark:bg-secondary-dark transition-colors">
+                            <div class="text-2xl mb-2">🎨</div>
+                            <div class="font-medium dark:text-white">Hobbies</div>
+                        </button>
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark p-4 rounded-xl hover:bg-secondary hover:dark:bg-secondary-dark transition-colors">
+                            <div class="text-2xl mb-2">🧘‍♂️</div>
+                            <div class="font-medium dark:text-white">Grounding</div>
+                        </button>
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark p-4 rounded-xl hover:bg-secondary hover:dark:bg-secondary-dark transition-colors">
+                            <div class="text-2xl mb-2">📞</div>
+                            <div class="font-medium dark:text-white">Contacts</div>
+                        </button>
+                    </div>
+
+                    <!-- Suggested Activities -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Suggested Activities</h3>
+                        <div class="space-y-3">
+                            <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4 flex justify-between items-center">
+                                <div>
+                                    <div class="font-medium dark:text-white">Code a new feature</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">120 mins • Most effective</div>
+                                </div>
+                                <button class="text-2xl">▶️</button>
+                            </div>
+                            <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4 flex justify-between items-center">
+                                <div>
+                                    <div class="font-medium dark:text-white">Walk in the park</div>
+                                    <div class="text-sm text-gray-600 dark:text-gray-400">30 mins • Refreshing</div>
+                                </div>
+                                <button class="text-2xl">▶️</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resolution Buttons -->
+                    <div class="space-y-3">
+                        <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-4 rounded-full hover:bg-opacity-90 transition-colors font-medium">
+                            I'm Better Now
+                        </button>
+                        <button class="w-full bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 rounded-full hover:bg-opacity-90 transition-colors text-sm">
+                            Still Need Help
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Resolution Form -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Resolution Form</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <span class="text-2xl">📊</span>
+                        <span class="ml-2 text-xl font-medium dark:text-white">Episode Resolution</span>
+                    </div>
+
+                    <!-- Duration -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Duration</h3>
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <div class="font-medium dark:text-white">00:03:45</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Automatically tracked</div>
+                        </div>
+                    </div>
+
+                    <!-- Intensity -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Intensity Level</h3>
+                        <input type="range" min="1" max="5" value="3" 
+                               class="w-full h-2 bg-secondary dark:bg-secondary-dark rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between mt-2 text-sm text-gray-600 dark:text-gray-400">
+                            <span>Low</span>
+                            <span>Mid</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+
+                    <!-- Success Status -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Were you successful?</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-xl">Yes 💪</button>
+                            <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark text-on-secondary dark:text-on-surface-dark py-3 rounded-xl">No 😔</button>
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-medium mb-3 dark:text-white">Notes (Optional)</h3>
+                        <textarea 
+                            class="w-full h-24 px-4 py-3 rounded-xl border border-secondary dark:border-secondary-dark focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none resize-none dark:bg-gray-700 dark:text-white"
+                            placeholder="What helped? What didn't?"></textarea>
+                    </div>
+
+                    <!-- AI Analysis -->
+                    <div class="mb-6">
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                    🤖
+                                </div>
+                                <div>
+                                    <h4 class="font-medium mb-2 dark:text-white">AI Analysis</h4>
+                                    <p class="text-gray-600 dark:text-gray-400 mb-3">Based on this episode:</p>
+                                    <ul class="space-y-2 text-gray-600 dark:text-gray-400">
+                                        <li>• Coding was most effective (85% success rate)</li>
+                                        <li>• Morning triggers are decreasing</li>
+                                        <li>• You're strongest between 2-4 PM</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-4 rounded-full hover:bg-opacity-90 transition-colors font-medium">
+                        Save Resolution
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Insights Card -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">AI Insights Card</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex items-center mb-6">
+                        <span class="text-2xl">🧠</span>
+                        <span class="ml-2 text-xl font-medium dark:text-white">AI Insights</span>
+                    </div>
+
+                    <!-- Weekly Pattern -->
+                    <div class="mb-6">
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <h3 class="font-medium mb-3 dark:text-white">Weekly Pattern Analysis</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Most Vulnerable</span>
+                                    <span class="font-medium dark:text-white">11 AM - 1 PM</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Strongest Time</span>
+                                    <span class="font-medium dark:text-white">2 PM - 4 PM</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Best Activity</span>
+                                    <span class="font-medium dark:text-white">Coding (85%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personalized Recommendations -->
+                    <div class="mb-6">
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <h3 class="font-medium mb-3 dark:text-white">Recommendations</h3>
+                            <div class="space-y-3">
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                        ⚡️
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600 dark:text-gray-400">Schedule coding sessions during your vulnerable hours (11 AM - 1 PM)</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                        🎯
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600 dark:text-gray-400">Your aspiration to become a top developer is a powerful motivator</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="w-8 h-8 bg-secondary dark:bg-secondary-dark rounded-full flex items-center justify-center">
+                                        📈
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-600 dark:text-gray-400">Morning triggers reduced by 40% this week</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Success Prediction -->
+                    <div class="mb-6">
+                        <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-medium dark:text-white">Current Strength</h3>
+                                <div class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark px-3 py-1 rounded-full text-sm">
+                                    85%
+                                </div>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mt-2">Based on your recent successes and current routine</p>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full hover:bg-opacity-90 transition-colors">
+                        View Detailed Analysis
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Voice Interaction Components -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Voice Interaction Components</h2>
+            
+            <!-- Voice Action Button -->
+            <div class="component-preview flex justify-center mb-8">
+                <div class="relative">
+                    <!-- Inactive State -->
+                    <button class="w-16 h-16 bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark rounded-full shadow-lg flex items-center justify-center hover:bg-opacity-90 transition-all transform hover:scale-105 mb-8">
+                        <span class="text-2xl">🎤</span>
+                    </button>
+
+                    <!-- Active/Listening State -->
+                    <button class="w-16 h-16 bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark rounded-full shadow-lg flex items-center justify-center relative">
+                        <span class="text-2xl">🎤</span>
+                        <!-- Ripple Animation -->
+                        <div class="absolute inset-0 rounded-full border-4 border-primary dark:border-primary-dark animate-ping"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-primary dark:border-primary-dark animate-pulse"></div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Voice Session Dialog -->
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <span class="text-2xl">🎤</span>
+                            <span class="ml-2 text-xl font-medium dark:text-white">Voice Assistant</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 bg-primary dark:bg-primary-dark rounded-full animate-pulse"></div>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Listening...</span>
+                        </div>
+                    </div>
+
+                    <!-- Conversation Area -->
+                    <div class="space-y-4 mb-6">
+                        <!-- User Message -->
+                        <div class="flex justify-end">
+                            <div class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark px-4 py-2 rounded-2xl rounded-tr-sm max-w-[80%]">
+                                <p>I'm feeling tempted right now</p>
+                            </div>
+                        </div>
+
+                        <!-- Assistant Response -->
+                        <div class="flex justify-start">
+                            <div class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark px-4 py-2 rounded-2xl rounded-tl-sm max-w-[80%]">
+                                <p>I understand you're going through a difficult moment. Remember your goal of becoming a top Flutter developer. Would you like to work on a coding project to redirect your energy?</p>
+                            </div>
+                        </div>
+
+                        <!-- Listening Indicator -->
+                        <div class="flex justify-center">
+                            <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark px-4 py-2 rounded-full text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                                <div class="flex gap-1">
+                                    <div class="w-2 h-2 bg-primary dark:bg-primary-dark rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+                                    <div class="w-2 h-2 bg-primary dark:bg-primary-dark rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+                                    <div class="w-2 h-2 bg-primary dark:bg-primary-dark rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+                                </div>
+                                <span>Listening...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 rounded-full flex items-center justify-center gap-2">
+                            <span>⏸️</span>
+                            <span>Pause</span>
+                        </button>
+                        <button class="bg-error dark:bg-error-dark text-white dark:text-on-error-dark py-3 rounded-full flex items-center justify-center gap-2">
+                            <span>⏹️</span>
+                            <span>End</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Feedback Dialog -->
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="text-center mb-6">
+                        <span class="text-4xl mb-2 block">🎯</span>
+                        <h3 class="text-xl font-medium dark:text-white">How helpful was this?</h3>
+                    </div>
+
+                    <!-- Rating Options -->
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark hover:border-primary dark:hover:border-primary-dark p-4 rounded-xl transition-colors">
+                            <span class="text-2xl block mb-1">😕</span>
+                            <span class="text-sm dark:text-gray-300">Not Much</span>
+                        </button>
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark hover:border-primary dark:hover:border-primary-dark p-4 rounded-xl transition-colors">
+                            <span class="text-2xl block mb-1">🙂</span>
+                            <span class="text-sm dark:text-gray-300">Helpful</span>
+                        </button>
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark hover:border-primary dark:hover:border-primary-dark p-4 rounded-xl transition-colors">
+                            <span class="text-2xl block mb-1">😊</span>
+                            <span class="text-sm dark:text-gray-300">Very Helpful</span>
+                        </button>
+                    </div>
+
+                    <!-- Optional Feedback -->
+                    <div class="mb-6">
+                        <textarea 
+                            placeholder="Any additional feedback? (Optional)"
+                            class="w-full px-4 py-3 rounded-xl border border-secondary dark:border-secondary-dark focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none resize-none h-24 dark:bg-gray-700 dark:text-white"
+                        ></textarea>
+                    </div>
+
+                    <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full">
+                        Submit Feedback
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Voice Quick Actions -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Voice Quick Actions</h2>
+            <div class="component-preview flex justify-center">
+                <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="grid grid-cols-2 gap-4">
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark hover:bg-secondary hover:dark:bg-secondary-dark p-4 rounded-xl transition-colors text-center">
+                            <span class="text-2xl block mb-2">🗣️</span>
+                            <span class="font-medium dark:text-white">I Need Help</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400 block mt-1">"Hey, I need help right now"</span>
+                        </button>
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark hover:bg-secondary hover:dark:bg-secondary-dark p-4 rounded-xl transition-colors text-center">
+                            <span class="text-2xl block mb-2">📝</span>
+                            <span class="font-medium dark:text-white">Journal Entry</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400 block mt-1">"Record how I'm feeling"</span>
+                        </button>
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark hover:bg-secondary hover:dark:bg-secondary-dark p-4 rounded-xl transition-colors text-center">
+                            <span class="text-2xl block mb-2">🎯</span>
+                            <span class="font-medium dark:text-white">My Goals</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400 block mt-1">"Remind me of my goals"</span>
+                        </button>
+                        <button class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark hover:bg-secondary hover:dark:bg-secondary-dark p-4 rounded-xl transition-colors text-center">
+                            <span class="text-2xl block mb-2">📊</span>
+                            <span class="font-medium dark:text-white">Progress Check</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400 block mt-1">"How am I doing today?"</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Achievement System Components -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Achievement System Components</h2>
+            
+            <!-- Achievement Card -->
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4 dark:text-white">Achievement Card</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                        <!-- Achievement Card - Locked State -->
+                        <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-5 mb-4">
+                            <div class="flex items-center mb-4">
+                                <div class="h-16 w-16 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mr-4">
+                                    <svg class="w-8 h-8 text-gray-400 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4M12 4v16"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-600 dark:text-gray-300">Ruby Lantern</h3>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Locked</p>
+                                </div>
+                            </div>
+                            <div class="bg-gray-200 dark:bg-gray-600 rounded-lg p-4">
+                                <p class="text-sm font-medium mb-2 dark:text-gray-300">How to unlock:</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">Complete 10 daily challenges</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Achievement Card - Unlocked State -->
+                        <div class="bg-secondary dark:bg-secondary-dark rounded-xl p-5">
+                            <div class="flex items-center mb-4">
+                                <div class="h-16 w-16 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center mr-4">
+                                    <svg class="w-8 h-8 text-primary dark:text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium dark:text-white">Turquoise Prayer Mat</h3>
+                                    <p class="text-sm text-primary dark:text-primary-dark">Unlocked on June 15, 2023</p>
+                                </div>
+                            </div>
+                            <div class="bg-white dark:bg-gray-700 bg-opacity-50 dark:bg-opacity-20 rounded-lg p-4">
+                                <p class="text-sm dark:text-gray-300">Track 30 days of consistent prayers. The prayer mat symbolizes your dedication to spiritual practice.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                    <p>Achievement cards display both locked and unlocked achievements with clear instructions on how to unlock them. Each achievement has:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>A distinctive icon representing the achievement</li>
+                        <li>Name and status (locked/unlocked)</li>
+                        <li>Instructions for unlocking (for locked achievements)</li>
+                        <li>Description and symbolic meaning (for unlocked achievements)</li>
+                        <li>Unlock date for completed achievements</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Achievement Detail Modal -->
+            <div class="bg-white p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4">Achievement Detail Modal</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                        <!-- Modal Header with Back Button -->
+                        <div class="flex items-center mb-6">
+                            <button class="p-2 rounded-full hover:bg-gray-100 mr-4">
+                                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Achievement Details -->
+                        <div class="flex flex-col items-center mb-6">
+                            <div class="h-24 w-24 bg-white rounded-full border-4 border-primary flex items-center justify-center mb-4">
+                                <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-xl font-medium mb-1">Jade Manuscript</h2>
+                            <p class="text-gray-500 mb-4">Complete 20 daily reflections. This manuscript represents your journey of self-discovery and insight.</p>
+                        </div>
+                        
+                        <!-- Achievement Stats -->
+                        <div class="bg-gray-100 rounded-xl p-5 mb-6">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-gray-600">Status</span>
+                                <span class="font-medium text-primary">15/20 completed</span>
+                            </div>
+                            <div class="w-full bg-gray-300 rounded-full h-2.5 mb-4">
+                                <div class="bg-primary h-2.5 rounded-full" style="width: 75%"></div>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Estimated completion</span>
+                                <span class="font-medium">5 days left</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Achievement Benefits -->
+                        <div class="bg-secondary bg-opacity-30 rounded-xl p-5">
+                            <h3 class="font-medium mb-3">Achievement Benefits</h3>
+                            <ul class="space-y-2">
+                                <li class="flex items-center">
+                                    <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-sm">Deeper self-awareness</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-sm">500 experience points</span>
+                                </li>
+                                <li class="flex items-center">
+                                    <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <span class="text-sm">Unlock reflection insights feature</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>The Achievement Detail Modal shows comprehensive information about a specific achievement:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Large achievement icon and full description</li>
+                        <li>Current progress with visual indicator</li>
+                        <li>Estimated time to completion</li>
+                        <li>Benefits and rewards for unlocking</li>
+                        <li>Back button to return to achievements list</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Level Progress Component -->
+            <div class="bg-white p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4">Level Progress Component</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                        <!-- Tab Navigation -->
+                        <div class="flex justify-between mb-6">
+                            <button class="px-4 py-2 text-gray-400">Trophies</button>
+                            <button class="px-4 py-2 text-primary border-b-2 border-primary font-medium">Level</button>
+                            <button class="px-4 py-2 text-gray-400">Perks</button>
+                        </div>
+                        
+                        <!-- Your Level Card -->
+                        <div class="bg-amber-100 rounded-xl p-5 mb-6">
+                            <h3 class="text-lg font-medium mb-4">Your Level</h3>
+                            <div class="flex items-center mb-4">
+                                <div class="h-16 w-16 bg-amber-500 rounded-full flex items-center justify-center mr-4 text-white font-bold text-2xl">
+                                    1
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium">New Journeyer</h3>
+                                    <p class="text-sm text-amber-700">0 points</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span>Level 1</span>
+                                <span>Level 2</span>
+                            </div>
+                            <div class="w-full bg-amber-200 rounded-full h-2.5 mb-2">
+                                <div class="bg-amber-500 h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p class="text-sm text-center">100 points needed for next level</p>
+                        </div>
+                        
+                        <!-- Level Benefits -->
+                        <div class="bg-gray-50 rounded-xl p-5">
+                            <h3 class="font-medium mb-4">Level Benefits</h3>
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <div class="mt-1 mr-3">
+                                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-8 8L0 19l4-4 8 8 8-8 4 4-4 4-8-8z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium">Unlock new achievements and trophies</h4>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="mt-1 mr-3">
+                                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-8 8L0 19l4-4 8 8 8-8 4 4-4 4-8-8z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium">Access to more advanced features and tools</h4>
+                                    </div>
+                                </li>
+                                <li class="flex items-start">
+                                    <div class="mt-1 mr-3">
+                                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-8 8L0 19l4-4 8 8 8-8 4 4-4 4-8-8z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-medium">Gain spiritual insights and personal growth</h4>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>The Level Progress component visualizes the user's current level and progression:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Current level with distinctive color and badge</li>
+                        <li>Visual progress bar to next level</li>
+                        <li>Points accumulation indicator</li>
+                        <li>List of benefits gained from leveling up</li>
+                        <li>Tab navigation for accessing related gamification features</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Trophies Grid Component -->
+            <div class="bg-white p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4">Trophies Grid Component</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-medium mb-4">Tazkiyah</h3>
+                        
+                        <!-- Grid of Trophies -->
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <!-- Unlocked Trophy -->
+                            <div class="flex flex-col items-center">
+                                <div class="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-md mb-2">
+                                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center">Ruby Lantern</span>
+                            </div>
+                            
+                            <!-- Unlocked Trophy -->
+                            <div class="flex flex-col items-center">
+                                <div class="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-md mb-2">
+                                    <svg class="w-8 h-8 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center">Turquoise Prayer Mat</span>
+                            </div>
+                            
+                            <!-- Locked Trophy -->
+                            <div class="flex flex-col items-center opacity-50">
+                                <div class="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center mb-2">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v2m0 4h.01"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center">Jade Manuscript</span>
+                            </div>
+                            
+                            <!-- Locked Trophy -->
+                            <div class="flex flex-col items-center opacity-50">
+                                <div class="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center mb-2">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center">Amethyst Shield</span>
+                            </div>
+                            
+                            <!-- Locked Trophy -->
+                            <div class="flex flex-col items-center opacity-50">
+                                <div class="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center mb-2">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center">Streak Master</span>
+                            </div>
+                            
+                            <!-- Locked Trophy -->
+                            <div class="flex flex-col items-center opacity-50">
+                                <div class="h-16 w-16 bg-gray-200 rounded-full flex items-center justify-center mb-2">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs text-center">Resolve Champion</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Category Filter -->
+                        <div class="flex justify-between mb-4">
+                            <button class="px-3 py-1 bg-primary text-white text-sm rounded-full">All</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">Prayer</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">Challenge</button>
+                            <button class="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">Reflection</button>
+                        </div>
+                        
+                        <!-- Bottom Navigation -->
+                        <div class="pt-4 border-t border-gray-200 mt-4 flex justify-between">
+                            <button class="flex flex-col items-center">
+                                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span class="text-xs mt-1">Home</span>
+                            </button>
+                            <button class="flex flex-col items-center">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                <span class="text-xs mt-1">Challenge</span>
+                            </button>
+                            <button class="flex flex-col items-center">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                </svg>
+                                <span class="text-xs mt-1">Learn</span>
+                            </button>
+                            <button class="flex flex-col items-center">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <span class="text-xs mt-1">Progress</span>
+                            </button>
+                            <button class="flex flex-col items-center">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span class="text-xs mt-1">Settings</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>The Trophies Grid component displays all available achievements in a visual grid:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Visual representation of each trophy with distinctive icons</li>
+                        <li>Clear visual distinction between unlocked and locked trophies</li>
+                        <li>Category filters for organizing trophies by type</li>
+                        <li>Compact grid layout for easy browsing</li>
+                        <li>Shows the app's trophy collection in an engaging format</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Achievement Unlock Notification -->
+            <div class="bg-white p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4">Achievement Unlock Notification</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                        <!-- Celebration Animation Container -->
+                        <div class="relative mb-6">
+                            <!-- Confetti Animation would be implemented with actual animation in Flutter -->
+                            <div class="absolute inset-0 flex items-center justify-center opacity-25">
+                                <div class="h-4 w-4 bg-yellow-500 rounded-full absolute top-10 left-20"></div>
+                                <div class="h-3 w-3 bg-primary rounded-full absolute top-20 left-40"></div>
+                                <div class="h-5 w-5 bg-teal-500 rounded-full absolute top-30 left-60"></div>
+                                <div class="h-4 w-4 bg-amber-500 rounded-full absolute top-40 left-80"></div>
+                                <div class="h-3 w-3 bg-blue-500 rounded-full absolute top-50 left-30"></div>
+                            </div>
+                            
+                            <!-- Achievement Unlocked Card -->
+                            <div class="bg-gradient-to-br from-primary to-purple-700 rounded-xl p-6 text-white text-center">
+                                <div class="flex justify-center mb-4">
+                                    <div class="h-24 w-24 bg-white rounded-full flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-8 8L0 19l4-4 8 8 8-8 4 4-4 4-8-8z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h2 class="text-xl font-bold mb-2">Achievement Unlocked!</h2>
+                                <h3 class="text-lg font-medium mb-4">Amethyst Shield</h3>
+                                <p class="mb-6">You've successfully used the emergency tool 5 times. Your defense against temptation is strengthening!</p>
+                                <div class="flex justify-between">
+                                    <button class="px-4 py-2 bg-white text-primary rounded-lg font-medium">View</button>
+                                    <button class="px-4 py-2 bg-white bg-opacity-30 text-white rounded-lg">Dismiss</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mini Notification -->
+                        <div class="bg-primary bg-opacity-10 border-l-4 border-primary rounded-r-lg p-4 flex items-center">
+                            <div class="h-10 w-10 bg-white rounded-full flex items-center justify-center mr-4 shadow-md">
+                                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-8 8L0 19l4-4 8 8 8-8 4 4-4 4-8-8z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-grow">
+                                <p class="text-sm font-medium text-primary">Achievement Unlocked: Amethyst Shield</p>
+                                <p class="text-xs text-gray-600">Your journey has reached a new milestone!</p>
+                            </div>
+                            <button class="ml-2">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>The Achievement Unlock Notification celebrates user accomplishments:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Celebratory full-screen modal for significant achievements</li>
+                        <li>Confetti animation effect for excitement (implemented in Flutter)</li>
+                        <li>Mini notification variant for less disruptive alerts</li>
+                        <li>Clear explanation of what was achieved</li>
+                        <li>Options to view detail or dismiss</li>
+                        <li>Motivational message reinforcing positive behavior</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Emergency Response Tool Component -->
+            <div class="bg-white p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4">Emergency Response Tool</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                        <!-- Emergency Header -->
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="text-2xl">⚡</div>
+                                <span class="text-xl font-bold text-error ml-2">Emergency Tool</span>
+                            </div>
+                            <button class="text-2xl">✕</button>
+                        </div>
+                        
+                        <!-- Timer Section -->
+                        <div class="bg-error bg-opacity-10 rounded-xl p-6 mb-6 text-center">
+                            <h3 class="text-lg font-medium mb-2">Breathe & Focus</h3>
+                            <div class="text-4xl font-bold mb-4 text-error">05:00</div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button class="bg-white border border-error text-error py-2 rounded-lg font-medium">Pause</button>
+                                <button class="bg-error text-white py-2 rounded-lg font-medium">Reset</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Distraction Tools -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-medium mb-4">Quick Distractions</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button class="flex flex-col items-center justify-center bg-secondary p-4 rounded-xl">
+                                    <svg class="w-8 h-8 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="text-sm">Browse Photos</span>
+                                </button>
+                                <button class="flex flex-col items-center justify-center bg-secondary p-4 rounded-xl">
+                                    <svg class="w-8 h-8 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                    </svg>
+                                    <span class="text-sm">Listen to Quran</span>
+                                </button>
+                                <button class="flex flex-col items-center justify-center bg-secondary p-4 rounded-xl">
+                                    <svg class="w-8 h-8 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    <span class="text-sm">Call Friend</span>
+                                </button>
+                                <button class="flex flex-col items-center justify-center bg-secondary p-4 rounded-xl">
+                                    <svg class="w-8 h-8 text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path>
+                                    </svg>
+                                    <span class="text-sm">Brain Games</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Dua Section -->
+                        <div class="bg-secondary bg-opacity-30 rounded-xl p-6 mb-6">
+                            <h3 class="text-lg font-medium mb-3">Dua for Strength</h3>
+                            <div class="italic text-gray-700 mb-2">"O Allah, I seek refuge in You from committing sins and from debt."</div>
+                            <div class="text-sm text-gray-500">— Sahih al-Bukhari 2397</div>
+                        </div>
+                        
+                        <!-- AI Help Button -->
+                        <button class="w-full flex items-center justify-center bg-primary text-white py-3 rounded-full mb-4">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <span>Get AI Help Now</span>
+                        </button>
+                        
+                        <!-- Resolution Buttons -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button class="bg-white border border-gray-300 text-gray-700 py-3 rounded-full">Still Struggling</button>
+                            <button class="bg-green-500 text-white py-3 rounded-full">Resolved</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>The Emergency Response Tool is a critical feature for helping users in moments of temptation:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Prominent timer for breathing exercises and distraction</li>
+                        <li>Quick access buttons to immediate distractions</li>
+                        <li>Inspirational dua to strengthen resolve</li>
+                        <li>One-tap access to AI guidance</li>
+                        <li>Simple resolution tracking to log success or continued struggle</li>
+                        <li>Designed for immediate impact during critical moments</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- AI Chat Interface Component -->
+            <div class="bg-white p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4">AI Chat Interface</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                        <!-- Chat Header -->
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-medium">AI Guidance</h2>
+                                    <p class="text-xs text-gray-500">Spiritual & practical help</p>
+                                </div>
+                            </div>
+                            <button class="p-2 rounded-full hover:bg-gray-100">
+                                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Chat Messages -->
+                        <div class="space-y-4 mb-4 max-h-96 overflow-y-auto pb-2">
+                            <!-- User Message -->
+                            <div class="flex justify-end">
+                                <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none max-w-[75%]">
+                                    <p class="text-sm">I'm feeling the urge to browse inappropriate content again. How can I stop this?</p>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Response -->
+                            <div class="flex">
+                                <div class="bg-gray-100 p-3 rounded-2xl rounded-tl-none max-w-[75%]">
+                                    <p class="text-sm mb-2">I understand this is challenging. Remember the hadith:</p>
+                                    <p class="text-sm italic mb-2">"Verily Allah has prescribed excellence in all things..." (Sahih Muslim)</p>
+                                    <p class="text-sm mb-2">Here are some immediate actions:</p>
+                                    <ul class="text-sm list-disc pl-5 space-y-1">
+                                        <li>Make wudu to refresh yourself</li>
+                                        <li>Change your environment immediately</li>
+                                        <li>Call a trusted friend</li>
+                                        <li>Use the emergency timer for 5 minutes</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- User Message -->
+                            <div class="flex justify-end">
+                                <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none max-w-[75%]">
+                                    <p class="text-sm">Thank you, the timer helps. What should I do long-term?</p>
+                                </div>
+                            </div>
+                            
+                            <!-- AI Response -->
+                            <div class="flex">
+                                <div class="bg-gray-100 p-3 rounded-2xl rounded-tl-none max-w-[75%]">
+                                    <p class="text-sm">For long-term success:</p>
+                                    <ol class="text-sm list-decimal pl-5 space-y-1 mb-2">
+                                        <li>Strengthen your daily salah</li>
+                                        <li>Develop a morning routine including Quran</li>
+                                        <li>Implement content filters on devices</li>
+                                        <li>Join our weekly challenges</li>
+                                    </ol>
+                                    <p class="text-sm">Would you like me to prepare a personalized plan based on your triggers?</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Responses -->
+                        <div class="flex overflow-x-auto gap-2 mb-4 pb-2">
+                            <button class="whitespace-nowrap bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm">Yes, please</button>
+                            <button class="whitespace-nowrap bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm">Tell me more</button>
+                            <button class="whitespace-nowrap bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm">Duas for strength</button>
+                            <button class="whitespace-nowrap bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm">Alternative activities</button>
+                        </div>
+                        
+                        <!-- Input Area -->
+                        <div class="flex items-center gap-2">
+                            <button class="p-2 bg-gray-100 rounded-full">
+                                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                </svg>
+                            </button>
+                            <input type="text" placeholder="Type your message..." 
+                                   class="flex-grow px-4 py-2 rounded-full border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50 outline-none">
+                            <button class="p-2 bg-primary rounded-full">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>The AI Chat Interface provides personalized guidance from an Islamic perspective:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Clean, focused chat design without distractions</li>
+                        <li>Contextual responses with Islamic references and practical advice</li>
+                        <li>Quick response buttons for common questions</li>
+                        <li>Voice input option for hands-free interaction</li>
+                        <li>Structured advice format with lists for clarity</li>
+                        <li>Combines spiritual guidance with practical steps</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Voice Input Component -->
+            <div class="bg-white p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4">Voice Input Component</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                        <!-- Header -->
+                        <div class="flex justify-between items-center mb-6">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-medium">Voice Input</h2>
+                                    <p class="text-xs text-gray-500">Speak instead of typing</p>
+                                </div>
+                            </div>
+                            <button class="p-2 rounded-full hover:bg-gray-100">
+                                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Recording State -->
+                        <div class="text-center mb-6">
+                            <div class="inline-flex items-center justify-center h-24 w-24 bg-red-100 rounded-full mb-4">
+                                <div class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-lg font-medium mb-1">Listening...</p>
+                            <p class="text-sm text-gray-500">Speak clearly and naturally</p>
+                        </div>
+                        
+                        <!-- Live Transcription Preview -->
+                        <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                            <p class="text-gray-700 italic">I'm feeling overwhelmed today and I need some advice on how to maintain my focus on what's important...</p>
+                            <div class="flex items-center justify-center mt-2">
+                                <span class="block w-2 h-2 bg-blue-600 rounded-full mr-1"></span>
+                                <span class="block w-2 h-2 bg-blue-600 rounded-full mr-1"></span>
+                                <span class="block w-2 h-2 bg-blue-600 rounded-full"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Control Buttons -->
+                        <div class="grid grid-cols-3 gap-3 mb-6">
+                            <button class="bg-gray-100 text-gray-700 py-3 rounded-xl flex flex-col items-center">
+                                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-xs">Pause</span>
+                            </button>
+                            <button class="bg-red-500 text-white py-3 rounded-xl flex flex-col items-center">
+                                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                                </svg>
+                                <span class="text-xs">Stop</span>
+                            </button>
+                            <button class="bg-gray-100 text-gray-700 py-3 rounded-xl flex flex-col items-center">
+                                <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                <span class="text-xs">Restart</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Model Selection & Settings -->
+                        <div class="bg-blue-50 rounded-xl p-4 mb-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-medium text-sm">Transcription Model</span>
+                                <select class="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1">
+                                    <option>OpenAI Whisper</option>
+                                    <option>AssemblyAI Best</option>
+                                    <option>AssemblyAI Nano</option>
+                                    <option>Local Whisper</option>
+                                </select>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium text-sm">Language</span>
+                                <select class="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1">
+                                    <option>English</option>
+                                    <option>Arabic</option>
+                                    <option>Urdu</option>
+                                    <option>Auto-detect</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button class="bg-white border border-gray-300 text-gray-700 py-3 rounded-full">Cancel</button>
+                            <button class="bg-blue-600 text-white py-3 rounded-full">Use Text</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>The Voice Input Component allows hands-free interaction throughout the app:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Clean recording interface with visual feedback</li>
+                        <li>Real-time transcription preview</li>
+                        <li>Simple controls for pause, stop, and restart</li>
+                        <li>Model selection for different transcription services</li>
+                        <li>Language selection with auto-detection option</li>
+                        <li>Can be integrated into journal entries, trigger recording, and AI chat</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Daily Challenge Component -->
+            <div class="bg-white p-6 rounded-lg mb-6">
+                <h3 class="text-lg font-medium mb-4">Daily Challenge Component</h3>
+                <div class="component-preview flex justify-center">
+                    <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+                                    <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg font-medium">Daily Challenge</h2>
+                                    <p class="text-xs text-gray-500">April 10, 2025</p>
+                                </div>
+                            </div>
+                            <div class="text-amber-600 font-medium text-sm bg-amber-50 px-3 py-1 rounded-full">
+                                +25 points
+                            </div>
+                        </div>
+                        
+                        <!-- Challenge Content -->
+                        <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 mb-6">
+                            <h3 class="text-lg font-bold mb-2">Digital Detox</h3>
+                            <p class="text-gray-700 mb-4">Stay away from all social media for the entire day. Use the time instead for dhikr, reading Quran, or connecting with family.</p>
+                            <div class="mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium">Difficulty</span>
+                                    <div class="flex">
+                                        <div class="w-4 h-4 bg-amber-500 rounded-full mr-1"></div>
+                                        <div class="w-4 h-4 bg-amber-500 rounded-full mr-1"></div>
+                                        <div class="w-4 h-4 bg-amber-500 rounded-full mr-1"></div>
+                                        <div class="w-4 h-4 bg-gray-200 rounded-full mr-1"></div>
+                                        <div class="w-4 h-4 bg-gray-200 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium">Category</span>
+                                    <span class="text-sm">Focus</span>
+                                </div>
+                            </div>
+                            <div class="bg-white bg-opacity-50 rounded-lg p-3">
+                                <p class="text-sm text-gray-600 italic mb-1">"And keep yourself patient with those who call upon their Lord in the morning and the evening, seeking His countenance."</p>
+                                <p class="text-xs text-gray-500">— Surah Al-Kahf 18:28</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Timer Component -->
+                        <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-medium">Time Remaining</span>
+                                <span class="font-bold">12:45:30</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-amber-500 h-2 rounded-full" style="width: 35%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <button class="bg-white border border-gray-300 text-gray-700 py-3 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                <span>Not Today</span>
+                            </button>
+                            <button class="bg-green-600 text-white py-3 rounded-xl flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Mark as Complete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-gray-500">
+                    <p>The Daily Challenge Component motivates users with positive daily goals:</p>
+                    <ul class="list-disc ml-5 mt-2">
+                        <li>Clear challenge description with difficulty rating</li>
+                        <li>Points reward for achievement motivation</li>
+                        <li>Timer to track challenge duration</li>
+                        <li>Relevant Quranic/Hadith reference for spiritual context</li>
+                        <li>Category labeling for challenge organization</li>
+                        <li>Simple completion tracking with completion button</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Screens Section - Figma-like Display -->
+        <section id="screens" class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Application Screens</h2>
+            <p class="text-gray-700 dark:text-gray-300 mb-6">View all major application screens in a Figma-like layout. Screens are arranged side-by-side for easy comparison.</p>
+            
+            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg mb-4 overflow-x-auto">
+                <div class="flex space-x-6 pb-4 min-w-max">
+                    <!-- Authentication Screen -->
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Authentication</h3>
+                        <div class="w-[320px] h-[640px] bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col overflow-hidden">
+                            <div class="flex-grow overflow-y-auto">
+                                <!-- Reuse existing Authentication Screen content -->
+                                <div class="text-center mb-6">
+                                    <span class="text-4xl">🔒</span>
+                                    <h1 class="text-xl font-bold mt-2 text-on-surface dark:text-on-surface-dark">Temptation Destroyer</h1>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <h2 class="text-lg font-medium mb-4 text-on-surface dark:text-on-surface-dark">Welcome Back</h2>
+                                    <div class="mb-4">
+                                        <input type="password" placeholder="Enter Password" 
+                                               class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-primary dark:focus:border-primary-dark focus:ring-2 focus:ring-primary dark:focus:ring-primary-dark focus:ring-opacity-50 outline-none">
+                                    </div>
+                                    <button class="w-full bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 rounded-full hover:bg-opacity-90 transition-colors font-medium">
+                                        Unlock App
+                                    </button>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <a href="#" class="text-primary dark:text-primary-dark text-sm hover:underline">Need help? Reset Password</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dashboard Screen -->
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Dashboard</h3>
+                        <div class="w-[320px] h-[640px] bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col overflow-hidden">
+                            <div class="flex-grow overflow-y-auto">
+                                <!-- Reuse existing Dashboard Screen content -->
+                                <div class="flex justify-between items-center mb-6">
+                                    <div class="flex items-center">
+                                        <span class="text-2xl">📊</span>
+                                        <span class="ml-2 text-xl font-medium dark:text-white">Dashboard</span>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <button class="text-2xl">🔔</button>
+                                        <button class="text-2xl">⚙️</button>
+                                    </div>
+                                </div>
+
+                                <!-- Streak Card -->
+                                <div class="bg-secondary dark:bg-secondary-dark rounded-xl p-4 mb-6">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-on-secondary dark:text-on-secondary-dark">Current Streak</span>
+                                        <span class="font-medium text-on-secondary dark:text-on-secondary-dark">7 days 🔥</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-on-secondary dark:text-on-secondary-dark">Best Streak</span>
+                                        <span class="font-medium text-on-secondary dark:text-on-secondary-dark">21 days 🏆</span>
+                                    </div>
+                                </div>
+
+                                <!-- Today's Overview -->
+                                <div class="mb-6">
+                                    <h3 class="text-lg font-medium mb-3 dark:text-white">Today's Overview</h3>
+                                    <div class="bg-surface dark:bg-surface-dark border border-secondary dark:border-secondary-dark rounded-xl p-4">
+                                        <div class="mb-2 dark:text-gray-300">Mood: 😊</div>
+                                        <div class="mb-2 dark:text-gray-300">Intensity: Low</div>
+                                        <div class="dark:text-gray-300">Progress: Great!</div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="grid grid-cols-3 gap-3">
+                                    <button class="bg-primary dark:bg-primary-dark text-white dark:text-on-primary-dark py-3 px-4 rounded-full text-sm">New Entry</button>
+                                    <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 px-4 rounded-full text-sm">View Stats</button>
+                                    <button class="bg-secondary dark:bg-secondary-dark text-on-secondary dark:text-on-secondary-dark py-3 px-4 rounded-full text-sm">AI Help</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Emergency Response Screen -->
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Emergency Tool</h3>
+                        <div class="w-[320px] h-[640px] bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col overflow-hidden">
+                            <div class="flex-grow overflow-y-auto">
+                                <!-- Emergency Header -->
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center">
+                                        <div class="text-2xl">⚡</div>
+                                        <span class="text-xl font-bold text-error dark:text-error-dark ml-2">Emergency Tool</span>
+                                    </div>
+                                    <button class="text-2xl dark:text-gray-300">✕</button>
+                                </div>
+                                
+                                <!-- Timer Section -->
+                                <div class="bg-error bg-opacity-10 dark:bg-opacity-20 rounded-xl p-6 mb-6 text-center">
+                                    <h3 class="text-lg font-medium mb-2 dark:text-white">Breathe & Focus</h3>
+                                    <div class="text-4xl font-bold mb-4 text-error dark:text-error-dark">05:00</div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <button class="bg-white dark:bg-gray-700 border border-error dark:border-error-dark text-error dark:text-error-dark py-2 rounded-lg font-medium">Pause</button>
+                                        <button class="bg-error dark:bg-error-dark text-white dark:text-on-error-dark py-2 rounded-lg font-medium">Reset</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Quick Distraction Tools -->
+                                <div class="mb-6">
+                                    <h3 class="text-lg font-medium mb-4 dark:text-white">Quick Distractions</h3>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <button class="flex flex-col items-center justify-center bg-secondary dark:bg-secondary-dark p-4 rounded-xl">
+                                            <svg class="w-8 h-8 text-primary dark:text-primary-dark mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span class="text-sm dark:text-on-secondary-dark">Browse Photos</span>
+                                        </button>
+                                        <button class="flex flex-col items-center justify-center bg-secondary dark:bg-secondary-dark p-4 rounded-xl">
+                                            <svg class="w-8 h-8 text-primary dark:text-primary-dark mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                            </svg>
+                                            <span class="text-sm dark:text-on-secondary-dark">Listen to Quran</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Chat Screen -->
+                    <div class="flex flex-col">
+                        <h3 class="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">AI Guidance</h3>
+                        <div class="w-[320px] h-[640px] bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4 flex flex-col overflow-hidden">
+                            <div class="flex-grow overflow-y-auto">
+                                <!-- Chat Header -->
+                                <div class="flex justify-between items-center mb-6">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 bg-primary bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h2 class="text-lg font-medium">AI Guidance</h2>
+                                            <p class="text-xs text-gray-500">Spiritual & practical help</p>
+                                        </div>
+                                    </div>
+                                    <button class="p-2 rounded-full hover:bg-gray-100">
+                                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Chat Messages -->
+                                <div class="space-y-4 mb-4 max-h-96 overflow-y-auto pb-2">
+                                    <!-- User Message -->
+                                    <div class="flex justify-end">
+                                        <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none max-w-[75%]">
+                                            <p class="text-sm">I'm feeling the urge to browse inappropriate content again. How can I stop this?</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- AI Response -->
+                                    <div class="flex">
+                                        <div class="bg-gray-100 p-3 rounded-2xl rounded-tl-none max-w-[75%]">
+                                            <p class="text-sm mb-2">I understand this is challenging. Remember the hadith:</p>
+                                            <p class="text-sm italic mb-2">"Verily Allah has prescribed excellence in all things..." (Sahih Muslim)</p>
+                                            <p class="text-sm mb-2">Here are some immediate actions:</p>
+                                            <ul class="text-sm list-disc pl-5 space-y-1">
+                                                <li>Make wudu to refresh yourself</li>
+                                                <li>Change your environment immediately</li>
+                                                <li>Call a trusted friend</li>
+                                                <li>Use the emergency timer for 5 minutes</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- User Message -->
+                                    <div class="flex justify-end">
+                                        <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none max-w-[75%]">
+                                            <p class="text-sm">Thank you, the timer helps. What should I do long-term?</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- AI Response -->
+                                    <div class="flex">
+                                        <div class="bg-gray-100 p-3 rounded-2xl rounded-tl-none max-w-[75%]">
+                                            <p class="text-sm">For long-term success:</p>
+                                            <ol class="text-sm list-decimal pl-5 space-y-1 mb-2">
+                                                <li>Strengthen your daily salah</li>
+                                                <li>Develop a morning routine including Quran</li>
+                                                <li>Implement content filters on devices</li>
+                                                <li>Join our weekly challenges</li>
+                                            </ol>
+                                            <p class="text-sm">Would you like me to prepare a personalized plan based on your triggers?</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Quick Responses -->
+                                <div class="flex overflow-x-auto gap-2 mb-4 pb-2">
+                                    <button class="whitespace-nowrap bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm">Yes, please</button>
+                                    <button class="whitespace-nowrap bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm">Tell me more</button>
+                                    <button class="whitespace-nowrap bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm">Duas for strength</button>
+                                    <button class="whitespace-nowrap bg-gray-100 text-gray-700 px-3 py-2 rounded-full text-sm">Alternative activities</button>
+                                </div>
+                                
+                                <!-- Input Area -->
+                                <div class="flex items-center gap-2">
+                                    <button class="p-2 bg-gray-100 rounded-full">
+                                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                        </svg>
+                                    </button>
+                                    <input type="text" placeholder="Type your message..." 
+                                           class="flex-grow px-4 py-2 rounded-full border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-50 outline-none">
+                                    <button class="p-2 bg-primary rounded-full">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500">
+                            <p>The AI Chat Interface provides personalized guidance from an Islamic perspective:</p>
+                            <ul class="list-disc ml-5 mt-2">
+                                <li>Clean, focused chat design without distractions</li>
+                                <li>Contextual responses with Islamic references and practical advice</li>
+                                <li>Quick response buttons for common questions</li>
+                                <li>Voice input option for hands-free interaction</li>
+                                <li>Structured advice format with lists for clarity</li>
+                                <li>Combines spiritual guidance with practical steps</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Voice Input Component -->
+                    <div class="bg-white p-6 rounded-lg mb-6">
+                        <h3 class="text-lg font-medium mb-4">Voice Input Component</h3>
+                        <div class="component-preview flex justify-center">
+                            <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                                <!-- Header -->
+                                <div class="flex justify-between items-center mb-6">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h2 class="text-lg font-medium">Voice Input</h2>
+                                            <p class="text-xs text-gray-500">Speak instead of typing</p>
+                                        </div>
+                                    </div>
+                                    <button class="p-2 rounded-full hover:bg-gray-100">
+                                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <!-- Recording State -->
+                                <div class="text-center mb-6">
+                                    <div class="inline-flex items-center justify-center h-24 w-24 bg-red-100 rounded-full mb-4">
+                                        <div class="h-16 w-16 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <p class="text-lg font-medium mb-1">Listening...</p>
+                                    <p class="text-sm text-gray-500">Speak clearly and naturally</p>
+                                </div>
+                                
+                                <!-- Live Transcription Preview -->
+                                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                                    <p class="text-gray-700 italic">I'm feeling overwhelmed today and I need some advice on how to maintain my focus on what's important...</p>
+                                    <div class="flex items-center justify-center mt-2">
+                                        <span class="block w-2 h-2 bg-blue-600 rounded-full mr-1"></span>
+                                        <span class="block w-2 h-2 bg-blue-600 rounded-full mr-1"></span>
+                                        <span class="block w-2 h-2 bg-blue-600 rounded-full"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Control Buttons -->
+                                <div class="grid grid-cols-3 gap-3 mb-6">
+                                    <button class="bg-gray-100 text-gray-700 py-3 rounded-xl flex flex-col items-center">
+                                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span class="text-xs">Pause</span>
+                                    </button>
+                                    <button class="bg-red-500 text-white py-3 rounded-xl flex flex-col items-center">
+                                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                                        </svg>
+                                        <span class="text-xs">Stop</span>
+                                    </button>
+                                    <button class="bg-gray-100 text-gray-700 py-3 rounded-xl flex flex-col items-center">
+                                        <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                        <span class="text-xs">Restart</span>
+                                    </button>
+                                </div>
+                                
+                                <!-- Model Selection & Settings -->
+                                <div class="bg-blue-50 rounded-xl p-4 mb-6">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <span class="font-medium text-sm">Transcription Model</span>
+                                        <select class="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1">
+                                            <option>OpenAI Whisper</option>
+                                            <option>AssemblyAI Best</option>
+                                            <option>AssemblyAI Nano</option>
+                                            <option>Local Whisper</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium text-sm">Language</span>
+                                        <select class="text-sm bg-white border border-gray-300 rounded-lg px-2 py-1">
+                                            <option>English</option>
+                                            <option>Arabic</option>
+                                            <option>Urdu</option>
+                                            <option>Auto-detect</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button class="bg-white border border-gray-300 text-gray-700 py-3 rounded-full">Cancel</button>
+                                    <button class="bg-blue-600 text-white py-3 rounded-full">Use Text</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500">
+                            <p>The Voice Input Component allows hands-free interaction throughout the app:</p>
+                            <ul class="list-disc ml-5 mt-2">
+                                <li>Clean recording interface with visual feedback</li>
+                                <li>Real-time transcription preview</li>
+                                <li>Simple controls for pause, stop, and restart</li>
+                                <li>Model selection for different transcription services</li>
+                                <li>Language selection with auto-detection option</li>
+                                <li>Can be integrated into journal entries, trigger recording, and AI chat</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Daily Challenge Component -->
+                    <div class="bg-white p-6 rounded-lg mb-6">
+                        <h3 class="text-lg font-medium mb-4">Daily Challenge Component</h3>
+                        <div class="component-preview flex justify-center">
+                            <div class="w-[360px] bg-white p-6 rounded-xl shadow-lg">
+                                <!-- Header -->
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+                                            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h2 class="text-lg font-medium">Daily Challenge</h2>
+                                            <p class="text-xs text-gray-500">April 10, 2025</p>
+                                        </div>
+                                    </div>
+                                    <div class="text-amber-600 font-medium text-sm bg-amber-50 px-3 py-1 rounded-full">
+                                        +25 points
+                                    </div>
+                                </div>
+                                
+                                <!-- Challenge Content -->
+                                <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-6 mb-6">
+                                    <h3 class="text-lg font-bold mb-2">Digital Detox</h3>
+                                    <p class="text-gray-700 mb-4">Stay away from all social media for the entire day. Use the time instead for dhikr, reading Quran, or connecting with family.</p>
+                                    <div class="mb-4">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="text-sm font-medium">Difficulty</span>
+                                            <div class="flex">
+                                                <div class="w-4 h-4 bg-amber-500 rounded-full mr-1"></div>
+                                                <div class="w-4 h-4 bg-amber-500 rounded-full mr-1"></div>
+                                                <div class="w-4 h-4 bg-amber-500 rounded-full mr-1"></div>
+                                                <div class="w-4 h-4 bg-gray-200 rounded-full mr-1"></div>
+                                                <div class="w-4 h-4 bg-gray-200 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm font-medium">Category</span>
+                                            <span class="text-sm">Focus</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white bg-opacity-50 rounded-lg p-3">
+                                        <p class="text-sm text-gray-600 italic mb-1">"And keep yourself patient with those who call upon their Lord in the morning and the evening, seeking His countenance."</p>
+                                        <p class="text-xs text-gray-500">— Surah Al-Kahf 18:28</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Timer Component -->
+                                <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <span class="font-medium">Time Remaining</span>
+                                        <span class="font-bold">12:45:30</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-amber-500 h-2 rounded-full" style="width: 35%"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Action Buttons -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <button class="bg-white border border-gray-300 text-gray-700 py-3 rounded-xl flex items-center justify-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                        <span>Not Today</span>
+                                    </button>
+                                    <button class="bg-green-600 text-white py-3 rounded-xl flex items-center justify-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <span>Mark as Complete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500">
+                            <p>The Daily Challenge Component motivates users with positive daily goals:</p>
+                            <ul class="list-disc ml-5 mt-2">
+                                <li>Clear challenge description with difficulty rating</li>
+                                <li>Points reward for achievement motivation</li>
+                                <li>Timer to track challenge duration</li>
+                                <li>Relevant Quranic/Hadith reference for spiritual context</li>
+                                <li>Category labeling for challenge organization</li>
+                                <li>Simple completion tracking with completion button</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Dark Mode Toggle Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            
+            // Check for saved theme preference or use system preference
+            const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+            const storedTheme = localStorage.getItem('theme');
+            
+            if (storedTheme === 'dark' || (!storedTheme && prefersDarkScheme.matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            
+            // Toggle theme when button is clicked
+            darkModeToggle.addEventListener('click', function() {
+                const isDark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+        });
+    </script>
+</body>
+</html> 
