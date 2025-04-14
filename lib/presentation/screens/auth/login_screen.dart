@@ -17,9 +17,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _passwordVisible = false;
+  bool _hasPasswordText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Add listener to update button state when text changes
+    _passwordController.addListener(_updatePasswordState);
+  }
+
+  void _updatePasswordState() {
+    final hasText = _passwordController.text.isNotEmpty;
+    if (hasText != _hasPasswordText) {
+      setState(() {
+        _hasPasswordText = hasText;
+      });
+    }
+  }
 
   @override
   void dispose() {
+    _passwordController.removeListener(_updatePasswordState);
     _passwordController.dispose();
     super.dispose();
   }
@@ -98,6 +116,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               obscureText: !_passwordVisible,
               onSubmitted: (_) => _login(),
+              onChanged: (_) => _updatePasswordState(),
             ),
 
             const SizedBox(height: 16),
@@ -154,7 +173,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   /// Check if login can be attempted
   bool _canLogin() {
-    return !_isLoading && _passwordController.text.isNotEmpty;
+    return !_isLoading && _hasPasswordText;
   }
 
   /// Attempt to login

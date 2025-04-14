@@ -17,16 +17,30 @@
 
 ### 2. Local Authentication
 - **Models**: `UserModel` (hashedPassword, lastLoginDate, securityQuestions, customApiKey)
-- **Repositories**: `AuthRepository` (savePassword, verifyPassword, updatePassword, saveApiKey, getApiKey)
-- **Use Cases**: `AuthUseCase` (login, setInitialPassword, validatePassword, manageApiKey)
+- **Repositories**: `AuthRepository` (savePassword, verifyPassword, updatePassword, saveApiKey, getApiKey, saveSecurityQuestions, verifySecurityAnswers)
+- **Use Cases**: `AuthUseCase` (login, setInitialPassword, validatePassword, manageApiKey, setupSecurityQuestions, verifySecurityAnswers)
 - **Providers**: `AuthProvider`
-- **Views**: PasswordSetupScreen, LoginScreen, ForgotPasswordScreen, ApiKeySetupScreen
+- **Views**: PasswordSetupScreen, LoginScreen, ForgotPasswordScreen, ApiKeySetupScreen, SecurityQuestionsSetupScreen
 
 #### Security Implementation Details
 - User's password will be used as the encryption/decryption key
 - Implement clear warnings about password importance
 - Store password securely with proper hashing and salting
 - Ensure password is never stored in plaintext
+
+#### Password Recovery System Implementation
+- **Security Questions Approach**:
+  - Create a model for storing security questions and encrypted answers
+  - Implement a separate encryption key for answers, derived from the answers themselves
+  - During setup, collect 3-5 personal questions and answers from the user
+  - Design a recovery flow that verifies multiple answers before allowing password reset
+  - Clearly warn users that data encrypted with the old password will be inaccessible
+- **Recovery Codes Approach**:
+  - Generate a set of recovery codes during initial password setup
+  - Use cryptographically secure random generator for codes
+  - Strongly encourage users to write these down and store them safely
+  - Implement a recovery flow using these codes as an alternative to security questions
+  - Provide clear instructions for using recovery codes
 
 ### 3. Emergency Response (Loss Cycle Tracking)
 - **Models**: `EmergencySessionModel` (id, startTime, endTime, activeTriggerIds, wasAIGuidanceShown, notes)

@@ -39,6 +39,8 @@ The user should be able to set up and use a password to protect their data.
    - [] updatePassword()
    - [] saveApiKey()
    - [] getApiKey()
+   - [] saveSecurityQuestions()
+   - [] verifySecurityAnswers()
 
 ### Domain Layer
 1. [] Create `AuthUseCase`:
@@ -46,6 +48,8 @@ The user should be able to set up and use a password to protect their data.
    - [] setInitialPassword()
    - [] validatePassword()
    - [] manageApiKey()
+   - [] setupSecurityQuestions()
+   - [] verifySecurityAnswers()
 
 ### Presentation Layer
 1. [] Create `AuthProvider` using Riverpod
@@ -54,6 +58,7 @@ The user should be able to set up and use a password to protect their data.
    - [] LoginScreen
    - [] ForgotPasswordScreen
    - [] ApiKeySetupScreen
+   - [] SecurityQuestionsSetupScreen
 
 ### Authentication Security Notices
 1. [] Implement clear security warnings:
@@ -62,6 +67,18 @@ The user should be able to set up and use a password to protect their data.
    - [] Offer option to write down password in a safe place
    - [] Explain encryption simply: "Your data is locked with this password and cannot be unlocked without it"
    - [] Provide guidance on creating a memorable but secure password
+
+### Password Recovery System
+1. [] Implement security questions-based recovery:
+   - [] Allow users to set up personal security questions during initial password setup
+   - [] Store answers securely (encrypted with a key derived from the answers themselves)
+   - [] Create a recovery flow that asks these questions
+   - [] If answers are correct, show password hint or allow password reset
+   - [] Clearly communicate that a password reset will make previously encrypted data inaccessible
+2. [] Create backup recovery code system:
+   - [] Generate recovery codes during initial setup
+   - [] Encourage users to store these codes safely offline
+   - [] Allow use of recovery codes as alternative to security questions
 
 ### User Experience Considerations
 1. [] Add appropriate humor and encouraging tone throughout the app:

@@ -104,6 +104,13 @@ This file tracks the detailed progress of developing the Temptation Destroyer ap
   - [ ] Add proper error handling
   - [ ] Test the complete flow
 
+### Bug Fixes - [Date: 2025-04-14]
+- Fixed dependency conflict with flutter_secure_storage by using compatible versions (22:48 PKT)
+- Fixed login button activation issue in LoginScreen (22:50 PKT)
+  - Added proper state tracking for password field content
+  - Implemented text change listener to update button state
+  - Improved user experience by immediately reflecting input state
+
 ## Technical Details
 
 ### Custom Encryption Implementation
@@ -148,8 +155,31 @@ This file tracks the detailed progress of developing the Temptation Destroyer ap
   - Proper error handling and loading states
 - Created reusable UI components for authentication screens
 
-### Next Steps
-1. Complete the ForgotPasswordScreen
-2. Test the complete authentication and emergency response flow
-3. Implement trigger management domain and presentation layers
-4. Create trigger management screens 
+### Password Recovery System Design
+- Security questions-based approach:
+  - Will allow users to set up personal security questions during setup
+  - Answers will be stored securely (encrypted with a key derived from the answers)
+  - Recovery flow will ask these questions and verify answers
+  - If correct, will show password hint or allow password reset
+  - Will clearly warn that old encrypted data becomes inaccessible
+- Recovery codes alternative:
+  - Will generate recovery codes during initial setup
+  - Users will be encouraged to store these codes safely
+  - Will provide a recovery flow using these codes
+
+### Next Steps (For April 15, 2025)
+1. Implement ForgotPasswordScreen and password recovery system:
+   - Create SecurityQuestionsSetupScreen for collecting security questions during initial setup
+   - Implement password recovery flow using security questions
+   - Add recovery codes generation and management
+   - Add clear warnings about data loss when resetting password
+
+2. Begin implementing trigger management:
+   - Create domain layer use cases for trigger management
+   - Build TriggerCollectionScreen UI
+   - Implement trigger creation and editing functionality
+
+3. Enhance app stability:
+   - Add proper error handling for database operations
+   - Test the complete authentication flow
+   - Validate the emergency response flow end-to-end 
