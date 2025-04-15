@@ -42,6 +42,37 @@
   - Implement a recovery flow using these codes as an alternative to security questions
   - Provide clear instructions for using recovery codes
 
+#### Advanced Encryption & Recovery Solutions (Phase 2)
+- **Current Limitation**: When a user forgets their password and resets it with a recovery code, all previously encrypted data becomes inaccessible because:
+  1. The encryption key is derived directly from the user's password
+  2. When the password changes, the new key cannot decrypt data encrypted with the old key
+  3. Recovery codes only verify identity but don't help with decryption
+
+- **Potential Solutions to Implement in Phase 2**:
+  1. **Master Key Approach**:
+     - Generate a random master key to encrypt all sensitive data
+     - Encrypt this master key with the user's password (instead of using password directly)
+     - When password changes, decrypt master key with recovery mechanism and re-encrypt with new password
+     - Data remains accessible since the actual encryption key (master key) doesn't change
+
+  2. **Envelope Encryption**:
+     - Generate a random data key for encrypting sensitive data
+     - Create "envelopes" that contain this data key encrypted with different access methods:
+       - Primary envelope: encrypted with user's password
+       - Recovery envelope: encrypted with a key derived from recovery answers or codes
+     - When password changes, use recovery envelope to access data key, then create new password envelope
+
+  3. **Accept Data Loss with Clear Warnings (Current MVP Approach)**:
+     - Explicitly inform users about the encryption limitation
+     - Provide clear warnings during password setup and recovery
+     - Suggest regular exports of critical data
+     - Recommend keeping password in secure password manager
+
+  4. **Two-Factor Derived Key**:
+     - Derive encryption key from combination of password and recovery factor
+     - Require both factors for normal operation but allow recovery with just recovery factor
+     - Provides compromise between security and recoverability
+
 ### 3. Emergency Response (Loss Cycle Tracking)
 - **Models**: `EmergencySessionModel` (id, startTime, endTime, activeTriggerIds, wasAIGuidanceShown, notes)
 - **Repositories**: `EmergencyRepository` (saveSession, getActiveSession, updateSession, endSession)

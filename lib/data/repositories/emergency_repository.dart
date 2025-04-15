@@ -1,6 +1,7 @@
 import '../models/emergency_session_model.dart';
 import '../../core/utils/object_box_manager.dart';
 import '../../objectbox.g.dart'; // Import generated ObjectBox code
+import 'dart:developer' as dev;
 
 /// Repository for managing emergency sessions (loss cycles)
 class EmergencyRepository {
@@ -45,7 +46,7 @@ class EmergencyRepository {
       box.put(session);
       return true;
     } catch (e) {
-      print('Error updating emergency session: $e');
+      dev.log('Error updating emergency session: $e');
       return false;
     }
   }
@@ -88,7 +89,7 @@ class EmergencyRepository {
       box.put(session);
       return true;
     } catch (e) {
-      print('Error ending emergency session: $e');
+      dev.log('Error ending emergency session: $e');
       return false;
     }
   }
@@ -147,7 +148,7 @@ class EmergencyRepository {
       box.put(session);
       return true;
     } catch (e) {
-      print('Error adding trigger to session: $e');
+      dev.log('Error adding trigger to session: $e');
       return false;
     }
   }

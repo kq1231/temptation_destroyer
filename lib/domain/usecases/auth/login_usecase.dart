@@ -1,4 +1,5 @@
 import '../../../data/repositories/auth_repository.dart';
+import 'dart:developer' as dev;
 
 /// Use case for user login
 class LoginUseCase {
@@ -19,7 +20,7 @@ class LoginUseCase {
       return isValid;
     } catch (e) {
       // Log the error but don't expose details to caller
-      print('Error during login: $e');
+      dev.log('Error during login: $e');
       return false;
     }
   }

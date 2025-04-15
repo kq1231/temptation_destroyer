@@ -4,6 +4,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/emergency/floating_help_button.dart';
+import '../triggers/trigger_collection_screen.dart';
 
 /// Main home screen of the app
 class HomeScreen extends ConsumerWidget {
@@ -78,7 +79,12 @@ class HomeScreen extends ConsumerWidget {
               title: const Text('Triggers'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigator.of(context).pushNamed('/triggers');
+                // Navigate to the TriggerCollectionScreen
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const TriggerCollectionScreen(),
+                  ),
+                );
               },
             ),
             ListTile(
@@ -95,6 +101,22 @@ class HomeScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.pop(context);
                 // Navigator.of(context).pushNamed('/statistics');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.security),
+              title: const Text('Recovery Codes'),
+              onTap: () {
+                Navigator.of(context).pop(); // Close drawer
+                Navigator.of(context).pushNamed('/recovery-codes');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.api),
+              title: const Text('AI Service Setup'),
+              onTap: () {
+                Navigator.of(context).pop(); // Close drawer
+                Navigator.of(context).pushNamed('/api-key-setup');
               },
             ),
             const Divider(),

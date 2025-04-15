@@ -26,6 +26,10 @@ class User {
   @Property()
   String? securityQuestions;
 
+  /// Recovery codes for password reset (stored as JSON string)
+  @Property()
+  String? recoveryCodes;
+
   /// Custom API key for AI services
   @Property()
   String? customApiKey;
@@ -38,6 +42,14 @@ class User {
   @Property()
   bool isFirstLogin;
 
+  /// Count of failed recovery attempts
+  @Property()
+  int failedRecoveryAttempts;
+
+  /// Timestamp of last failed recovery attempt
+  @Property(type: PropertyType.date)
+  DateTime? lastFailedRecoveryAttempt;
+
   /// Constructor
   User({
     this.id = 0,
@@ -45,8 +57,11 @@ class User {
     this.passwordSalt,
     this.lastLoginDate,
     this.securityQuestions,
+    this.recoveryCodes,
     this.customApiKey,
     this.apiServiceType,
     this.isFirstLogin = true,
+    this.failedRecoveryAttempts = 0,
+    this.lastFailedRecoveryAttempt,
   });
 }

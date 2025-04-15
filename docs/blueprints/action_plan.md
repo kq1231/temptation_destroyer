@@ -80,6 +80,17 @@ The user should be able to set up and use a password to protect their data.
    - [] Encourage users to store these codes safely offline
    - [] Allow use of recovery codes as alternative to security questions
 
+### Password Reset and Encryption Challenges
+1. [] Address the issue of data loss during password reset:
+   - [] Document the encryption challenge: data encrypted with old password can't be accessed with new password
+   - [] Implement a robust user warning system explaining this limitation
+   - [] Add clear documentation in recovery screens about data accessibility
+   - [] Consider one of these advanced solutions for Phase 2:
+     - [] Master Key Approach: Store a master encryption key that's encrypted with user password
+     - [] Envelope Encryption: Encrypt data with random key, then encrypt that key with password
+     - [] Key Recovery System: Store recovery keys in secure locations that survive password changes
+   - [] For MVP (Phase 1): Accept data loss on password reset with clear warnings
+
 ### User Experience Considerations
 1. [] Add appropriate humor and encouraging tone throughout the app:
    - [] Include light-hearted messages in loading screens

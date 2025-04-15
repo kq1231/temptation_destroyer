@@ -1,6 +1,7 @@
 import '../models/trigger_model.dart';
 import '../../core/utils/object_box_manager.dart';
 import '../../objectbox.g.dart'; // Import generated ObjectBox code
+import 'dart:developer' as dev;
 
 /// Repository for managing user's triggers
 class TriggerRepository {
@@ -21,7 +22,7 @@ class TriggerRepository {
       box.put(trigger);
       return true;
     } catch (e) {
-      print('Error updating trigger: $e');
+      dev.log('Error updating trigger: $e');
       return false;
     }
   }
@@ -34,7 +35,7 @@ class TriggerRepository {
       final box = ObjectBoxManager.instance.box<Trigger>();
       return box.remove(triggerId);
     } catch (e) {
-      print('Error deleting trigger: $e');
+      dev.log('Error deleting trigger: $e');
       return false;
     }
   }

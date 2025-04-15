@@ -159,8 +159,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Center(
               child: TextButton(
                 onPressed: () {
-                  // Navigate to forgot password screen
-                  Navigator.of(context).pushNamed('/forgot-password');
+                  // Navigate to password recovery screen
+                  Navigator.of(context).pushNamed('/recovery');
                 },
                 child: const Text(AppStrings.forgotPassword),
               ),

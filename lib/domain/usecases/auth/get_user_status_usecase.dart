@@ -1,5 +1,6 @@
 import '../../../data/models/user_model.dart';
 import '../../../data/repositories/auth_repository.dart';
+import 'dart:developer' as dev;
 
 /// Authentication status enum
 enum AuthStatus {
@@ -41,7 +42,7 @@ class GetUserStatusUseCase {
         return AuthStatus.existingUser;
       }
     } catch (e) {
-      print('Error getting user status: $e');
+      dev.log('Error getting user status: $e');
       return AuthStatus.error;
     }
   }
@@ -51,7 +52,7 @@ class GetUserStatusUseCase {
     try {
       return await _repository.getUser();
     } catch (e) {
-      print('Error getting user: $e');
+      dev.log('Error getting user: $e');
       // Return a blank user model in case of error
       return User(hashedPassword: '', isFirstLogin: true);
     }

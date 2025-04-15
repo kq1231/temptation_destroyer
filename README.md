@@ -1,16 +1,49 @@
-# temptation_destroyer
+# Temptation Destroyer
 
-A new Flutter project.
+A privacy-focused Flutter application designed to help Muslims overcome sinful behaviors, build positive habits, and strengthen their connection with Allah.
 
-## Getting Started
+## 🌟 Why Temptation Destroyer?
 
-This project is a starting point for a Flutter application.
+In today's digital age, Muslims face unprecedented challenges to their faith and spiritual well-being. Temptation Destroyer provides a comprehensive, Islamic-centered approach to overcoming these challenges:
 
-A few resources to get you started if this is your first Flutter project:
+- **Complete Privacy**: All your data stays on your device with strong encryption
+- **Emergency Response System**: Immediate help when facing temptation
+- **Islamic Guidance**: Duas, hadiths, and Islamic principles integrated throughout
+- **Achievement System**: Gamified journey with meaningful rewards like "Turquoise Prayer Mat" for consistent prayers
+- **AI-Powered Support**: Personalized guidance based on your specific struggles
+- **Voice Interaction**: Hands-free operation when you need help most
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## 🛡️ Core Features
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Emergency Response**: One-tap help during moments of weakness
+- **Trigger Management**: Identify and manage what leads to temptation
+- **Alternative Activities**: Personalized hobby suggestions based on available time
+- **Daily Challenges**: Build positive habits through daily Islamic challenges
+- **Achievement System**: Track your progress with meaningful milestones
+- **Statistics & Insights**: Visualize your journey to better habits
+- **Voice Support**: Voice-activated emergency help and journaling
+- **Bring Your Own API Key**: Use your preferred AI service by providing your own API key from OpenAI, Anthropic, or any OpenRouter model of your choice
+
+## 💪 For the Ummah
+
+Temptation Destroyer was built with the Muslim Ummah in mind:
+
+- **Respects Your Privacy**: No data leaves your device without your permission
+- **Strengthens Your Faith**: Integrates Islamic principles throughout the recovery journey
+- **Accessible to All**: Simple interface works for all ages and tech comfort levels
+- **Judgment-Free Zone**: Supportive environment focused on growth and mercy
+- **Full Control Over AI**: You decide which AI service to use by providing your own API key
+
+## 🚀 Getting Started
+
+1. Download the app from the App Store or Google Play
+2. Complete the simple onboarding process
+3. Set up your password (this encrypts all your data)
+4. Add your preferred AI service API key (OpenAI, Anthropic, or OpenRouter)
+5. Begin your journey to freedom from temptation
+
+May Allah make this app a means of guidance and strength for the Ummah.
+
+---
+
+*"And whoever fears Allah - He will make for him a way out." - Quran 65:2*

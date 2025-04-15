@@ -4,6 +4,7 @@ import '../../domain/usecases/auth/get_user_status_usecase.dart';
 import '../../domain/usecases/auth/login_usecase.dart';
 import '../../domain/usecases/auth/set_password_usecase.dart';
 import '../../domain/usecases/auth/manage_api_key_usecase.dart';
+import '../../domain/usecases/auth/recovery_codes_usecase.dart';
 import '../../data/models/user_model.dart';
 
 /// Provider for the authentication repository
@@ -33,6 +34,12 @@ final manageApiKeyUseCaseProvider = Provider<ManageApiKeyUseCase>((ref) {
 final getUserStatusUseCaseProvider = Provider<GetUserStatusUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return GetUserStatusUseCase(repository);
+});
+
+/// Provider for the recovery codes use case
+final recoveryCodesUseCaseProvider = Provider<RecoveryCodesUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return RecoveryCodesUseCase(repository);
 });
 
 /// Authentication state
@@ -72,6 +79,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   final SetPasswordUseCase _setPasswordUseCase;
   final ManageApiKeyUseCase _manageApiKeyUseCase;
   final GetUserStatusUseCase _getUserStatusUseCase;
+  final RecoveryCodesUseCase _recoveryCodesUseCase;
 
   /// Constructor
   AuthNotifier({
@@ -79,10 +87,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required SetPasswordUseCase setPasswordUseCase,
     required ManageApiKeyUseCase manageApiKeyUseCase,
     required GetUserStatusUseCase getUserStatusUseCase,
+    required RecoveryCodesUseCase recoveryCodesUseCase,
   })  : _loginUseCase = loginUseCase,
         _setPasswordUseCase = setPasswordUseCase,
         _manageApiKeyUseCase = manageApiKeyUseCase,
         _getUserStatusUseCase = getUserStatusUseCase,
+        _recoveryCodesUseCase = recoveryCodesUseCase,
         super(AuthState());
 
   /// Initialize the auth state
@@ -271,6 +281,65 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Generate recovery codes for the user
+  Future<List<String>> generateRecoveryCodes({int count = 5}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final codes =
+          await _recoveryCodesUseCase.generateRecoveryCodes(count: count);
+      state = state.copyWith(isLoading: false);
+      return codes;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Failed to generate recovery codes: $e',
+      );
+      return [];
+    }
+  }
+
+  /// Reset password using a recovery code
+  Future<Map<String, dynamic>> resetPasswordWithRecoveryCode(
+      String recoveryCode, String newPassword) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final result = await _recoveryCodesUseCase.resetPasswordWithRecoveryCode(
+        recoveryCode,
+        newPassword,
+      );
+
+      if (result['success']) {
+        final user = await _getUserStatusUseCase.getUser();
+        state = state.copyWith(
+          user: user,
+          status: AuthStatus.authenticated,
+          isLoading: false,
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: result['message'],
+        );
+      }
+
+      return result;
+    } catch (e) {
+      final errorMessage = 'Failed to reset password: $e';
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: errorMessage,
+      );
+      return {'success': false, 'rateLimited': false, 'message': errorMessage};
+    }
+  }
+
+  /// Check if the user has recovery codes set up
+  Future<bool> hasRecoveryCodes() async {
+    return await _recoveryCodesUseCase.hasRecoveryCodes();
+  }
+
   /// Check if user is authenticated
   bool get isAuthenticated => state.status == AuthStatus.authenticated;
 
@@ -285,5 +354,6 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
     setPasswordUseCase: ref.watch(setPasswordUseCaseProvider),
     manageApiKeyUseCase: ref.watch(manageApiKeyUseCaseProvider),
     getUserStatusUseCase: ref.watch(getUserStatusUseCaseProvider),
+    recoveryCodesUseCase: ref.watch(recoveryCodesUseCaseProvider),
   );
 });

@@ -7,6 +7,7 @@ class AppStrings {
   static const String appName = 'Temptation Destroyer';
   static const String appSlogan =
       'Strength through struggle, victory through persistence';
+  static const String appVersionText = 'Version 1.0.0';
 
   // General UI strings
   static const String loading = 'Loading...';

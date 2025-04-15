@@ -321,7 +321,7 @@ class _EmergencyTip extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CircleAvatar(
-          backgroundColor: AppColors.primary.withOpacity(0.2),
+          backgroundColor: AppColors.primary.withAlpha(51),
           radius: 20,
           child: Icon(icon, color: AppColors.primary),
         ),

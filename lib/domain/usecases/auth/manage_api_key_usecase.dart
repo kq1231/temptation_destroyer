@@ -1,4 +1,5 @@
 import '../../../data/repositories/auth_repository.dart';
+import 'dart:developer' as dev;
 
 /// Use case for managing API keys for AI services
 class ManageApiKeyUseCase {
@@ -16,7 +17,7 @@ class ManageApiKeyUseCase {
     try {
       return await _repository.saveApiKey(apiKey, serviceType);
     } catch (e) {
-      print('Error saving API key: $e');
+      dev.log('Error saving API key: $e');
       return false;
     }
   }
@@ -28,7 +29,7 @@ class ManageApiKeyUseCase {
     try {
       return await _repository.getApiKey();
     } catch (e) {
-      print('Error getting API key: $e');
+      dev.log('Error getting API key: $e');
       return null;
     }
   }
@@ -40,7 +41,7 @@ class ManageApiKeyUseCase {
     try {
       return await _repository.getApiServiceType();
     } catch (e) {
-      print('Error getting API service type: $e');
+      dev.log('Error getting API service type: $e');
       return null;
     }
   }
@@ -52,7 +53,7 @@ class ManageApiKeyUseCase {
     try {
       return await _repository.saveApiKey('', '');
     } catch (e) {
-      print('Error clearing API key: $e');
+      dev.log('Error clearing API key: $e');
       return false;
     }
   }

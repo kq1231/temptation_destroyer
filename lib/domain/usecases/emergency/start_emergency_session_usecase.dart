@@ -12,10 +12,12 @@ class StartEmergencySessionUseCase {
   ///
   /// [triggerId] - Optional initial trigger ID to associate with this session
   /// [intensity] - Optional initial intensity level (1-10)
+  /// [notes] - Optional notes about the session
   /// Returns the newly created emergency session
   Future<EmergencySession> execute({
     String? triggerId,
     int? intensity,
+    String? notes,
   }) async {
     // Check if there's already an active session
     final activeSession = await _repository.getActiveSession();
@@ -38,9 +40,9 @@ class StartEmergencySessionUseCase {
     final newSession = EmergencySession(
       startTime: DateTime.now(),
       endTime: null,
-      activeTriggerIds: triggerId != null ? triggerId : null,
+      activeTriggerIds: triggerId ?? '',
       intensity: intensity ?? 5, // Default to medium intensity if not specified
-      notes: '',
+      notes: notes ?? '',
       wasSuccessful: null,
       helpfulStrategies: '',
     );
