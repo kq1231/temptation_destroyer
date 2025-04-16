@@ -14,7 +14,10 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
+import 'data/models/ai_models.dart';
+import 'data/models/aspiration_model.dart';
 import 'data/models/emergency_session_model.dart';
+import 'data/models/hobby_model.dart';
 import 'data/models/trigger_model.dart';
 import 'data/models/user_model.dart';
 
@@ -22,59 +25,278 @@ export 'package:objectbox/objectbox.dart'; // so that callers only have to impor
 
 final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(1, 565911162749560298),
-      name: 'EmergencySessionModel',
-      lastPropertyId: const obx_int.IdUid(10, 1245832919544223211),
+      id: const obx_int.IdUid(4, 5382531126528966459),
+      name: 'AIResponseModel',
+      lastPropertyId: const obx_int.IdUid(7, 7284077518790205545),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 1615750766328326112),
+            id: const obx_int.IdUid(1, 2065960333714854431),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 5571737721030089582),
+            id: const obx_int.IdUid(2, 8060149680020338552),
+            name: 'uid',
+            type: 9,
+            flags: 2080,
+            indexId: const obx_int.IdUid(3, 7712359689618131082)),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 554570590989212876),
+            name: 'context',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 9172255039743366101),
+            name: 'response',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 3422233065008435390),
+            name: 'timestamp',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 9010034396928681793),
+            name: 'wasHelpful',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 7284077518790205545),
+            name: 'isEncrypted',
+            type: 1,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(5, 6684572823739821310),
+      name: 'AIServiceConfig',
+      lastPropertyId: const obx_int.IdUid(11, 8067232528677260136),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 8039466220283059300),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 1185105766014409847),
+            name: 'uid',
+            type: 9,
+            flags: 2080,
+            indexId: const obx_int.IdUid(4, 1273605320268502310)),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 2355316464666904892),
+            name: 'apiKey',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 6112304331995016060),
+            name: 'preferredModel',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 6049819857264738469),
+            name: 'allowDataTraining',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 2219895886433063406),
+            name: 'isEncrypted',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(11, 8067232528677260136),
+            name: 'dbServiceType',
+            type: 6,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(6, 8038929499369523082),
+      name: 'AspirationModel',
+      lastPropertyId: const obx_int.IdUid(14, 883643344588905737),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 23304912838466421),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 8453437843819331460),
+            name: 'uid',
+            type: 9,
+            flags: 2080,
+            indexId: const obx_int.IdUid(5, 2521924568791733273)),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 7420555856425195886),
+            name: 'dua',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 2891736367259188810),
+            name: 'isAchieved',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 7243749976480602437),
+            name: 'targetDate',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 1866512700588382508),
+            name: 'note',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 1070899588276822817),
+            name: 'createdAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 4435921661956222223),
+            name: 'achievedDate',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(10, 620335365088470462),
+            name: 'isEncrypted',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(14, 883643344588905737),
+            name: 'dbCategory',
+            type: 6,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(7, 4505480076388769121),
+      name: 'ChatHistorySettings',
+      lastPropertyId: const obx_int.IdUid(4, 6623205066321315835),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 8965043584036134040),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 3602469054736069059),
+            name: 'storeChatHistory',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 8532966641792521154),
+            name: 'autoDeleteAfterDays',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 6623205066321315835),
+            name: 'lastCleared',
+            type: 10,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(8, 4131266175279097061),
+      name: 'ChatMessageModel',
+      lastPropertyId: const obx_int.IdUid(6, 2588843359393737065),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 4246612909578813734),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 3114175433637546436),
+            name: 'uid',
+            type: 9,
+            flags: 2080,
+            indexId: const obx_int.IdUid(6, 6153727445342815698)),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 928851796564468241),
+            name: 'content',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 607444390803571562),
+            name: 'isUserMessage',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 8339599868613333553),
+            name: 'timestamp',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 2588843359393737065),
+            name: 'isEncrypted',
+            type: 1,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(9, 8628637741962715112),
+      name: 'EmergencySession',
+      lastPropertyId: const obx_int.IdUid(10, 5085942315203135592),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 7749448877122072055),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 5801053582782848985),
             name: 'sessionId',
             type: 9,
             flags: 2080,
-            indexId: const obx_int.IdUid(1, 3548844010489133431)),
+            indexId: const obx_int.IdUid(7, 4090512242824674080)),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 3154935104438855566),
+            id: const obx_int.IdUid(3, 1123333626856611741),
             name: 'startTime',
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 4231261392579040681),
+            id: const obx_int.IdUid(4, 6316297896790899910),
             name: 'endTime',
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 2681554415396974063),
+            id: const obx_int.IdUid(5, 1176541736828965737),
             name: 'activeTriggerIds',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 767168598278742911),
+            id: const obx_int.IdUid(6, 2120227240715610739),
             name: 'wasAIGuidanceShown',
             type: 1,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 1422745122981706590),
+            id: const obx_int.IdUid(7, 519754010540436084),
             name: 'notes',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 6815928807855179292),
+            id: const obx_int.IdUid(8, 105727403335945723),
             name: 'intensity',
             type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 1579482186747108307),
+            id: const obx_int.IdUid(9, 341370545983928423),
             name: 'wasSuccessful',
             type: 1,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(10, 1245832919544223211),
+            id: const obx_int.IdUid(10, 5085942315203135592),
             name: 'helpfulStrategies',
             type: 9,
             flags: 0)
@@ -82,115 +304,195 @@ final _entities = <obx_int.ModelEntity>[
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(2, 8755138201011373113),
-      name: 'TriggerModel',
-      lastPropertyId: const obx_int.IdUid(11, 8278726151384783726),
+      id: const obx_int.IdUid(10, 8340466199117957427),
+      name: 'HobbyModel',
+      lastPropertyId: const obx_int.IdUid(18, 2099984524798230988),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 2167728151839681866),
+            id: const obx_int.IdUid(1, 5898591615488565605),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 7620108606640191335),
-            name: 'triggerId',
+            id: const obx_int.IdUid(2, 7743864478258256205),
+            name: 'uid',
             type: 9,
             flags: 2080,
-            indexId: const obx_int.IdUid(2, 3841213203514361365)),
+            indexId: const obx_int.IdUid(8, 407504552681484699)),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 8262529195314612134),
+            id: const obx_int.IdUid(3, 5670643447286165687),
+            name: 'name',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 4599182935941550225),
             name: 'description',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 7646292331246731586),
-            name: 'triggerTypeValue',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 2588605991265152809),
-            name: 'intensity',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 8245590564100759391),
+            id: const obx_int.IdUid(9, 1039785768554750610),
             name: 'createdAt',
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 2270421302834360664),
-            name: 'notes',
+            id: const obx_int.IdUid(10, 2462457338400032727),
+            name: 'isEncrypted',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(13, 3621252245498381568),
+            name: 'frequencyGoal',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 3322285039199958135),
-            name: 'activeTimes',
-            type: 9,
+            id: const obx_int.IdUid(14, 8607792756904392621),
+            name: 'durationGoalMinutes',
+            type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 162608734531038007),
-            name: 'activeDays',
-            type: 9,
+            id: const obx_int.IdUid(15, 8479111339213196151),
+            name: 'satisfactionRating',
+            type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(10, 5317087322181146925),
-            name: 'activeTimesList',
-            type: 30,
+            id: const obx_int.IdUid(16, 3619416543117857483),
+            name: 'lastPracticedAt',
+            type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(11, 8278726151384783726),
-            name: 'activeDaysList',
-            type: 27,
+            id: const obx_int.IdUid(18, 2099984524798230988),
+            name: 'dbCategory',
+            type: 6,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(3, 4857296881808942799),
-      name: 'UserModel',
-      lastPropertyId: const obx_int.IdUid(8, 5491796628158094474),
+      id: const obx_int.IdUid(11, 4909300790776885457),
+      name: 'Trigger',
+      lastPropertyId: const obx_int.IdUid(12, 3885677959703952956),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 1024703197263590431),
+            id: const obx_int.IdUid(1, 7225158478899216332),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 8702117622623828049),
+            id: const obx_int.IdUid(2, 8710528896938068727),
+            name: 'triggerId',
+            type: 9,
+            flags: 2080,
+            indexId: const obx_int.IdUid(9, 759429143322953816)),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 6822993285652899234),
+            name: 'description',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(5, 1789007516772421337),
+            name: 'intensity',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(6, 5820162568708265027),
+            name: 'createdAt',
+            type: 10,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 2851426920116437598),
+            name: 'notes',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 813308995838187822),
+            name: 'activeTimes',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 4555371641017178831),
+            name: 'activeDays',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(10, 344814719254923249),
+            name: 'activeTimesList',
+            type: 30,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(11, 5757231406194431639),
+            name: 'activeDaysList',
+            type: 27,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(12, 3885677959703952956),
+            name: 'dbTriggerType',
+            type: 6,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(12, 732594421888719398),
+      name: 'User',
+      lastPropertyId: const obx_int.IdUid(11, 2507643350163163335),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 2288705050104329307),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 5289230246256388199),
             name: 'hashedPassword',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 4135519897461469362),
+            id: const obx_int.IdUid(3, 8102910547392366590),
             name: 'passwordSalt',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 3324290692423908662),
+            id: const obx_int.IdUid(4, 6745765736988837930),
             name: 'lastLoginDate',
             type: 10,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 2411309932995274532),
+            id: const obx_int.IdUid(5, 5161014558321515296),
             name: 'securityQuestions',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 4795934497715024907),
+            id: const obx_int.IdUid(6, 6748223421430813969),
+            name: 'recoveryCodes',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(7, 1482035989455239295),
             name: 'customApiKey',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 8137783214183318794),
+            id: const obx_int.IdUid(8, 8181983465992276639),
             name: 'apiServiceType',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 5491796628158094474),
+            id: const obx_int.IdUid(9, 4370594521017770630),
             name: 'isFirstLogin',
             type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(10, 4171318181986782160),
+            name: 'failedRecoveryAttempts',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(11, 2507643350163163335),
+            name: 'lastFailedRecoveryAttempt',
+            type: 10,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -232,21 +534,323 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(3, 4857296881808942799),
-      lastIndexId: const obx_int.IdUid(2, 3841213203514361365),
+      lastEntityId: const obx_int.IdUid(12, 732594421888719398),
+      lastIndexId: const obx_int.IdUid(9, 759429143322953816),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
-      retiredEntityUids: const [],
+      retiredEntityUids: const [
+        565911162749560298,
+        8755138201011373113,
+        4857296881808942799
+      ],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [],
+      retiredPropertyUids: const [
+        1615750766328326112,
+        5571737721030089582,
+        3154935104438855566,
+        4231261392579040681,
+        2681554415396974063,
+        767168598278742911,
+        1422745122981706590,
+        6815928807855179292,
+        1579482186747108307,
+        1245832919544223211,
+        2167728151839681866,
+        7620108606640191335,
+        8262529195314612134,
+        7646292331246731586,
+        2588605991265152809,
+        8245590564100759391,
+        2270421302834360664,
+        3322285039199958135,
+        162608734531038007,
+        5317087322181146925,
+        8278726151384783726,
+        1024703197263590431,
+        8702117622623828049,
+        4135519897461469362,
+        3324290692423908662,
+        2411309932995274532,
+        4795934497715024907,
+        8137783214183318794,
+        5491796628158094474,
+        3988049051118326264,
+        6165037033586125045,
+        8538049812891270845,
+        8047209285624182291,
+        7567276621680032467,
+        813328325650535162,
+        5299953927144011070,
+        7946734572044867549,
+        8385082509793175043,
+        1844444119017765496,
+        6560906498271996966,
+        1483791641364040888,
+        3626138294483248116,
+        81139484235961090,
+        3633703736518874286,
+        3962834585581653776
+      ],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
       version: 1);
 
   final bindings = <Type, obx_int.EntityDefinition>{
-    EmergencySession: obx_int.EntityDefinition<EmergencySession>(
+    AIResponseModel: obx_int.EntityDefinition<AIResponseModel>(
         model: _entities[0],
+        toOneRelations: (AIResponseModel object) => [],
+        toManyRelations: (AIResponseModel object) => {},
+        getId: (AIResponseModel object) => object.id,
+        setId: (AIResponseModel object, int id) {
+          object.id = id;
+        },
+        objectToFB: (AIResponseModel object, fb.Builder fbb) {
+          final uidOffset = fbb.writeString(object.uid);
+          final contextOffset = fbb.writeString(object.context);
+          final responseOffset = fbb.writeString(object.response);
+          fbb.startTable(8);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, uidOffset);
+          fbb.addOffset(2, contextOffset);
+          fbb.addOffset(3, responseOffset);
+          fbb.addInt64(4, object.timestamp.millisecondsSinceEpoch);
+          fbb.addBool(5, object.wasHelpful);
+          fbb.addBool(6, object.isEncrypted);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final uidParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final contextParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 8, '');
+          final responseParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 10, '');
+          final timestampParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
+          final wasHelpfulParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
+          final object = AIResponseModel(
+              id: idParam,
+              uid: uidParam,
+              context: contextParam,
+              response: responseParam,
+              timestamp: timestampParam,
+              wasHelpful: wasHelpfulParam)
+            ..isEncrypted =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 16, false);
+
+          return object;
+        }),
+    AIServiceConfig: obx_int.EntityDefinition<AIServiceConfig>(
+        model: _entities[1],
+        toOneRelations: (AIServiceConfig object) => [],
+        toManyRelations: (AIServiceConfig object) => {},
+        getId: (AIServiceConfig object) => object.id,
+        setId: (AIServiceConfig object, int id) {
+          object.id = id;
+        },
+        objectToFB: (AIServiceConfig object, fb.Builder fbb) {
+          final uidOffset = fbb.writeString(object.uid);
+          final apiKeyOffset =
+              object.apiKey == null ? null : fbb.writeString(object.apiKey!);
+          final preferredModelOffset = object.preferredModel == null
+              ? null
+              : fbb.writeString(object.preferredModel!);
+          fbb.startTable(12);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, uidOffset);
+          fbb.addOffset(3, apiKeyOffset);
+          fbb.addOffset(4, preferredModelOffset);
+          fbb.addBool(5, object.allowDataTraining);
+          fbb.addBool(6, object.isEncrypted);
+          fbb.addInt64(10, object.dbServiceType);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final uidParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final apiKeyParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGetNullable(buffer, rootOffset, 10);
+          final preferredModelParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 12);
+          final allowDataTrainingParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
+          final object = AIServiceConfig(
+              id: idParam,
+              uid: uidParam,
+              apiKey: apiKeyParam,
+              preferredModel: preferredModelParam,
+              allowDataTraining: allowDataTrainingParam)
+            ..isEncrypted =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 16, false)
+            ..dbServiceType = const fb.Int64Reader()
+                .vTableGetNullable(buffer, rootOffset, 24);
+
+          return object;
+        }),
+    AspirationModel: obx_int.EntityDefinition<AspirationModel>(
+        model: _entities[2],
+        toOneRelations: (AspirationModel object) => [],
+        toManyRelations: (AspirationModel object) => {},
+        getId: (AspirationModel object) => object.id,
+        setId: (AspirationModel object, int id) {
+          object.id = id;
+        },
+        objectToFB: (AspirationModel object, fb.Builder fbb) {
+          final uidOffset = fbb.writeString(object.uid);
+          final duaOffset = fbb.writeString(object.dua);
+          final noteOffset =
+              object.note == null ? null : fbb.writeString(object.note!);
+          fbb.startTable(15);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, uidOffset);
+          fbb.addOffset(2, duaOffset);
+          fbb.addBool(4, object.isAchieved);
+          fbb.addInt64(5, object.targetDate?.millisecondsSinceEpoch);
+          fbb.addOffset(6, noteOffset);
+          fbb.addInt64(7, object.createdAt.millisecondsSinceEpoch);
+          fbb.addInt64(8, object.achievedDate?.millisecondsSinceEpoch);
+          fbb.addBool(9, object.isEncrypted);
+          fbb.addInt64(13, object.dbCategory);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final targetDateValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 14);
+          final achievedDateValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 20);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final uidParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final duaParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 8, '');
+          final isAchievedParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 12, false);
+          final targetDateParam = targetDateValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(targetDateValue);
+          final noteParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGetNullable(buffer, rootOffset, 16);
+          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0));
+          final achievedDateParam = achievedDateValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(achievedDateValue);
+          final object = AspirationModel(
+              id: idParam,
+              uid: uidParam,
+              dua: duaParam,
+              isAchieved: isAchievedParam,
+              targetDate: targetDateParam,
+              note: noteParam,
+              createdAt: createdAtParam,
+              achievedDate: achievedDateParam)
+            ..isEncrypted =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 22, false)
+            ..dbCategory = const fb.Int64Reader()
+                .vTableGetNullable(buffer, rootOffset, 30);
+
+          return object;
+        }),
+    ChatHistorySettings: obx_int.EntityDefinition<ChatHistorySettings>(
+        model: _entities[3],
+        toOneRelations: (ChatHistorySettings object) => [],
+        toManyRelations: (ChatHistorySettings object) => {},
+        getId: (ChatHistorySettings object) => object.id,
+        setId: (ChatHistorySettings object, int id) {
+          object.id = id;
+        },
+        objectToFB: (ChatHistorySettings object, fb.Builder fbb) {
+          fbb.startTable(5);
+          fbb.addInt64(0, object.id);
+          fbb.addBool(1, object.storeChatHistory);
+          fbb.addInt64(2, object.autoDeleteAfterDays);
+          fbb.addInt64(3, object.lastCleared.millisecondsSinceEpoch);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final storeChatHistoryParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 6, false);
+          final autoDeleteAfterDaysParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
+          final lastClearedParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+          final object = ChatHistorySettings(
+              id: idParam,
+              storeChatHistory: storeChatHistoryParam,
+              autoDeleteAfterDays: autoDeleteAfterDaysParam,
+              lastCleared: lastClearedParam);
+
+          return object;
+        }),
+    ChatMessageModel: obx_int.EntityDefinition<ChatMessageModel>(
+        model: _entities[4],
+        toOneRelations: (ChatMessageModel object) => [],
+        toManyRelations: (ChatMessageModel object) => {},
+        getId: (ChatMessageModel object) => object.id,
+        setId: (ChatMessageModel object, int id) {
+          object.id = id;
+        },
+        objectToFB: (ChatMessageModel object, fb.Builder fbb) {
+          final uidOffset = fbb.writeString(object.uid);
+          final contentOffset = fbb.writeString(object.content);
+          fbb.startTable(7);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, uidOffset);
+          fbb.addOffset(2, contentOffset);
+          fbb.addBool(3, object.isUserMessage);
+          fbb.addInt64(4, object.timestamp.millisecondsSinceEpoch);
+          fbb.addBool(5, object.isEncrypted);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final uidParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final contentParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 8, '');
+          final isUserMessageParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 10, false);
+          final timestampParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
+          final object = ChatMessageModel(
+              id: idParam,
+              uid: uidParam,
+              content: contentParam,
+              isUserMessage: isUserMessageParam,
+              timestamp: timestampParam)
+            ..isEncrypted =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
+
+          return object;
+        }),
+    EmergencySession: obx_int.EntityDefinition<EmergencySession>(
+        model: _entities[5],
         toOneRelations: (EmergencySession object) => [],
         toManyRelations: (EmergencySession object) => {},
         getId: (EmergencySession object) => object.id,
@@ -319,8 +923,83 @@ obx_int.ModelDefinition getObjectBoxModel() {
 
           return object;
         }),
+    HobbyModel: obx_int.EntityDefinition<HobbyModel>(
+        model: _entities[6],
+        toOneRelations: (HobbyModel object) => [],
+        toManyRelations: (HobbyModel object) => {},
+        getId: (HobbyModel object) => object.id,
+        setId: (HobbyModel object, int id) {
+          object.id = id;
+        },
+        objectToFB: (HobbyModel object, fb.Builder fbb) {
+          final uidOffset = fbb.writeString(object.uid);
+          final nameOffset = fbb.writeString(object.name);
+          final descriptionOffset = object.description == null
+              ? null
+              : fbb.writeString(object.description!);
+          final frequencyGoalOffset = object.frequencyGoal == null
+              ? null
+              : fbb.writeString(object.frequencyGoal!);
+          fbb.startTable(19);
+          fbb.addInt64(0, object.id);
+          fbb.addOffset(1, uidOffset);
+          fbb.addOffset(2, nameOffset);
+          fbb.addOffset(3, descriptionOffset);
+          fbb.addInt64(8, object.createdAt.millisecondsSinceEpoch);
+          fbb.addBool(9, object.isEncrypted);
+          fbb.addOffset(12, frequencyGoalOffset);
+          fbb.addInt64(13, object.durationGoalMinutes);
+          fbb.addInt64(14, object.satisfactionRating);
+          fbb.addInt64(15, object.lastPracticedAt?.millisecondsSinceEpoch);
+          fbb.addInt64(17, object.dbCategory);
+          fbb.finish(fbb.endTable());
+          return object.id;
+        },
+        objectFromFB: (obx.Store store, ByteData fbData) {
+          final buffer = fb.BufferContext(fbData);
+          final rootOffset = buffer.derefObject(0);
+          final lastPracticedAtValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 34);
+          final idParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+          final uidParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 6, '');
+          final nameParam = const fb.StringReader(asciiOptimization: true)
+              .vTableGet(buffer, rootOffset, 8, '');
+          final descriptionParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 10);
+          final frequencyGoalParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 28);
+          final durationGoalMinutesParam =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 30);
+          final satisfactionRatingParam =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 32);
+          final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0));
+          final lastPracticedAtParam = lastPracticedAtValue == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(lastPracticedAtValue);
+          final object = HobbyModel(
+              id: idParam,
+              uid: uidParam,
+              name: nameParam,
+              description: descriptionParam,
+              frequencyGoal: frequencyGoalParam,
+              durationGoalMinutes: durationGoalMinutesParam,
+              satisfactionRating: satisfactionRatingParam,
+              createdAt: createdAtParam,
+              lastPracticedAt: lastPracticedAtParam)
+            ..isEncrypted =
+                const fb.BoolReader().vTableGet(buffer, rootOffset, 22, false)
+            ..dbCategory = const fb.Int64Reader()
+                .vTableGetNullable(buffer, rootOffset, 38);
+
+          return object;
+        }),
     Trigger: obx_int.EntityDefinition<Trigger>(
-        model: _entities[1],
+        model: _entities[7],
         toOneRelations: (Trigger object) => [],
         toManyRelations: (Trigger object) => {},
         getId: (Trigger object) => object.id,
@@ -343,11 +1022,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .toList(growable: false));
           final activeDaysListOffset =
               fbb.writeListInt64(object.activeDaysList);
-          fbb.startTable(12);
+          fbb.startTable(13);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, triggerIdOffset);
           fbb.addOffset(2, descriptionOffset);
-          fbb.addInt64(3, object.triggerTypeValue);
           fbb.addInt64(4, object.intensity);
           fbb.addInt64(5, object.createdAt.millisecondsSinceEpoch);
           fbb.addOffset(6, notesOffset);
@@ -355,6 +1033,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addOffset(8, activeDaysOffset);
           fbb.addOffset(9, activeTimesListOffset);
           fbb.addOffset(10, activeDaysListOffset);
+          fbb.addInt64(11, object.dbTriggerType);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -368,8 +1047,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final descriptionParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGet(buffer, rootOffset, 8, '');
-          final triggerTypeValueParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0);
           final intensityParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0);
           final createdAtParam = DateTime.fromMillisecondsSinceEpoch(
@@ -385,7 +1062,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
               id: idParam,
               triggerId: triggerIdParam,
               description: descriptionParam,
-              triggerTypeValue: triggerTypeValueParam,
               intensity: intensityParam,
               createdAt: createdAtParam,
               notes: notesParam,
@@ -397,12 +1073,14 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 .vTableGet(buffer, rootOffset, 22, [])
             ..activeDaysList =
                 const fb.ListReader<int>(fb.Int64Reader(), lazy: false)
-                    .vTableGet(buffer, rootOffset, 24, []);
+                    .vTableGet(buffer, rootOffset, 24, [])
+            ..dbTriggerType = const fb.Int64Reader()
+                .vTableGetNullable(buffer, rootOffset, 26);
 
           return object;
         }),
     User: obx_int.EntityDefinition<User>(
-        model: _entities[2],
+        model: _entities[8],
         toOneRelations: (User object) => [],
         toManyRelations: (User object) => {},
         getId: (User object) => object.id,
@@ -417,21 +1095,28 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final securityQuestionsOffset = object.securityQuestions == null
               ? null
               : fbb.writeString(object.securityQuestions!);
+          final recoveryCodesOffset = object.recoveryCodes == null
+              ? null
+              : fbb.writeString(object.recoveryCodes!);
           final customApiKeyOffset = object.customApiKey == null
               ? null
               : fbb.writeString(object.customApiKey!);
           final apiServiceTypeOffset = object.apiServiceType == null
               ? null
               : fbb.writeString(object.apiServiceType!);
-          fbb.startTable(9);
+          fbb.startTable(12);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, hashedPasswordOffset);
           fbb.addOffset(2, passwordSaltOffset);
           fbb.addInt64(3, object.lastLoginDate?.millisecondsSinceEpoch);
           fbb.addOffset(4, securityQuestionsOffset);
-          fbb.addOffset(5, customApiKeyOffset);
-          fbb.addOffset(6, apiServiceTypeOffset);
-          fbb.addBool(7, object.isFirstLogin);
+          fbb.addOffset(5, recoveryCodesOffset);
+          fbb.addOffset(6, customApiKeyOffset);
+          fbb.addOffset(7, apiServiceTypeOffset);
+          fbb.addBool(8, object.isFirstLogin);
+          fbb.addInt64(9, object.failedRecoveryAttempts);
+          fbb.addInt64(
+              10, object.lastFailedRecoveryAttempt?.millisecondsSinceEpoch);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -440,6 +1125,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final rootOffset = buffer.derefObject(0);
           final lastLoginDateValue =
               const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 10);
+          final lastFailedRecoveryAttemptValue =
+              const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 24);
           final idParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
           final hashedPasswordParam =
@@ -454,23 +1141,36 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final securityQuestionsParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 12);
-          final customApiKeyParam =
+          final recoveryCodesParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 14);
-          final apiServiceTypeParam =
+          final customApiKeyParam =
               const fb.StringReader(asciiOptimization: true)
                   .vTableGetNullable(buffer, rootOffset, 16);
+          final apiServiceTypeParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 18);
           final isFirstLoginParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 18, false);
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 20, false);
+          final failedRecoveryAttemptsParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 22, 0);
+          final lastFailedRecoveryAttemptParam =
+              lastFailedRecoveryAttemptValue == null
+                  ? null
+                  : DateTime.fromMillisecondsSinceEpoch(
+                      lastFailedRecoveryAttemptValue);
           final object = User(
               id: idParam,
               hashedPassword: hashedPasswordParam,
               passwordSalt: passwordSaltParam,
               lastLoginDate: lastLoginDateParam,
               securityQuestions: securityQuestionsParam,
+              recoveryCodes: recoveryCodesParam,
               customApiKey: customApiKeyParam,
               apiServiceType: apiServiceTypeParam,
-              isFirstLogin: isFirstLoginParam);
+              isFirstLogin: isFirstLoginParam,
+              failedRecoveryAttempts: failedRecoveryAttemptsParam,
+              lastFailedRecoveryAttempt: lastFailedRecoveryAttemptParam);
 
           return object;
         })
@@ -479,126 +1179,336 @@ obx_int.ModelDefinition getObjectBoxModel() {
   return obx_int.ModelDefinition(model, bindings);
 }
 
+/// [AIResponseModel] entity fields to define ObjectBox queries.
+class AIResponseModel_ {
+  /// See [AIResponseModel.id].
+  static final id =
+      obx.QueryIntegerProperty<AIResponseModel>(_entities[0].properties[0]);
+
+  /// See [AIResponseModel.uid].
+  static final uid =
+      obx.QueryStringProperty<AIResponseModel>(_entities[0].properties[1]);
+
+  /// See [AIResponseModel.context].
+  static final context =
+      obx.QueryStringProperty<AIResponseModel>(_entities[0].properties[2]);
+
+  /// See [AIResponseModel.response].
+  static final response =
+      obx.QueryStringProperty<AIResponseModel>(_entities[0].properties[3]);
+
+  /// See [AIResponseModel.timestamp].
+  static final timestamp =
+      obx.QueryDateProperty<AIResponseModel>(_entities[0].properties[4]);
+
+  /// See [AIResponseModel.wasHelpful].
+  static final wasHelpful =
+      obx.QueryBooleanProperty<AIResponseModel>(_entities[0].properties[5]);
+
+  /// See [AIResponseModel.isEncrypted].
+  static final isEncrypted =
+      obx.QueryBooleanProperty<AIResponseModel>(_entities[0].properties[6]);
+}
+
+/// [AIServiceConfig] entity fields to define ObjectBox queries.
+class AIServiceConfig_ {
+  /// See [AIServiceConfig.id].
+  static final id =
+      obx.QueryIntegerProperty<AIServiceConfig>(_entities[1].properties[0]);
+
+  /// See [AIServiceConfig.uid].
+  static final uid =
+      obx.QueryStringProperty<AIServiceConfig>(_entities[1].properties[1]);
+
+  /// See [AIServiceConfig.apiKey].
+  static final apiKey =
+      obx.QueryStringProperty<AIServiceConfig>(_entities[1].properties[2]);
+
+  /// See [AIServiceConfig.preferredModel].
+  static final preferredModel =
+      obx.QueryStringProperty<AIServiceConfig>(_entities[1].properties[3]);
+
+  /// See [AIServiceConfig.allowDataTraining].
+  static final allowDataTraining =
+      obx.QueryBooleanProperty<AIServiceConfig>(_entities[1].properties[4]);
+
+  /// See [AIServiceConfig.isEncrypted].
+  static final isEncrypted =
+      obx.QueryBooleanProperty<AIServiceConfig>(_entities[1].properties[5]);
+
+  /// See [AIServiceConfig.dbServiceType].
+  static final dbServiceType =
+      obx.QueryIntegerProperty<AIServiceConfig>(_entities[1].properties[6]);
+}
+
+/// [AspirationModel] entity fields to define ObjectBox queries.
+class AspirationModel_ {
+  /// See [AspirationModel.id].
+  static final id =
+      obx.QueryIntegerProperty<AspirationModel>(_entities[2].properties[0]);
+
+  /// See [AspirationModel.uid].
+  static final uid =
+      obx.QueryStringProperty<AspirationModel>(_entities[2].properties[1]);
+
+  /// See [AspirationModel.dua].
+  static final dua =
+      obx.QueryStringProperty<AspirationModel>(_entities[2].properties[2]);
+
+  /// See [AspirationModel.isAchieved].
+  static final isAchieved =
+      obx.QueryBooleanProperty<AspirationModel>(_entities[2].properties[3]);
+
+  /// See [AspirationModel.targetDate].
+  static final targetDate =
+      obx.QueryDateProperty<AspirationModel>(_entities[2].properties[4]);
+
+  /// See [AspirationModel.note].
+  static final note =
+      obx.QueryStringProperty<AspirationModel>(_entities[2].properties[5]);
+
+  /// See [AspirationModel.createdAt].
+  static final createdAt =
+      obx.QueryDateProperty<AspirationModel>(_entities[2].properties[6]);
+
+  /// See [AspirationModel.achievedDate].
+  static final achievedDate =
+      obx.QueryDateProperty<AspirationModel>(_entities[2].properties[7]);
+
+  /// See [AspirationModel.isEncrypted].
+  static final isEncrypted =
+      obx.QueryBooleanProperty<AspirationModel>(_entities[2].properties[8]);
+
+  /// See [AspirationModel.dbCategory].
+  static final dbCategory =
+      obx.QueryIntegerProperty<AspirationModel>(_entities[2].properties[9]);
+}
+
+/// [ChatHistorySettings] entity fields to define ObjectBox queries.
+class ChatHistorySettings_ {
+  /// See [ChatHistorySettings.id].
+  static final id =
+      obx.QueryIntegerProperty<ChatHistorySettings>(_entities[3].properties[0]);
+
+  /// See [ChatHistorySettings.storeChatHistory].
+  static final storeChatHistory =
+      obx.QueryBooleanProperty<ChatHistorySettings>(_entities[3].properties[1]);
+
+  /// See [ChatHistorySettings.autoDeleteAfterDays].
+  static final autoDeleteAfterDays =
+      obx.QueryIntegerProperty<ChatHistorySettings>(_entities[3].properties[2]);
+
+  /// See [ChatHistorySettings.lastCleared].
+  static final lastCleared =
+      obx.QueryDateProperty<ChatHistorySettings>(_entities[3].properties[3]);
+}
+
+/// [ChatMessageModel] entity fields to define ObjectBox queries.
+class ChatMessageModel_ {
+  /// See [ChatMessageModel.id].
+  static final id =
+      obx.QueryIntegerProperty<ChatMessageModel>(_entities[4].properties[0]);
+
+  /// See [ChatMessageModel.uid].
+  static final uid =
+      obx.QueryStringProperty<ChatMessageModel>(_entities[4].properties[1]);
+
+  /// See [ChatMessageModel.content].
+  static final content =
+      obx.QueryStringProperty<ChatMessageModel>(_entities[4].properties[2]);
+
+  /// See [ChatMessageModel.isUserMessage].
+  static final isUserMessage =
+      obx.QueryBooleanProperty<ChatMessageModel>(_entities[4].properties[3]);
+
+  /// See [ChatMessageModel.timestamp].
+  static final timestamp =
+      obx.QueryDateProperty<ChatMessageModel>(_entities[4].properties[4]);
+
+  /// See [ChatMessageModel.isEncrypted].
+  static final isEncrypted =
+      obx.QueryBooleanProperty<ChatMessageModel>(_entities[4].properties[5]);
+}
+
 /// [EmergencySession] entity fields to define ObjectBox queries.
-class EmergencySessionModel_ {
+class EmergencySession_ {
   /// See [EmergencySession.id].
   static final id =
-      obx.QueryIntegerProperty<EmergencySession>(_entities[0].properties[0]);
+      obx.QueryIntegerProperty<EmergencySession>(_entities[5].properties[0]);
 
   /// See [EmergencySession.sessionId].
   static final sessionId =
-      obx.QueryStringProperty<EmergencySession>(_entities[0].properties[1]);
+      obx.QueryStringProperty<EmergencySession>(_entities[5].properties[1]);
 
   /// See [EmergencySession.startTime].
   static final startTime =
-      obx.QueryDateProperty<EmergencySession>(_entities[0].properties[2]);
+      obx.QueryDateProperty<EmergencySession>(_entities[5].properties[2]);
 
   /// See [EmergencySession.endTime].
   static final endTime =
-      obx.QueryDateProperty<EmergencySession>(_entities[0].properties[3]);
+      obx.QueryDateProperty<EmergencySession>(_entities[5].properties[3]);
 
   /// See [EmergencySession.activeTriggerIds].
   static final activeTriggerIds =
-      obx.QueryStringProperty<EmergencySession>(_entities[0].properties[4]);
+      obx.QueryStringProperty<EmergencySession>(_entities[5].properties[4]);
 
   /// See [EmergencySession.wasAIGuidanceShown].
   static final wasAIGuidanceShown =
-      obx.QueryBooleanProperty<EmergencySession>(_entities[0].properties[5]);
+      obx.QueryBooleanProperty<EmergencySession>(_entities[5].properties[5]);
 
   /// See [EmergencySession.notes].
   static final notes =
-      obx.QueryStringProperty<EmergencySession>(_entities[0].properties[6]);
+      obx.QueryStringProperty<EmergencySession>(_entities[5].properties[6]);
 
   /// See [EmergencySession.intensity].
   static final intensity =
-      obx.QueryIntegerProperty<EmergencySession>(_entities[0].properties[7]);
+      obx.QueryIntegerProperty<EmergencySession>(_entities[5].properties[7]);
 
   /// See [EmergencySession.wasSuccessful].
   static final wasSuccessful =
-      obx.QueryBooleanProperty<EmergencySession>(_entities[0].properties[8]);
+      obx.QueryBooleanProperty<EmergencySession>(_entities[5].properties[8]);
 
   /// See [EmergencySession.helpfulStrategies].
   static final helpfulStrategies =
-      obx.QueryStringProperty<EmergencySession>(_entities[0].properties[9]);
+      obx.QueryStringProperty<EmergencySession>(_entities[5].properties[9]);
+}
+
+/// [HobbyModel] entity fields to define ObjectBox queries.
+class HobbyModel_ {
+  /// See [HobbyModel.id].
+  static final id =
+      obx.QueryIntegerProperty<HobbyModel>(_entities[6].properties[0]);
+
+  /// See [HobbyModel.uid].
+  static final uid =
+      obx.QueryStringProperty<HobbyModel>(_entities[6].properties[1]);
+
+  /// See [HobbyModel.name].
+  static final name =
+      obx.QueryStringProperty<HobbyModel>(_entities[6].properties[2]);
+
+  /// See [HobbyModel.description].
+  static final description =
+      obx.QueryStringProperty<HobbyModel>(_entities[6].properties[3]);
+
+  /// See [HobbyModel.createdAt].
+  static final createdAt =
+      obx.QueryDateProperty<HobbyModel>(_entities[6].properties[4]);
+
+  /// See [HobbyModel.isEncrypted].
+  static final isEncrypted =
+      obx.QueryBooleanProperty<HobbyModel>(_entities[6].properties[5]);
+
+  /// See [HobbyModel.frequencyGoal].
+  static final frequencyGoal =
+      obx.QueryStringProperty<HobbyModel>(_entities[6].properties[6]);
+
+  /// See [HobbyModel.durationGoalMinutes].
+  static final durationGoalMinutes =
+      obx.QueryIntegerProperty<HobbyModel>(_entities[6].properties[7]);
+
+  /// See [HobbyModel.satisfactionRating].
+  static final satisfactionRating =
+      obx.QueryIntegerProperty<HobbyModel>(_entities[6].properties[8]);
+
+  /// See [HobbyModel.lastPracticedAt].
+  static final lastPracticedAt =
+      obx.QueryDateProperty<HobbyModel>(_entities[6].properties[9]);
+
+  /// See [HobbyModel.dbCategory].
+  static final dbCategory =
+      obx.QueryIntegerProperty<HobbyModel>(_entities[6].properties[10]);
 }
 
 /// [Trigger] entity fields to define ObjectBox queries.
-class TriggerModel_ {
+class Trigger_ {
   /// See [Trigger.id].
   static final id =
-      obx.QueryIntegerProperty<Trigger>(_entities[1].properties[0]);
+      obx.QueryIntegerProperty<Trigger>(_entities[7].properties[0]);
 
   /// See [Trigger.triggerId].
   static final triggerId =
-      obx.QueryStringProperty<Trigger>(_entities[1].properties[1]);
+      obx.QueryStringProperty<Trigger>(_entities[7].properties[1]);
 
   /// See [Trigger.description].
   static final description =
-      obx.QueryStringProperty<Trigger>(_entities[1].properties[2]);
-
-  /// See [Trigger.triggerTypeValue].
-  static final triggerTypeValue =
-      obx.QueryIntegerProperty<Trigger>(_entities[1].properties[3]);
+      obx.QueryStringProperty<Trigger>(_entities[7].properties[2]);
 
   /// See [Trigger.intensity].
   static final intensity =
-      obx.QueryIntegerProperty<Trigger>(_entities[1].properties[4]);
+      obx.QueryIntegerProperty<Trigger>(_entities[7].properties[3]);
 
   /// See [Trigger.createdAt].
   static final createdAt =
-      obx.QueryDateProperty<Trigger>(_entities[1].properties[5]);
+      obx.QueryDateProperty<Trigger>(_entities[7].properties[4]);
 
   /// See [Trigger.notes].
   static final notes =
-      obx.QueryStringProperty<Trigger>(_entities[1].properties[6]);
+      obx.QueryStringProperty<Trigger>(_entities[7].properties[5]);
 
   /// See [Trigger.activeTimes].
   static final activeTimes =
-      obx.QueryStringProperty<Trigger>(_entities[1].properties[7]);
+      obx.QueryStringProperty<Trigger>(_entities[7].properties[6]);
 
   /// See [Trigger.activeDays].
   static final activeDays =
-      obx.QueryStringProperty<Trigger>(_entities[1].properties[8]);
+      obx.QueryStringProperty<Trigger>(_entities[7].properties[7]);
 
   /// See [Trigger.activeTimesList].
   static final activeTimesList =
-      obx.QueryStringVectorProperty<Trigger>(_entities[1].properties[9]);
+      obx.QueryStringVectorProperty<Trigger>(_entities[7].properties[8]);
 
   /// See [Trigger.activeDaysList].
   static final activeDaysList =
-      obx.QueryIntegerVectorProperty<Trigger>(_entities[1].properties[10]);
+      obx.QueryIntegerVectorProperty<Trigger>(_entities[7].properties[9]);
+
+  /// See [Trigger.dbTriggerType].
+  static final dbTriggerType =
+      obx.QueryIntegerProperty<Trigger>(_entities[7].properties[10]);
 }
 
 /// [User] entity fields to define ObjectBox queries.
-class UserModel_ {
+class User_ {
   /// See [User.id].
-  static final id = obx.QueryIntegerProperty<User>(_entities[2].properties[0]);
+  static final id = obx.QueryIntegerProperty<User>(_entities[8].properties[0]);
 
   /// See [User.hashedPassword].
   static final hashedPassword =
-      obx.QueryStringProperty<User>(_entities[2].properties[1]);
+      obx.QueryStringProperty<User>(_entities[8].properties[1]);
 
   /// See [User.passwordSalt].
   static final passwordSalt =
-      obx.QueryStringProperty<User>(_entities[2].properties[2]);
+      obx.QueryStringProperty<User>(_entities[8].properties[2]);
 
   /// See [User.lastLoginDate].
   static final lastLoginDate =
-      obx.QueryDateProperty<User>(_entities[2].properties[3]);
+      obx.QueryDateProperty<User>(_entities[8].properties[3]);
 
   /// See [User.securityQuestions].
   static final securityQuestions =
-      obx.QueryStringProperty<User>(_entities[2].properties[4]);
+      obx.QueryStringProperty<User>(_entities[8].properties[4]);
+
+  /// See [User.recoveryCodes].
+  static final recoveryCodes =
+      obx.QueryStringProperty<User>(_entities[8].properties[5]);
 
   /// See [User.customApiKey].
   static final customApiKey =
-      obx.QueryStringProperty<User>(_entities[2].properties[5]);
+      obx.QueryStringProperty<User>(_entities[8].properties[6]);
 
   /// See [User.apiServiceType].
   static final apiServiceType =
-      obx.QueryStringProperty<User>(_entities[2].properties[6]);
+      obx.QueryStringProperty<User>(_entities[8].properties[7]);
 
   /// See [User.isFirstLogin].
   static final isFirstLogin =
-      obx.QueryBooleanProperty<User>(_entities[2].properties[7]);
+      obx.QueryBooleanProperty<User>(_entities[8].properties[8]);
+
+  /// See [User.failedRecoveryAttempts].
+  static final failedRecoveryAttempts =
+      obx.QueryIntegerProperty<User>(_entities[8].properties[9]);
+
+  /// See [User.lastFailedRecoveryAttempt].
+  static final lastFailedRecoveryAttempt =
+      obx.QueryDateProperty<User>(_entities[8].properties[10]);
 }

@@ -313,4 +313,74 @@ docs
 4. The app currently supports auth, emergency response, and trigger management
 5. The AIServiceProvider has basic setup but needs to be enhanced
 
-I'm available if you have any questions during the implementation. Good luck with Phase 2! 
+I'm available if you have any questions during the implementation. Good luck with Phase 2!
+
+---
+
+# Temptation Destroyer App - Phase 2 Development Tasks
+
+## Project Overview
+You'll be working on Phase 2 of the Temptation Destroyer app, an addiction recovery application with Islamic principles. We've completed Phase 1 (core features) and part of Phase 2 (hobby management), and now need to implement the remaining Phase 2 features.
+
+## Current Project State
+- Project follows clean architecture (data/domain/presentation layers)
+- Core features implemented (auth, emergency response, trigger management)
+- Hobby management feature fully implemented with CRUD operations
+- ObjectBox database with encryption set up and working
+- Models properly handle ObjectBox integration, especially for enums
+
+## Documentation Resources
+- docs/blueprints/design-system.html - UI components and design specs
+- docs/blueprints/action_plan.md - Detailed feature roadmap
+- docs/blueprints/implementation-plan.md - Phased approach with priorities
+- docs/blueprints/development-log.md - Progress log with technical details
+
+## Project Structure
+- Run `find lib -type d | sort` to see the directory structure
+- Run `tree lib` for a more visual representation of the codebase structure
+- Look at existing implementations (especially in lib/data/models, lib/data/repositories, lib/domain/usecases/hobby, and lib/presentation/screens/hobbies) for reference
+
+## Your Tasks for Phase 2 Completion
+You'll be working on two main features:
+
+### 1. Aspirations & Goals Feature
+Implement functionality for users to set and track Islamic aspirations and duas.
+
+**Required Components:**
+- Complete `AspirationModel` with proper ObjectBox integration
+- Implement `AspirationRepository` with CRUD operations
+- Create domain layer use cases:
+  - ManageAspirationsUseCase
+  - TrackProgressUseCase
+- Build UI components:
+  - AspirationEntryScreen
+  - CategorySelector
+  - DuaInput
+  - GoalsList
+- Integrate with the main app flow
+
+### 2. AI Guidance Feature
+Implement personalized AI assistance system with Islamic guidance.
+
+**Required Components:**
+- Complete `AIRepository` implementation
+- Integrate with multiple AI providers (OpenAI, Anthropic, Open Router)
+- Create chat interface with proper state management
+- Add offline fallback mechanism
+- Implement voice-to-text and text-to-speech functionality
+
+## Technical Considerations
+- Follow clean architecture patterns established in the codebase
+- Use Riverpod for state management
+- Handle ObjectBox entities properly, especially enum types
+- Ensure proper error handling and loading states
+- Follow UI design system in design-system.html
+- Add unit tests for critical components
+
+## Getting Started
+1. Use the tree command to understand the project structure
+2. Check the development log to see implementation details of completed features
+3. Look at hobby management implementation as a reference
+4. Start with the `AspirationModel` and work your way up through the layers
+
+Please reach out if you have any questions. JazakAllah Khair!

@@ -23,9 +23,29 @@ class Trigger {
   @Property()
   String description;
 
+  /// The actual enum type as a transient property
+  @Transient()
+  TriggerType? triggerType;
+
   /// Type of trigger (emotional, situational, etc.) stored as integer
-  @Property()
-  int triggerTypeValue;
+  int? get dbTriggerType {
+    _ensureStableEnumValues();
+    return triggerType?.index;
+  }
+
+  /// Set the trigger type value
+  set dbTriggerType(int? value) {
+    _ensureStableEnumValues();
+    if (value == null) {
+      triggerType = null;
+    } else {
+      if (value >= 0 && value < TriggerType.values.length) {
+        triggerType = TriggerType.values[value];
+      } else {
+        triggerType = TriggerType.emotional;
+      }
+    }
+  }
 
   /// Intensity/severity of the trigger (1-10)
   @Property()
@@ -52,7 +72,7 @@ class Trigger {
     this.id = 0,
     String? triggerId,
     required this.description,
-    required this.triggerTypeValue,
+    TriggerType triggerType = TriggerType.emotional,
     this.intensity = 5,
     DateTime? createdAt,
     this.notes,
@@ -60,37 +80,6 @@ class Trigger {
     this.activeDays,
   })  : triggerId = triggerId ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now();
-
-  /// Named constructor that takes TriggerType enum
-  Trigger.withEnum({
-    int id = 0,
-    String? triggerId,
-    required String description,
-    required TriggerType triggerType,
-    int intensity = 5,
-    DateTime? createdAt,
-    String? notes,
-    String? activeTimes,
-    String? activeDays,
-  }) : this(
-          id: id,
-          triggerId: triggerId,
-          description: description,
-          triggerTypeValue: triggerType.index,
-          intensity: intensity,
-          createdAt: createdAt,
-          notes: notes,
-          activeTimes: activeTimes,
-          activeDays: activeDays,
-        );
-
-  /// Get the trigger type as enum
-  TriggerType get triggerType => TriggerType.values[triggerTypeValue];
-
-  /// Set the trigger type from enum
-  set triggerType(TriggerType type) {
-    triggerTypeValue = type.index;
-  }
 
   /// Get list of active times
   List<String> get activeTimesList {
@@ -150,5 +139,14 @@ class Trigger {
     if (hour >= 12 && hour < 17) return 'afternoon';
     if (hour >= 17 && hour < 21) return 'evening';
     return 'night';
+  }
+
+  /// Ensure enum values have stable indices
+  void _ensureStableEnumValues() {
+    assert(TriggerType.emotional.index == 0);
+    assert(TriggerType.situational.index == 1);
+    assert(TriggerType.temporal.index == 2);
+    assert(TriggerType.physical.index == 3);
+    assert(TriggerType.custom.index == 4);
   }
 }

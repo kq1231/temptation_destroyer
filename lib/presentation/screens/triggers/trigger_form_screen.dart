@@ -22,7 +22,7 @@ class _TriggerFormScreenState extends ConsumerState<TriggerFormScreen> {
   final _descriptionController = TextEditingController();
   final _notesController = TextEditingController();
 
-  TriggerType _selectedType = TriggerType.emotional;
+  late TriggerType _selectedType;
   int _intensity = 5;
   final List<String> _selectedTimes = [];
   final List<int> _selectedDays = [];
@@ -52,7 +52,7 @@ class _TriggerFormScreenState extends ConsumerState<TriggerFormScreen> {
     if (widget.trigger != null) {
       _descriptionController.text = widget.trigger!.description;
       _notesController.text = widget.trigger!.notes ?? '';
-      _selectedType = widget.trigger!.triggerType;
+      _selectedType = widget.trigger!.triggerType ?? TriggerType.emotional;
       _intensity = widget.trigger!.intensity;
       _selectedTimes.addAll(widget.trigger!.activeTimesList);
       _selectedDays.addAll(widget.trigger!.activeDaysList);
@@ -94,7 +94,7 @@ class _TriggerFormScreenState extends ConsumerState<TriggerFormScreen> {
           );
     } else {
       // Update existing trigger
-      final updatedTrigger = Trigger.withEnum(
+      final updatedTrigger = Trigger(
         id: widget.trigger!.id,
         triggerId: widget.trigger!.triggerId,
         description: description,

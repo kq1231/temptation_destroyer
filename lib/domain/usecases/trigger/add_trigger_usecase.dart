@@ -30,7 +30,7 @@ class AddTriggerUseCase {
     List<String>? activeTimes,
     List<int>? activeDays,
   }) async {
-    final trigger = Trigger.withEnum(
+    final trigger = Trigger(
       description: description,
       triggerType: triggerType,
       intensity: intensity,

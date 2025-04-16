@@ -55,7 +55,7 @@ class TriggerRepository {
     final box = ObjectBoxManager.instance.box<Trigger>();
 
     // Query for the trigger with the matching external ID
-    final query = box.query(TriggerModel_.triggerId.equals(triggerId)).build();
+    final query = box.query(Trigger_.triggerId.equals(triggerId)).build();
     final results = query.find();
     query.close();
 
@@ -81,8 +81,7 @@ class TriggerRepository {
     final box = ObjectBoxManager.instance.box<Trigger>();
 
     // Query for triggers of the specified type
-    final query =
-        box.query(TriggerModel_.triggerTypeValue.equals(type.index)).build();
+    final query = box.query(Trigger_.dbTriggerType.equals(type.index)).build();
     final results = query.find();
     query.close();
 

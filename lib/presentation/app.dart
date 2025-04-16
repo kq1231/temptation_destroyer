@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:temptation_destroyer/data/models/hobby_model.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/password_setup_screen.dart';
 import 'screens/auth/recovery_codes_screen.dart';
@@ -7,6 +8,9 @@ import 'screens/auth/password_recovery_screen.dart';
 import 'screens/auth/api_key/api_key_setup_screen.dart';
 import 'screens/emergency/emergency_screen.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/hobbies/hobby_management_screen.dart';
+import 'screens/hobbies/hobby_form_screen.dart';
+import 'screens/hobbies/hobby_details_screen.dart';
 import 'providers/auth_provider.dart';
 import '../domain/usecases/auth/get_user_status_usecase.dart';
 
@@ -33,6 +37,25 @@ class TemptationDestroyerApp extends ConsumerWidget {
         '/recovery-codes': (context) => const RecoveryCodesScreen(),
         '/recovery': (context) => const PasswordRecoveryScreen(),
         '/api-key-setup': (context) => const ApiKeySetupScreen(),
+        '/hobbies': (context) => const HobbyManagementScreen(),
+        '/hobbies/add': (context) => const HobbyFormScreen(),
+      },
+      // Add onGenerateRoute for dynamic routes
+      onGenerateRoute: (settings) {
+        if (settings.name == '/hobbies/edit') {
+          // Extract the hobby from arguments
+          final hobby = settings.arguments as HobbyModel?;
+          return MaterialPageRoute(
+            builder: (context) => HobbyFormScreen(hobby: hobby),
+          );
+        } else if (settings.name == '/hobbies/details') {
+          // Extract the hobby from arguments
+          final hobby = settings.arguments as HobbyModel;
+          return MaterialPageRoute(
+            builder: (context) => HobbyDetailsScreen(hobby: hobby),
+          );
+        }
+        return null;
       },
     );
   }

@@ -23,7 +23,7 @@ class EmergencyRepository {
     final box = ObjectBoxManager.instance.box<EmergencySession>();
 
     // Query for sessions where endTime is null (active sessions)
-    final query = box.query(EmergencySessionModel_.endTime.isNull()).build();
+    final query = box.query(EmergencySession_.endTime.isNull()).build();
     final activeSessions = query.find();
     query.close();
 
@@ -115,7 +115,7 @@ class EmergencyRepository {
     // Query for sessions in the specified time range
     final query = box
         .query(
-          EmergencySessionModel_.startTime.between(
+          EmergencySession_.startTime.between(
             startDate.millisecondsSinceEpoch,
             endDate.millisecondsSinceEpoch,
           ),
