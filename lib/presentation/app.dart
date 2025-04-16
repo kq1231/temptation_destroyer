@@ -11,6 +11,8 @@ import 'screens/home/home_screen.dart';
 import 'screens/hobbies/hobby_management_screen.dart';
 import 'screens/hobbies/hobby_form_screen.dart';
 import 'screens/hobbies/hobby_details_screen.dart';
+import 'screens/aspirations/aspirations_management_screen.dart';
+import 'screens/ai/ai_guidance_screen.dart';
 import 'providers/auth_provider.dart';
 import '../domain/usecases/auth/get_user_status_usecase.dart';
 
@@ -39,6 +41,8 @@ class TemptationDestroyerApp extends ConsumerWidget {
         '/api-key-setup': (context) => const ApiKeySetupScreen(),
         '/hobbies': (context) => const HobbyManagementScreen(),
         '/hobbies/add': (context) => const HobbyFormScreen(),
+        '/aspirations': (context) => const AspirationsManagementScreen(),
+        '/ai-guidance': (context) => const AIGuidanceScreen(),
       },
       // Add onGenerateRoute for dynamic routes
       onGenerateRoute: (settings) {

@@ -256,57 +256,87 @@ class AIRepository {
     return _responseBox.put(response);
   }
 
-  /// Get a fallback response for offline mode or errors
+  /// Get a specific AI response by ID
+  AIResponseModel? getAIResponse(int id) {
+    final response = _responseBox.get(id);
+    return _decryptAIResponseIfNeeded(response);
+  }
+
+  /// Update an AI response (e.g., to mark it as helpful)
+  bool updateAIResponse(AIResponseModel response) {
+    // Encrypt if needed
+    if (!response.isEncrypted && ObjectBoxManager.instance.isEncrypted) {
+      response.context = ObjectBoxManager.encryptString(response.context);
+      response.response = ObjectBoxManager.encryptString(response.response);
+      response.isEncrypted = true;
+    }
+
+    return _responseBox.put(response) > 0;
+  }
+
+  /// Get a fallback response when offline or on error
   AIResponseModel _getFallbackResponse(String userInput, String context) {
-    // Get the most appropriate fallback response based on keywords
-    final response = _selectFallbackResponse(userInput);
+    // Create list of fallback responses for different scenarios
+    final fallbackResponses = [
+      "Remember that Allah is with those who are patient. Whatever challenge you're facing, try to seek refuge in prayer and dhikr. The Prophet Muhammad (peace be upon him) said: 'Whoever Allah wishes good for, He puts them to trial.'",
+      "In times of difficulty, try to remember the verse: 'And Allah is with you wherever you are.' (Qur'an 57:4). Perhaps taking a moment for deep breathing, prayer, or reaching out to a trusted friend could help.",
+      "The Prophet (peace be upon him) taught us to say 'Astaghfirullah' (I seek forgiveness from Allah) when we're struggling. Combined with practical actions like changing your environment or engaging in a beneficial activity, this can help overcome the current challenge.",
+      "Consider taking a few moments to pray two raka'at of voluntary prayer. The Prophet (peace be upon him) would turn to prayer in times of distress. After prayer, try to engage in a hobby or activity that brings you joy and keeps you away from temptation.",
+      "When facing a trial, remember the hadith: 'Wonderful is the affair of the believer, for there is good in every affair of his.' Try to identify what this situation is teaching you, and take practical steps to protect yourself.",
+    ];
+
+    // Try to match the input with a relevant response
+    String fallbackResponse;
+    if (userInput.contains('urgent') || context.contains('emergency')) {
+      fallbackResponse =
+          "During urgent moments of temptation, immediately change your environment. Step outside, call someone trustworthy, or engage in dhikr. Remember that immediate distraction followed by prayer is one of the most effective strategies the Prophet (peace be upon him) taught us for overcoming temptation.";
+    } else if (userInput.contains('sad') ||
+        userInput.contains('depress') ||
+        context.contains('sad') ||
+        context.contains('depress')) {
+      fallbackResponse =
+          "During times of sadness, remember the Prophet's (peace be upon him) dua: 'O Allah, I seek refuge in You from anxiety and grief.' Consider speaking to a trusted friend or counselor about your feelings. Combining spiritual practices with social support and possibly professional help is an approach aligned with Islamic principles of comprehensive wellbeing.";
+    } else {
+      // Select a random fallback response if no specific match
+      fallbackResponse = fallbackResponses[
+          DateTime.now().millisecondsSinceEpoch % fallbackResponses.length];
+    }
 
     return AIResponseModel(
       context: context,
-      response: response,
+      response: fallbackResponse,
       wasHelpful: false,
     );
   }
 
-  /// Select a fallback response based on the user input
-  String _selectFallbackResponse(String userInput) {
-    final input = userInput.toLowerCase();
+  /// Decrypt AI response if needed
+  AIResponseModel? _decryptAIResponseIfNeeded(AIResponseModel? response) {
+    if (response == null) return null;
 
-    // Check for keywords to provide more relevant offline responses
-    if (input.contains('urge') ||
-        input.contains('tempt') ||
-        input.contains('relapse')) {
-      return "When facing strong urges, remember Allah's words in Surah Yusuf: 'And I do not acquit myself. Indeed, the soul is a persistent enjoiner of evil, except those upon which my Lord has mercy.' Try to immediately change your environment, make wudu, and perform salah. Physical activity like push-ups can also help redirect energy. Remember, this moment will pass, and your future self will thank you for resisting.";
-    } else if (input.contains('sad') ||
-        input.contains('depress') ||
-        input.contains('down')) {
-      return "During times of sadness, recall the Prophet Muhammad's ﷺ teaching: 'No fatigue, nor disease, nor anxiety, nor sadness, nor hurt, nor distress befalls a Muslim, even if it were the prick he receives from a thorn, but that Allah expiates some of his sins for that.' Your feelings are valid, but they are temporary. Try to pray two rakats, make dua, and if possible, talk to a trusted friend or family member.";
-    } else if (input.contains('lonely') || input.contains('alone')) {
-      return "Loneliness can be difficult, but remember that Allah is always with you. The Prophet ﷺ said, 'Allah is with those whose hearts are broken.' Try to reach out to family or friends, attend the mosque if possible, or join Islamic community activities. Filling your time with beneficial activities like learning, exercise, or helping others can also reduce feelings of loneliness.";
-    } else if (input.contains('guilt') || input.contains('shame')) {
-      return "Feeling guilt after sin is a sign of faith. The Prophet ﷺ said: 'Remorse is repentance.' Allah loves those who turn back to Him in sincere repentance. Make istighfar (seeking forgiveness), perform wudu, pray two rakats of repentance, and resolve to do better. Remember that Allah's mercy encompasses all things.";
-    } else if (input.contains('bored') || input.contains('boredom')) {
-      return "Boredom can often lead to temptation. Consider engaging in beneficial activities like reading Quran, learning a new skill, physical exercise, or helping others. The Prophet ﷺ said: 'Take advantage of five before five: your youth before your old age, your health before your sickness, your wealth before your poverty, your free time before you are preoccupied, and your life before your death.'";
-    } else if (input.contains('prayer') ||
-        input.contains('salah') ||
-        input.contains('worship')) {
-      return "Prayer is a shield against temptation. The Quran states: 'Indeed, prayer prohibits immorality and wrongdoing' (29:45). If you're struggling with prayer, start with what you can manage consistently, even if it's just one prayer a day. Quality is more important than quantity. Remember to focus on your connection with Allah during prayer, rather than just going through the motions.";
+    if (response.isEncrypted) {
+      // Create a decrypted copy
+      final decrypted = response.copyWith(
+        context: ObjectBoxManager.decryptString(response.context),
+        response: ObjectBoxManager.decryptString(response.response),
+        isEncrypted: false,
+      );
+      return decrypted;
     }
 
-    // Default fallback response
-    return "Remember that seeking help is a sign of strength, not weakness. The Prophet Muhammad ﷺ said: 'The strong person is not the one who overcomes people, but the one who overcomes their nafs (self).' Take a deep breath, make wudu, and try to change your environment. If possible, reach out to a trusted friend or family member for support. Allah does not burden a soul beyond what it can bear, and with every hardship comes ease.";
+    return response;
+  }
+
+  /// Get all AI responses
+  List<AIResponseModel> getAllAIResponses() {
+    final responses = _responseBox.getAll();
+    return responses
+        .map((response) => _decryptAIResponseIfNeeded(response)!)
+        .toList();
   }
 
   /// Store a chat message
-  Future<int> storeChatMessage(ChatMessageModel message) async {
-    // Check if chat storage is enabled
-    final settings = getChatSettings();
-    if (!settings.storeChatHistory) {
-      return 0; // Don't store if disabled
-    }
-
-    // Encrypt if needed
-    if (ObjectBoxManager.instance.isEncrypted && !message.isEncrypted) {
+  int storeChatMessage(ChatMessageModel message) {
+    if (!message.isEncrypted && ObjectBoxManager.instance.isEncrypted) {
       message.content = ObjectBoxManager.encryptString(message.content);
       message.isEncrypted = true;
     }
@@ -315,89 +345,61 @@ class AIRepository {
   }
 
   /// Get chat history
-  List<ChatMessageModel> getChatHistory({
-    int limit = 50,
-    int offset = 0,
-    DateTime? startDate,
-    DateTime? endDate,
-  }) {
-    // Create query builder
-    QueryBuilder<ChatMessageModel> qBuilder = _chatBox.query();
+  List<ChatMessageModel> getChatHistory() {
+    final messages = _chatBox.getAll();
+    return messages
+        .map((message) => _decryptChatMessageIfNeeded(message)!)
+        .toList();
+  }
 
-    if (startDate != null && endDate != null) {
-      qBuilder = _chatBox.query(ChatMessageModel_.timestamp.between(
-          startDate.millisecondsSinceEpoch, endDate.millisecondsSinceEpoch));
-    } else if (startDate != null) {
-      qBuilder = _chatBox.query(ChatMessageModel_.timestamp
-          .greaterThan(startDate.millisecondsSinceEpoch));
-    } else if (endDate != null) {
-      qBuilder = _chatBox.query(
-          ChatMessageModel_.timestamp.lessThan(endDate.millisecondsSinceEpoch));
-    }
-
-    // Add order by timestamp (descending)
-    qBuilder.order(ChatMessageModel_.timestamp, flags: Order.descending);
-
-    // Execute query with pagination
-    final query = qBuilder.build()
-      ..offset = offset
+  /// Get recent chat history limited by count
+  List<ChatMessageModel> getRecentChatHistory(int limit) {
+    final query = _chatBox
+        .query()
+        .order(ChatMessageModel_.timestamp, flags: Order.descending)
+        .build()
       ..limit = limit;
 
     final messages = query.find();
     query.close();
 
-    // Decrypt if needed
-    if (ObjectBoxManager.instance.isEncrypted) {
-      for (final message in messages) {
-        if (message.isEncrypted) {
-          message.content = ObjectBoxManager.decryptString(message.content);
-          message.isEncrypted = false; // Mark as decrypted in memory
-        }
-      }
+    // Sort chronologically (oldest first)
+    messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    return messages
+        .map((message) => _decryptChatMessageIfNeeded(message)!)
+        .toList();
+  }
+
+  /// Decrypt chat message if needed
+  ChatMessageModel? _decryptChatMessageIfNeeded(ChatMessageModel? message) {
+    if (message == null) return null;
+
+    if (message.isEncrypted) {
+      // Create a decrypted copy
+      final decrypted = message.copyWith(
+        content: ObjectBoxManager.decryptString(message.content),
+        isEncrypted: false,
+      );
+      return decrypted;
     }
 
-    return messages;
+    return message;
   }
 
   /// Clear chat history
-  Future<void> clearChatHistory() async {
+  void clearChatHistory() {
     _chatBox.removeAll();
 
-    // Update last cleared timestamp
-    final settings = getChatSettings();
+    // Update the last cleared date in settings
+    final settings = getChatHistorySettings();
     settings.lastCleared = DateTime.now();
     _settingsBox.put(settings);
   }
 
-  /// Get chat settings, creating default if needed
-  ChatHistorySettings getChatSettings() {
-    // Try to get existing settings
-    final List<ChatHistorySettings> settings = _settingsBox.getAll();
-    if (settings.isNotEmpty) {
-      return settings.first;
-    }
-
-    // Create default settings if none exist
-    final defaultSettings = ChatHistorySettings();
-    _settingsBox.put(defaultSettings);
-    return defaultSettings;
-  }
-
-  /// Update chat settings
-  Future<void> updateChatSettings(ChatHistorySettings settings) async {
-    _settingsBox.put(settings);
-  }
-
-  /// Auto-delete chat messages older than the retention period
-  Future<void> cleanupOldChatMessages() async {
-    final settings = getChatSettings();
-    if (!settings.storeChatHistory || settings.autoDeleteAfterDays <= 0) {
-      return;
-    }
-
-    final cutoffDate = DateTime.now().subtract(
-      Duration(days: settings.autoDeleteAfterDays),
-    );
+  /// Delete chat messages older than specified days
+  int deleteOldChatMessages(int olderThanDays) {
+    final cutoffDate = DateTime.now().subtract(Duration(days: olderThanDays));
 
     final query = _chatBox
         .query(ChatMessageModel_.timestamp
@@ -405,48 +407,80 @@ class AIRepository {
         .build();
 
     final oldMessages = query.find();
-    _chatBox.removeMany(oldMessages.map((m) => m.id).toList());
     query.close();
-  }
 
-  /// Get the current AI service configuration
-  AIServiceConfig getServiceConfig() {
-    final List<AIServiceConfig> configs = _configBox.getAll();
-    if (configs.isNotEmpty) {
-      final config = configs.first;
-
-      // Decrypt API key if it's encrypted
-      if (config.isEncrypted && config.apiKey != null) {
-        config.apiKey = ObjectBoxManager.decryptString(config.apiKey!);
-        config.isEncrypted = false; // Mark as decrypted in memory
+    int count = 0;
+    for (final message in oldMessages) {
+      if (_chatBox.remove(message.id)) {
+        count++;
       }
-
-      return config;
     }
 
-    // Create default config if none exists
-    final defaultConfig = AIServiceConfig(
-      serviceType: AIServiceType.offline,
-    );
-    _configBox.put(defaultConfig);
-    return defaultConfig;
+    return count;
   }
 
-  /// Save API service configuration
-  Future<void> saveServiceConfig(AIServiceConfig config) async {
+  /// Get chat history settings
+  ChatHistorySettings getChatHistorySettings() {
+    final allSettings = _settingsBox.getAll();
+
+    if (allSettings.isEmpty) {
+      // Create default settings if none exist
+      final defaultSettings = ChatHistorySettings();
+      _settingsBox.put(defaultSettings);
+      return defaultSettings;
+    }
+
+    return allSettings.first;
+  }
+
+  /// Update chat history settings
+  void updateChatHistorySettings(ChatHistorySettings settings) {
+    _settingsBox.put(settings);
+  }
+
+  /// Get the AI service configuration
+  AIServiceConfig getServiceConfig() {
+    final allConfigs = _configBox.getAll();
+
+    if (allConfigs.isEmpty) {
+      // Create default config if none exists
+      final defaultConfig = AIServiceConfig();
+      _configBox.put(defaultConfig);
+      return defaultConfig;
+    }
+
+    final config = allConfigs.first;
+
+    if (config.isEncrypted) {
+      // Decrypt API key if encrypted
+      final decrypted = config.copyWith(
+        apiKey: config.apiKey != null
+            ? ObjectBoxManager.decryptString(config.apiKey!)
+            : null,
+        isEncrypted: false,
+      );
+      return decrypted;
+    }
+
+    return config;
+  }
+
+  /// Save the AI service configuration
+  void saveServiceConfig(AIServiceConfig config) {
     // Encrypt API key if needed
-    if (ObjectBoxManager.instance.isEncrypted &&
-        !config.isEncrypted &&
-        config.apiKey != null &&
-        config.apiKey!.isNotEmpty) {
-      config.apiKey = ObjectBoxManager.encryptString(config.apiKey!);
-      config.isEncrypted = true;
+    if (!config.isEncrypted &&
+        ObjectBoxManager.instance.isEncrypted &&
+        config.apiKey != null) {
+      config = config.copyWith(
+        apiKey: ObjectBoxManager.encryptString(config.apiKey!),
+        isEncrypted: true,
+      );
     }
 
     _configBox.put(config);
   }
 
-  /// Get available models for a service type
+  /// Get available models for the selected service
   List<String> getAvailableModels(AIServiceType serviceType) {
     switch (serviceType) {
       case AIServiceType.openAI:
@@ -454,7 +488,6 @@ class AIRepository {
           'gpt-3.5-turbo',
           'gpt-4',
           'gpt-4-turbo',
-          'gpt-4o',
         ];
       case AIServiceType.anthropic:
         return [
@@ -466,17 +499,25 @@ class AIRepository {
         return [
           'gpt-3.5-turbo',
           'gpt-4',
-          'gpt-4-turbo',
-          'gpt-4o',
-          'claude-3-haiku-20240307',
-          'claude-3-sonnet-20240229',
-          'claude-3-opus-20240229',
-          'mistral-7b-instruct',
-          'llama-3-8b-instruct',
-          'llama-3-70b-instruct',
+          'claude-3-haiku',
+          'claude-3-sonnet',
+          'claude-3-opus',
+          'mistral-medium',
+          'llama3-70b',
         ];
       case AIServiceType.offline:
-        return ['offline'];
+        return [];
     }
+  }
+
+  /// Delete all AI data (responses and chat history)
+  void deleteAllAIData() {
+    _responseBox.removeAll();
+    _chatBox.removeAll();
+
+    // Update lastCleared in settings
+    final settings = getChatHistorySettings();
+    settings.lastCleared = DateTime.now();
+    _settingsBox.put(settings);
   }
 }

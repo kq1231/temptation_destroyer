@@ -96,6 +96,22 @@ class HomeScreen extends ConsumerWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.star),
+              title: const Text('Aspirations'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed('/aspirations');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.chat_bubble_outline),
+              title: const Text('AI Guidance'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed('/ai-guidance');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.insights),
               title: const Text('Statistics'),
               onTap: () {
@@ -204,6 +220,24 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       _buildFeatureButton(
                         context,
+                        Icons.star,
+                        'Goals',
+                        () => Navigator.of(context).pushNamed('/aspirations'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildFeatureButton(
+                        context,
+                        Icons.chat_bubble_outline,
+                        'AI Help',
+                        () => Navigator.of(context).pushNamed('/ai-guidance'),
+                      ),
+                      _buildFeatureButton(
+                        context,
                         Icons.insights,
                         'Stats',
                         () {
@@ -215,6 +249,7 @@ class HomeScreen extends ConsumerWidget {
                           );
                         },
                       ),
+                      const SizedBox(width: 80), // Empty space for balance
                     ],
                   ),
                 ],
