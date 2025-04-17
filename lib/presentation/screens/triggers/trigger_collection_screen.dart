@@ -307,14 +307,15 @@ class _TriggerCollectionScreenState
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
-                                color:
-                                    _getTriggerTypeColor(trigger.triggerType!),
+                                color: _getTriggerTypeColor(
+                                    trigger.triggerType ??
+                                        TriggerType.emotional),
                                 shape: BoxShape.circle,
                               ),
                             ),
                       title: Text(trigger.description),
-                      subtitle:
-                          Text(_getTriggerTypeLabel(trigger.triggerType!)),
+                      subtitle: Text(_getTriggerTypeLabel(
+                          trigger.triggerType ?? TriggerType.emotional)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

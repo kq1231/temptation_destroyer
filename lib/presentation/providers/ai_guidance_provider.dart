@@ -114,7 +114,7 @@ class AIGuidanceNotifier extends StateNotifier<AIGuidanceState> {
       state = state.copyWith(isLoading: true, errorMessage: null);
 
       // Load chat history if available
-      final chatHistory = await _aiRepository.getRecentChatHistory(50);
+      final chatHistory = _aiRepository.getRecentChatHistory(50);
       final messages =
           chatHistory.map((m) => ChatMessage.fromModel(m)).toList();
 
@@ -154,7 +154,7 @@ class AIGuidanceNotifier extends StateNotifier<AIGuidanceState> {
       );
 
       // Save user message to chat history
-      await _aiRepository.storeChatMessage(userMessage.toModel());
+      _aiRepository.storeChatMessage(userMessage.toModel());
 
       // Generate AI response with pending state
       final pendingAiMessage = ChatMessage(
@@ -188,7 +188,7 @@ class AIGuidanceNotifier extends StateNotifier<AIGuidanceState> {
       );
 
       // Save AI message to chat history
-      await _aiRepository.storeChatMessage(aiMessage.toModel());
+      _aiRepository.storeChatMessage(aiMessage.toModel());
     } catch (e) {
       // Update the pending message to show an error
       final updatedMessages = state.messages.map((m) {
@@ -240,7 +240,7 @@ class AIGuidanceNotifier extends StateNotifier<AIGuidanceState> {
   Future<void> rateResponse(String responseId, bool wasHelpful) async {
     try {
       // Find the corresponding stored AI response
-      final aiResponses = await _aiRepository.getAllAIResponses();
+      final aiResponses = _aiRepository.getAllAIResponses();
       final aiResponse = aiResponses.firstWhere(
         (response) => response.uid == responseId,
         orElse: () => throw Exception('AI response not found'),

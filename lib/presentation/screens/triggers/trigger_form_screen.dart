@@ -22,7 +22,7 @@ class _TriggerFormScreenState extends ConsumerState<TriggerFormScreen> {
   final _descriptionController = TextEditingController();
   final _notesController = TextEditingController();
 
-  late TriggerType _selectedType;
+  TriggerType _selectedType = TriggerType.emotional;
   int _intensity = 5;
   final List<String> _selectedTimes = [];
   final List<int> _selectedDays = [];

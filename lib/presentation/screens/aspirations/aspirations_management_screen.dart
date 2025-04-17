@@ -143,7 +143,7 @@ class _AspirationsManagementScreenState
         child: Column(
           children: [
             Text(
-              'Progress: $achievedCount/${totalCount}',
+              'Progress: $achievedCount/$totalCount',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

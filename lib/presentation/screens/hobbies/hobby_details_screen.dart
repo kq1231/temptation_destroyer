@@ -34,11 +34,14 @@ class HobbyDetailsScreen extends ConsumerWidget {
               spacing: 8,
               children: [
                 Chip(
-                  label: Text(_getCategoryName(hobby.category!)),
-                  backgroundColor:
-                      _getCategoryColor(hobby.category!).withValues(alpha: 0.2),
+                  label: Text(_getCategoryName(
+                      hobby.category ?? HobbyCategory.physical)),
+                  backgroundColor: _getCategoryColor(
+                          hobby.category ?? HobbyCategory.physical)
+                      .withValues(alpha: 0.2),
                   labelStyle: TextStyle(
-                    color: _getCategoryColor(hobby.category!),
+                    color: _getCategoryColor(
+                        hobby.category ?? HobbyCategory.physical),
                     fontWeight: FontWeight.bold,
                   ),
                 ),

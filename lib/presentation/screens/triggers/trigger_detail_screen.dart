@@ -104,8 +104,10 @@ class TriggerDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final triggerTypeColor = _getTriggerTypeColor(trigger.triggerType!);
-    final triggerTypeLabel = _getTriggerTypeLabel(trigger.triggerType!);
+    final triggerTypeColor =
+        _getTriggerTypeColor(trigger.triggerType ?? TriggerType.emotional);
+    final triggerTypeLabel =
+        _getTriggerTypeLabel(trigger.triggerType ?? TriggerType.emotional);
 
     return Scaffold(
       appBar: AppBar(

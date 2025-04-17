@@ -116,7 +116,7 @@ class HomeScreen extends ConsumerWidget {
               title: const Text('Statistics'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigator.of(context).pushNamed('/statistics');
+                Navigator.of(context).pushNamed('/statistics');
               },
             ),
             ListTile(
@@ -240,14 +240,7 @@ class HomeScreen extends ConsumerWidget {
                         context,
                         Icons.insights,
                         'Stats',
-                        () {
-                          // Not implemented yet
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Statistics coming soon!'),
-                            ),
-                          );
-                        },
+                        () => Navigator.of(context).pushNamed('/statistics'),
                       ),
                       const SizedBox(width: 80), // Empty space for balance
                     ],
