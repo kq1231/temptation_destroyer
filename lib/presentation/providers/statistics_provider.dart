@@ -23,6 +23,7 @@ final streakProvider = FutureProvider<int>((ref) async {
 // Provider for the weekly progress data
 final weeklyProgressProvider =
     FutureProvider<Map<String, dynamic>>((ref) async {
+  // ignore: unused_local_variable
   final statistics = await ref.watch(statisticsProvider.future);
 
   // In a real implementation, we would parse the JSON data from statistics
