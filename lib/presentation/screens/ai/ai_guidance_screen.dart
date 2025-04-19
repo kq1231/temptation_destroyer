@@ -5,6 +5,8 @@ import '../../../presentation/providers/chat_provider.dart';
 import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/ai_models.dart';
 import '../../widgets/app_loading_indicator.dart';
+import '../../widgets/emergency_chat_widget.dart';
+import '../../../core/context/context_manager.dart';
 
 class AIGuidanceScreen extends ConsumerStatefulWidget {
   static const routeName = '/ai-guidance';
@@ -19,6 +21,9 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
   bool _isInitialized = false;
+  bool _isEmergencyMode = false;
+  String _emergencyTriggerMessage = '';
+  final ContextManager _contextManager = ContextManager();
 
   @override
   void initState() {
@@ -69,6 +74,29 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
     final isOffline =
         aiServiceState.config.serviceType == AIServiceType.offline;
 
+    // If in emergency mode, show the emergency chat UI
+    if (_isEmergencyMode) {
+      return Scaffold(
+        body: EmergencyChatWidget(
+          triggerMessage: _emergencyTriggerMessage,
+          onExit: () {
+            setState(() {
+              _isEmergencyMode = false;
+            });
+          },
+          onRequestProfessionalHelp: () {
+            // TODO: Implement professional help request
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Finding professional help resources...'),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    // Standard chat UI
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Guidance'),
@@ -391,6 +419,15 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   void _sendMessage() {
     final message = _messageController.text.trim();
     if (message.isNotEmpty) {
+      // Check if this is an emergency message
+      if (_contextManager.isEmergencyContext(message) && !_isEmergencyMode) {
+        // Activate emergency mode
+        setState(() {
+          _isEmergencyMode = true;
+          _emergencyTriggerMessage = message;
+        });
+      }
+
       ref.read(chatProvider.notifier).sendMessage(message);
       _messageController.clear();
     }

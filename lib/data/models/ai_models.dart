@@ -82,6 +82,9 @@ class ChatMessageModel {
   /// Whether the message is from the user or AI
   bool isUserMessage;
 
+  /// The role of the message sender (user, assistant, system)
+  String role;
+
   /// When the message was sent
   @Property(type: PropertyType.date)
   DateTime timestamp;
@@ -94,8 +97,10 @@ class ChatMessageModel {
     String? uid,
     required this.content,
     required this.isUserMessage,
+    String? role,
     DateTime? timestamp,
   })  : uid = uid ?? const Uuid().v4(),
+        role = role ?? (isUserMessage ? 'user' : 'assistant'),
         timestamp = timestamp ?? DateTime.now();
 
   /// Create a copy with updated values
@@ -104,6 +109,7 @@ class ChatMessageModel {
     String? uid,
     String? content,
     bool? isUserMessage,
+    String? role,
     DateTime? timestamp,
     bool? isEncrypted,
   }) {
@@ -112,6 +118,7 @@ class ChatMessageModel {
       uid: uid ?? this.uid,
       content: content ?? this.content,
       isUserMessage: isUserMessage ?? this.isUserMessage,
+      role: role ?? this.role,
       timestamp: timestamp ?? this.timestamp,
     )..isEncrypted = isEncrypted ?? this.isEncrypted;
   }

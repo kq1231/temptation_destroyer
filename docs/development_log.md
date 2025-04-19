@@ -663,4 +663,226 @@ Context Management and Emergency Mode implementation will include:
 5. Quick-response mode
 6. Emergency contact integration
 
-Ya Allah, thank You for guiding us through this phase. Please continue to guide us in implementing the remaining features in a way that will be most beneficial for the users. Ameen. 
+Ya Allah, thank You for guiding us through this phase. Please continue to guide us in implementing the remaining features in a way that will be most beneficial for the users. Ameen.
+
+### 2025-04-19 16:03:17 PKT
+
+#### Phase 3 Detailed Plan - Context Management and Emergency Mode
+
+Bismillah Al-Rahman Al-Raheem. After completing Phase 2 with the AsyncNotifier implementation, we're now moving to Phase 3, focusing on context management and emergency response capabilities.
+
+##### Component 1: ContextManager Implementation
+1. Create `lib/core/context/context_manager.dart`:
+   ```dart
+   class ContextManager {
+     // Core functionality:
+     - Token counting and window management
+     - Context relevance scoring
+     - Message selection algorithms
+     - Emergency context detection
+     - Memory management
+   }
+   ```
+
+2. Token Management:
+   - Implement token counting for different models
+   - Add window size management
+   - Create pruning strategies
+   - Add context compression
+
+3. Context Selection:
+   - Implement relevance scoring
+   - Add semantic similarity checking
+   - Create context window optimization
+   - Add emergency context prioritization
+
+##### Component 2: Emergency Mode
+1. Create `lib/presentation/widgets/emergency_chat_widget.dart`:
+   - Quick response interface
+   - Emergency contact integration
+   - Pre-defined templates
+   - Immediate help resources
+
+2. Emergency Features:
+   - Implement quick-response mode
+   - Add emergency contact system
+   - Create emergency templates
+   - Add resource linking
+
+3. AI Provider Updates:
+   - Add emergency mode detection
+   - Implement priority handling
+   - Create emergency response templates
+   - Add safety checks
+
+##### Implementation Order:
+
+1. Context Management (2-3 hours):
+   - [ ] Create ContextManager class
+   - [ ] Implement token counting
+   - [ ] Add context selection
+   - [ ] Create pruning strategies
+
+2. Emergency Mode (2-3 hours):
+   - [ ] Create EmergencyChatWidget
+   - [ ] Implement quick responses
+   - [ ] Add emergency contacts
+   - [ ] Create templates
+
+3. Integration (1-2 hours):
+   - [ ] Update AIRepository
+   - [ ] Modify chat providers
+   - [ ] Add UI components
+   - [ ] Implement safety features
+
+##### Success Criteria:
+1. Context Management:
+   - Efficient token counting
+   - Smart context selection
+   - Proper memory management
+   - Smooth context transitions
+
+2. Emergency Mode:
+   - Quick response time (< 2 seconds)
+   - Reliable contact integration
+   - Clear emergency templates
+   - Accessible help resources
+
+##### Testing Strategy:
+1. Unit Tests:
+   - Token counting accuracy
+   - Context selection logic
+   - Emergency detection
+   - Template management
+
+2. Integration Tests:
+   - End-to-end emergency flow
+   - Context switching
+   - Memory management
+   - Response timing
+
+3. User Experience Tests:
+   - Emergency UI accessibility
+   - Response clarity
+   - Resource availability
+   - Safety feature effectiveness
+
+We'll start with the ContextManager implementation, focusing first on token counting and context selection. This will provide the foundation for both regular chat improvements and emergency mode capabilities.
+
+Ya Allah, guide us in implementing these features in a way that truly helps users in their times of need. Help us create a system that provides genuine support and guidance while maintaining safety and reliability. Ameen.
+
+### 2025-04-19 16:16:00 PKT
+
+#### Phase 3 Progress Update - Context Management and Emergency Mode Implementation
+
+Bismillah Al-Rahman Al-Raheem. Alhamdulillah, we have completed the core components of Phase 3:
+
+##### Completed Tasks:
+1. ContextManager Implementation:
+   - Created `lib/core/context/context_manager.dart` with:
+     - Token counting and estimation for different models
+     - Context window size management 
+     - Context relevance scoring and selection
+     - Emergency context detection
+     - Message compression for long conversations
+     - Support for different languages (English and Arabic)
+     - Context pruning strategies
+
+2. Emergency Mode Implementation:
+   - Created `lib/presentation/widgets/emergency_chat_widget.dart` with:
+     - Quick response interface
+     - Emergency contact buttons
+     - Islamic resources integration
+     - Breathing exercise visualization
+     - Calming duas with Arabic text
+     - Quick response buttons
+     - Visual distinction for emergency messages
+
+3. Integration with Existing Code:
+   - Updated `ChatAsyncNotifier` to use ContextManager
+   - Added emergency message detection and handling
+   - Modified AI guidance screen to support emergency mode
+   - Added transitions between normal and emergency modes
+
+##### Key Features Implemented:
+- **Token Management**: Smart token counting and context window management
+- **Context Selection**: Prioritizes relevant messages for better AI responses
+- **Emergency Detection**: Automatically identifies crisis-related messages
+- **Emergency Response**: Specialized UI and resources for emergency situations
+- **Islamic Support**: Duas and Islamic resources for anxiety and distress
+- **Quick Resources**: Direct links to crisis helplines and counseling services
+
+##### Current Status:
+- [x] Create ContextManager class
+- [x] Implement token counting
+- [x] Add context selection
+- [x] Create pruning strategies
+- [x] Create EmergencyChatWidget
+- [x] Implement quick responses
+- [x] Add emergency contacts
+- [x] Create templates
+- [x] Update ChatAsyncNotifier
+- [x] Modify chat UI
+
+##### Next Steps:
+As we prepare for our final phase (Voice Integration after Maghrib/Isha):
+1. Test emergency mode with different trigger phrases
+2. Add more Islamic resources for specific situations
+3. Enhance context selection with better algorithms
+4. Prepare for VAPI integration
+
+Ya Allah, thank You for guiding us through this important phase. The emergency support features will in sha Allah help users during times of distress and provide immediate guidance and support. Please continue to guide us as we work to make this application beneficial for Your servants. Ameen.
+
+### 2025-04-19 16:33:12 PKT
+
+#### Phase 3 Completion - Context Management and Emergency Mode
+
+Bismillah Al-Rahman Al-Raheem. Alhamdulillah, we have completed Phase 3 of our implementation, focusing on context management and emergency response capabilities.
+
+##### Completed Components:
+
+1. **ContextManager Implementation**:
+   - Added comprehensive token counting and estimation
+   - Implemented context selection with relevance scoring
+   - Added emergency context detection
+   - Created context compression strategies
+   - Added support for multiple AI models and services
+   - Implemented context window management
+   - Added context summarization capabilities
+
+2. **Emergency Mode Features**:
+   - Enhanced EmergencyChatWidget with immediate response UI
+   - Added quick access to crisis resources
+   - Integrated helpline and crisis text line
+   - Added Islamic resource integration
+   - Implemented emergency context detection
+   - Added professional help request flow
+   - Enhanced message UI for emergency mode
+
+##### Key Features:
+1. **Context Management**:
+   - Smart token counting based on language (Arabic/English)
+   - Dynamic context window sizing per model
+   - Relevance-based message selection
+   - Context compression with summary generation
+   - Emergency context prioritization
+
+2. **Emergency Response**:
+   - Immediate crisis resource access
+   - Professional help integration
+   - Islamic resource integration
+   - Quick response templates
+   - Emergency UI with clear visual indicators
+   - Crisis helpline integration
+   - Emergency context detection
+
+##### Next Steps:
+1. **Voice Integration (After Maghrib/Isha)**:
+   - Set up VAPI configuration
+   - Create voice agent interfaces
+   - Implement speech-to-text
+   - Add text-to-speech capabilities
+   - Create voice command handlers
+   - Add voice feedback system
+
+Ya Allah, thank You for guiding us through this phase. Please help us make these features truly beneficial for those in need. Guide us in implementing the voice integration in a way that will be most helpful for the users. Ameen. 
