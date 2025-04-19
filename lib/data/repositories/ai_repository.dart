@@ -1,25 +1,82 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 import '../../core/utils/object_box_manager.dart';
+import '../../core/security/secure_storage_service.dart';
 import '../models/ai_models.dart';
 import '../../objectbox.g.dart';
 
 /// Repository for handling AI-related operations
 class AIRepository {
+  final SecureStorageService _secureStorage;
   final Box<AIResponseModel> _responseBox;
   final Box<ChatMessageModel> _chatBox;
   final Box<ChatHistorySettings> _settingsBox;
   final Box<AIServiceConfig> _configBox;
+  final Dio _dio;
+
+  // Rate limiting configuration
+  static const _maxRequestsPerMinute = 60;
+  final Map<AIServiceType, List<DateTime>> _requestTimestamps = {};
 
   /// Constructor
   AIRepository()
-      : _responseBox = ObjectBoxManager.instance.box<AIResponseModel>(),
+      : _secureStorage = SecureStorageService.instance,
+        _responseBox = ObjectBoxManager.instance.box<AIResponseModel>(),
         _chatBox = ObjectBoxManager.instance.box<ChatMessageModel>(),
         _settingsBox = ObjectBoxManager.instance.box<ChatHistorySettings>(),
-        _configBox = ObjectBoxManager.instance.box<AIServiceConfig>();
+        _configBox = ObjectBoxManager.instance.box<AIServiceConfig>(),
+        _dio = Dio() {
+    _initializeRequestTracking();
+  }
+
+  /// Initialize request tracking for rate limiting
+  void _initializeRequestTracking() {
+    for (final type in AIServiceType.values) {
+      _requestTimestamps[type] = [];
+    }
+  }
+
+  /// Check if we can make a request (rate limiting)
+  bool _canMakeRequest(AIServiceType serviceType) {
+    final timestamps = _requestTimestamps[serviceType]!;
+    final now = DateTime.now();
+
+    // Remove timestamps older than 1 minute
+    timestamps.removeWhere(
+        (timestamp) => now.difference(timestamp) > const Duration(minutes: 1));
+
+    // Check if we're under the limit
+    if (timestamps.length < _maxRequestsPerMinute) {
+      timestamps.add(now);
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Get API key for a service type from secure storage
+  Future<String?> _getSecureApiKey(AIServiceType type) async {
+    return _secureStorage.getKey(type.toString());
+  }
+
+  /// Validate API key for a service
+  Future<bool> _validateApiKey(AIServiceType type, String key) async {
+    // TODO: Implement key validation logic for each service
+    // For now, just check if it's not empty and has a valid format
+    if (key.isEmpty) return false;
+
+    switch (type) {
+      case AIServiceType.openAI:
+        return key.startsWith('sk-') && key.length > 20;
+      case AIServiceType.anthropic:
+        return key.startsWith('sk-ant-') && key.length > 20;
+      case AIServiceType.openRouter:
+        return key.length > 20;
+      case AIServiceType.offline:
+        return true;
+    }
+  }
 
   /// Generate a response from the AI
   Future<AIResponseModel> generateResponse({
@@ -35,12 +92,32 @@ class AIRepository {
       return _getFallbackResponse(userInput, context);
     }
 
+    // Check rate limiting
+    if (!_canMakeRequest(serviceConfig.serviceType)) {
+      throw Exception('Rate limit exceeded for ${serviceConfig.serviceType}');
+    }
+
     try {
+      // Get API key from secure storage
+      final apiKey = await _getSecureApiKey(serviceConfig.serviceType);
+      if (apiKey == null) {
+        throw Exception('No API key found for ${serviceConfig.serviceType}');
+      }
+
+      // Validate API key
+      final isValid = await _validateApiKey(serviceConfig.serviceType, apiKey);
+      if (!isValid) {
+        throw Exception('Invalid API key for ${serviceConfig.serviceType}');
+      }
+
+      // Create a config copy with the secure API key
+      final secureConfig = serviceConfig.copyWith(apiKey: apiKey);
+
       // Send the request to the appropriate AI service
       final response = await _sendRequestToAIService(
         userInput: userInput,
         context: context,
-        config: serviceConfig,
+        config: secureConfig,
       );
 
       // Create and save the AI response
@@ -61,176 +138,282 @@ class AIRepository {
     }
   }
 
-  /// Send a request to the selected AI service
+  /// Send a request to the selected AI service with retry logic
   Future<String> _sendRequestToAIService({
     required String userInput,
     required String context,
     required AIServiceConfig config,
   }) async {
-    switch (config.serviceType) {
-      case AIServiceType.openAI:
-        return _sendOpenAIRequest(userInput, context, config);
-      case AIServiceType.anthropic:
-        return _sendAnthropicRequest(userInput, context, config);
-      case AIServiceType.openRouter:
-        return _sendOpenRouterRequest(userInput, context, config);
-      case AIServiceType.offline:
-        return "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.";
+    int retryCount = 0;
+    const maxRetries = 3;
+    Duration retryDelay = const Duration(seconds: 1);
+
+    while (retryCount < maxRetries) {
+      try {
+        switch (config.serviceType) {
+          case AIServiceType.openAI:
+            return await _sendOpenAIRequest(userInput, context, config);
+          case AIServiceType.anthropic:
+            return await _sendAnthropicRequest(userInput, context, config);
+          case AIServiceType.openRouter:
+            return await _sendOpenRouterRequest(userInput, context, config);
+          case AIServiceType.offline:
+            return "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.";
+        }
+      } catch (e) {
+        retryCount++;
+        if (retryCount == maxRetries) {
+          // If this was the last retry, rethrow the error
+          rethrow;
+        }
+        // Wait before retrying, with exponential backoff
+        await Future.delayed(retryDelay);
+        retryDelay *= 2;
+      }
     }
+
+    throw Exception('Failed after $maxRetries retries');
   }
 
   /// Send a request to OpenAI
   Future<String> _sendOpenAIRequest(
       String userInput, String context, AIServiceConfig config) async {
-    if (config.apiKey == null || config.apiKey!.isEmpty) {
-      throw Exception('No API key provided for OpenAI');
-    }
-
-    final uri = Uri.parse('https://api.openai.com/v1/chat/completions');
-
-    // Default to gpt-3.5-turbo if no model specified
-    final model = config.preferredModel ?? 'gpt-3.5-turbo';
-
-    // Construct the messages with context and user input
-    final messages = [
-      {
-        'role': 'system',
-        'content':
-            'You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment. Keep responses concise but helpful.'
-      },
-      {'role': 'user', 'content': 'Context about my situation: $context'},
-      {'role': 'user', 'content': userInput}
-    ];
-
     try {
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${config.apiKey}'
-        },
-        body: jsonEncode({
-          'model': model,
-          'messages': messages,
-          'temperature': 0.7,
-          'max_tokens': 500,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['choices'][0]['message']['content'].trim();
-      } else {
-        debugPrint('OpenAI error: ${response.body}');
-        throw Exception('Error calling OpenAI API: ${response.statusCode}');
+      final apiKey = await _getSecureApiKey(AIServiceType.openAI);
+      if (apiKey == null) {
+        throw AIServiceException('OpenAI API key not found');
       }
+
+      if (!_canMakeRequest(AIServiceType.openAI)) {
+        throw AIServiceException('Rate limit exceeded for OpenAI');
+      }
+
+      final selectedModel =
+          await _selectOptimalModel(userInput, context, config);
+      final maxRetries = 3;
+      var retryCount = 0;
+      var backoffDelay = const Duration(seconds: 1);
+
+      while (retryCount <= maxRetries) {
+        try {
+          final response = await _dio.post(
+            'https://api.openai.com/v1/chat/completions',
+            data: {
+              'model': selectedModel,
+              'messages': [
+                {'role': 'system', 'content': context},
+                {'role': 'user', 'content': userInput}
+              ],
+              'temperature': config.temperature,
+              'max_tokens': config.maxTokens,
+            },
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer $apiKey',
+                'Content-Type': 'application/json',
+              },
+              sendTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
+            ),
+          );
+
+          final responseData = response.data;
+          return responseData['choices'][0]['message']['content'] as String;
+        } on DioException catch (e) {
+          if (e.response?.statusCode == 429 || e.response?.statusCode == 500) {
+            if (retryCount == maxRetries) rethrow;
+            await Future.delayed(backoffDelay);
+            backoffDelay *= 2;
+            retryCount++;
+            continue;
+          }
+          rethrow;
+        }
+      }
+
+      throw AIServiceException('Max retries exceeded for OpenAI request');
     } catch (e) {
-      debugPrint('Error with OpenAI request: $e');
-      rethrow;
+      if (e is AIServiceException) rethrow;
+      throw AIServiceException(
+          'Failed to generate OpenAI response: ${e.toString()}');
     }
   }
 
   /// Send a request to Anthropic
   Future<String> _sendAnthropicRequest(
       String userInput, String context, AIServiceConfig config) async {
-    if (config.apiKey == null || config.apiKey!.isEmpty) {
-      throw Exception('No API key provided for Anthropic');
-    }
-
-    final uri = Uri.parse('https://api.anthropic.com/v1/messages');
-
-    // Default to claude-3-haiku if no model specified
-    final model = config.preferredModel ?? 'claude-3-haiku-20240307';
-
-    // Construct the system prompt with Islamic guidance context
-    const systemPrompt =
-        'You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment. Keep responses concise but helpful.';
-
-    // Combine context and user input
-    final userMessage = 'Context about my situation: $context\n\n$userInput';
-
     try {
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': config.apiKey!,
-          'anthropic-version': '2023-06-01'
-        },
-        body: jsonEncode({
-          'model': model,
-          'system': systemPrompt,
-          'messages': [
-            {'role': 'user', 'content': userMessage}
-          ],
-          'max_tokens': 500,
-          'temperature': 0.7,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['content'][0]['text'].trim();
-      } else {
-        debugPrint('Anthropic error: ${response.body}');
-        throw Exception('Error calling Anthropic API: ${response.statusCode}');
+      final apiKey = await _getSecureApiKey(AIServiceType.anthropic);
+      if (apiKey == null) {
+        throw AIServiceException('Anthropic API key not found');
       }
+
+      if (!_canMakeRequest(AIServiceType.anthropic)) {
+        throw AIServiceException('Rate limit exceeded for Anthropic');
+      }
+
+      final selectedModel =
+          await _selectOptimalModel(userInput, context, config);
+      final maxRetries = 3;
+      var retryCount = 0;
+      var backoffDelay = const Duration(seconds: 1);
+
+      while (retryCount <= maxRetries) {
+        try {
+          final response = await _dio.post(
+            'https://api.anthropic.com/v1/messages',
+            data: {
+              'model': selectedModel,
+              'messages': [
+                {'role': 'user', 'content': '$context\n\n$userInput'}
+              ],
+              'max_tokens': config.maxTokens,
+              'temperature': config.temperature,
+            },
+            options: Options(
+              headers: {
+                'x-api-key': apiKey,
+                'anthropic-version': '2024-01-01',
+                'Content-Type': 'application/json',
+              },
+              sendTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
+            ),
+          );
+
+          final responseData = response.data;
+          return responseData['content'][0]['text'] as String;
+        } on DioException catch (e) {
+          if (e.response?.statusCode == 429 || e.response?.statusCode == 500) {
+            if (retryCount == maxRetries) rethrow;
+            await Future.delayed(backoffDelay);
+            backoffDelay *= 2;
+            retryCount++;
+            continue;
+          }
+          rethrow;
+        }
+      }
+
+      throw AIServiceException('Max retries exceeded for Anthropic request');
     } catch (e) {
-      debugPrint('Error with Anthropic request: $e');
-      rethrow;
+      if (e is AIServiceException) rethrow;
+      throw AIServiceException(
+          'Failed to generate Anthropic response: ${e.toString()}');
     }
   }
 
-  /// Send a request to OpenRouter
+  /// Send a request to OpenRouter with enhanced error handling and model selection
   Future<String> _sendOpenRouterRequest(
       String userInput, String context, AIServiceConfig config) async {
-    if (config.apiKey == null || config.apiKey!.isEmpty) {
-      throw Exception('No API key provided for OpenRouter');
+    try {
+      final apiKey = await _getSecureApiKey(AIServiceType.openRouter);
+      if (apiKey == null) {
+        throw AIServiceException('OpenRouter API key not found');
+      }
+
+      if (!_canMakeRequest(AIServiceType.openRouter)) {
+        throw AIServiceException('Rate limit exceeded for OpenRouter');
+      }
+
+      final selectedModel =
+          await _selectOptimalModel(userInput, context, config);
+      final maxRetries = 3;
+      var retryCount = 0;
+      var backoffDelay = const Duration(seconds: 1);
+
+      // Adjust parameters based on the model
+      int maxTokens = config.maxTokens;
+      double temperature = config.temperature;
+
+      // Model-specific adjustments
+      if (selectedModel.contains('claude-3')) {
+        maxTokens = 1000; // Claude models can handle longer responses
+      } else if (selectedModel.contains('gpt-4')) {
+        maxTokens = 800; // GPT-4 models get slightly more tokens
+      } else if (selectedModel.contains('llama3-70b')) {
+        maxTokens = 600; // Llama models get moderate tokens
+      }
+
+      while (retryCount <= maxRetries) {
+        try {
+          final response = await _dio.post(
+            'https://openrouter.ai/api/v1/chat/completions',
+            data: {
+              'model': selectedModel,
+              'messages': [
+                {
+                  'role': 'system',
+                  'content':
+                      'You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment. Keep responses concise but helpful.'
+                },
+                {
+                  'role': 'user',
+                  'content': 'Context about my situation: $context'
+                },
+                {'role': 'user', 'content': userInput}
+              ],
+              'temperature': temperature,
+              'max_tokens': maxTokens,
+              'request_timeout': 60, // Timeout in seconds
+            },
+            options: Options(
+              headers: {
+                'Authorization': 'Bearer $apiKey',
+                'HTTP-Referer': 'https://temptation-destroyer.app',
+                'X-Title': 'Temptation Destroyer',
+                'Content-Type': 'application/json',
+              },
+              sendTimeout: const Duration(seconds: 60),
+              receiveTimeout: const Duration(seconds: 60),
+            ),
+          );
+
+          final responseData = response.data;
+          return responseData['choices'][0]['message']['content'] as String;
+        } on DioException catch (e) {
+          if (e.response?.statusCode == 429 || e.response?.statusCode == 500) {
+            if (retryCount == maxRetries) rethrow;
+            await Future.delayed(backoffDelay);
+            backoffDelay *= 2;
+            retryCount++;
+            continue;
+          }
+          rethrow;
+        }
+      }
+
+      throw AIServiceException('Max retries exceeded for OpenRouter request');
+    } catch (e) {
+      if (e is AIServiceException) rethrow;
+      throw AIServiceException(
+          'Failed to generate OpenRouter response: ${e.toString()}');
+    }
+  }
+
+  /// Select the optimal model based on input complexity and availability
+  Future<String> _selectOptimalModel(
+      String userInput, String context, AIServiceConfig config) async {
+    // If user has specified a model, use it
+    if (config.preferredModel != null &&
+        getAvailableModels(AIServiceType.openRouter)
+            .contains(config.preferredModel)) {
+      return config.preferredModel!;
     }
 
-    final uri = Uri.parse('https://openrouter.ai/api/v1/chat/completions');
+    // Calculate total input length
+    final totalLength = userInput.length + context.length;
 
-    // Default to gpt-3.5-turbo if no model specified
-    final model = config.preferredModel ?? 'gpt-3.5-turbo';
-
-    // Construct the messages with context and user input
-    final messages = [
-      {
-        'role': 'system',
-        'content':
-            'You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment. Keep responses concise but helpful.'
-      },
-      {'role': 'user', 'content': 'Context about my situation: $context'},
-      {'role': 'user', 'content': userInput}
-    ];
-
-    try {
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${config.apiKey}',
-          'HTTP-Referer':
-              'https://temptation-destroyer.app' // Required by OpenRouter
-        },
-        body: jsonEncode({
-          'model': model,
-          'messages': messages,
-          'temperature': 0.7,
-          'max_tokens': 500,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['choices'][0]['message']['content'].trim();
-      } else {
-        debugPrint('OpenRouter error: ${response.body}');
-        throw Exception('Error calling OpenRouter API: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Error with OpenRouter request: $e');
-      rethrow;
+    // Select model based on complexity
+    if (totalLength > 2000) {
+      // For long/complex inputs, use more capable models
+      return 'claude-3-opus';
+    } else if (totalLength > 500) {
+      // For medium length inputs
+      return 'claude-3-sonnet';
+    } else {
+      // For short/simple inputs
+      return 'claude-3-haiku';
     }
   }
 
@@ -480,34 +663,94 @@ class AIRepository {
     _configBox.put(config);
   }
 
-  /// Get available models for the selected service
-  List<String> getAvailableModels(AIServiceType serviceType) {
+  /// Get available models for the selected service with pricing info
+  List<Map<String, dynamic>> getAvailableModelsWithPricing(
+      AIServiceType serviceType) {
     switch (serviceType) {
       case AIServiceType.openAI:
         return [
-          'gpt-3.5-turbo',
-          'gpt-4',
-          'gpt-4-turbo',
+          {
+            'id': 'gpt-3.5-turbo',
+            'name': 'GPT-3.5 Turbo',
+            'cost_per_1k_tokens': 0.0015,
+          },
+          {
+            'id': 'gpt-4',
+            'name': 'GPT-4',
+            'cost_per_1k_tokens': 0.03,
+          },
+          {
+            'id': 'gpt-4-turbo',
+            'name': 'GPT-4 Turbo',
+            'cost_per_1k_tokens': 0.01,
+          },
         ];
       case AIServiceType.anthropic:
         return [
-          'claude-3-haiku-20240307',
-          'claude-3-sonnet-20240229',
-          'claude-3-opus-20240229',
+          {
+            'id': 'claude-3-haiku',
+            'name': 'Claude 3 Haiku',
+            'cost_per_1k_tokens': 0.0025,
+          },
+          {
+            'id': 'claude-3-sonnet',
+            'name': 'Claude 3 Sonnet',
+            'cost_per_1k_tokens': 0.008,
+          },
+          {
+            'id': 'claude-3-opus',
+            'name': 'Claude 3 Opus',
+            'cost_per_1k_tokens': 0.015,
+          },
         ];
       case AIServiceType.openRouter:
         return [
-          'gpt-3.5-turbo',
-          'gpt-4',
-          'claude-3-haiku',
-          'claude-3-sonnet',
-          'claude-3-opus',
-          'mistral-medium',
-          'llama3-70b',
+          {
+            'id': 'gpt-3.5-turbo',
+            'name': 'GPT-3.5 Turbo',
+            'cost_per_1k_tokens': 0.001,
+          },
+          {
+            'id': 'gpt-4',
+            'name': 'GPT-4',
+            'cost_per_1k_tokens': 0.025,
+          },
+          {
+            'id': 'claude-3-haiku',
+            'name': 'Claude 3 Haiku',
+            'cost_per_1k_tokens': 0.002,
+          },
+          {
+            'id': 'claude-3-sonnet',
+            'name': 'Claude 3 Sonnet',
+            'cost_per_1k_tokens': 0.007,
+          },
+          {
+            'id': 'claude-3-opus',
+            'name': 'Claude 3 Opus',
+            'cost_per_1k_tokens': 0.013,
+          },
+          {
+            'id': 'mistral-medium',
+            'name': 'Mistral Medium',
+            'cost_per_1k_tokens': 0.002,
+          },
+          {
+            'id': 'llama3-70b',
+            'name': 'Llama 3 70B',
+            'cost_per_1k_tokens': 0.0008,
+          },
         ];
       case AIServiceType.offline:
         return [];
     }
+  }
+
+  /// Get available models for the selected service (IDs only)
+  List<String> getAvailableModels(AIServiceType serviceType) {
+    return getAvailableModelsWithPricing(serviceType)
+        .map((model) => model['id'] as String)
+        .toList();
   }
 
   /// Delete all AI data (responses and chat history)

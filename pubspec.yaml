@@ -62,6 +62,7 @@ dependencies:
   # Networking
   url_launcher: ^6.2.2
   http: ^1.1.0
+  dio: ^5.4.1  # HTTP client for Dart
 
 dev_dependencies:
   flutter_test:

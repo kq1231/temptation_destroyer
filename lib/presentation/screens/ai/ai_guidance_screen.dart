@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../presentation/providers/ai_guidance_provider.dart';
 import '../../../presentation/providers/ai_service_provider.dart';
+import '../../../presentation/providers/chat_provider.dart';
 import '../../../core/utils/date_formatter.dart';
+import '../../../data/models/ai_models.dart';
 import '../../widgets/app_loading_indicator.dart';
 
 class AIGuidanceScreen extends ConsumerStatefulWidget {
@@ -20,12 +21,17 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   bool _isInitialized = false;
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
       // Initialize the chat state when the screen first loads
-      Future.microtask(
-          () => ref.read(aiGuidanceProvider.notifier).initialize());
+      Future.microtask(() => ref.read(chatProvider.notifier).initialize());
       _isInitialized = true;
     }
   }
@@ -33,33 +39,35 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   @override
   void dispose() {
     _messageController.dispose();
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
-      });
+  void _onScroll() {
+    if (_scrollController.position.pixels <= 200) {
+      ref.read(chatProvider.notifier).loadMoreMessages();
     }
   }
 
+  // void _scrollToBottom() {
+  //   if (_scrollController.hasClients) {
+  //     Future.delayed(const Duration(milliseconds: 100), () {
+  //       _scrollController.animateTo(
+  //         _scrollController.position.maxScrollExtent,
+  //         duration: const Duration(milliseconds: 200),
+  //         curve: Curves.easeOut,
+  //       );
+  //     });
+  //   }
+  // }
+
   @override
   Widget build(BuildContext context) {
-    final aiGuidanceState = ref.watch(aiGuidanceProvider);
+    final chatState = ref.watch(chatProvider);
     final aiServiceState = ref.watch(aiServiceProvider);
     final isOffline =
         aiServiceState.config.serviceType == AIServiceType.offline;
-
-    // Automatically scroll to bottom when messages change
-    if (aiGuidanceState.messages.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +77,6 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // Navigate to AI settings screen
               Navigator.of(context).pushNamed('/ai-settings');
             },
           ),
@@ -77,7 +84,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
           // Clear chat history button
           IconButton(
             icon: const Icon(Icons.delete),
-            onPressed: aiGuidanceState.isLoading
+            onPressed: chatState.isLoading
                 ? null
                 : () => _showClearChatConfirmation(context),
           ),
@@ -104,15 +111,42 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
               ),
             ),
 
-          // Loading indicator
-          if (aiGuidanceState.isLoading && aiGuidanceState.messages.isEmpty)
-            const Expanded(child: AppLoadingIndicator()),
+          // Main content
+          Expanded(
+            child: chatState.when(
+              data: (state) {
+                if (!state.isInitialized) {
+                  return const Center(child: AppLoadingIndicator());
+                }
 
-          // Show error if there is one
-          if (aiGuidanceState.errorMessage != null &&
-              aiGuidanceState.messages.isEmpty)
-            Expanded(
-              child: Center(
+                if (state.messages.isEmpty) {
+                  return _buildWelcomeScreen();
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await ref.read(chatProvider.notifier).initialize();
+                  },
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: state.messages.length + (state.hasMore ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == state.messages.length) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+                      return _buildChatMessage(state.messages[index]);
+                    },
+                  ),
+                );
+              },
+              loading: () => const Center(child: AppLoadingIndicator()),
+              error: (error, stack) => Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -120,13 +154,13 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
                         color: Colors.red, size: 48),
                     const SizedBox(height: 16),
                     Text(
-                      'Error: ${aiGuidanceState.errorMessage}',
+                      'Error: $error',
                       style: const TextStyle(color: Colors.red),
                       textAlign: TextAlign.center,
                     ),
                     TextButton(
                       onPressed: () {
-                        ref.read(aiGuidanceProvider.notifier).initialize();
+                        ref.read(chatProvider.notifier).initialize();
                       },
                       child: const Text('Retry'),
                     ),
@@ -134,24 +168,10 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
                 ),
               ),
             ),
-
-          // Messages list
-          Expanded(
-            child: aiGuidanceState.messages.isEmpty
-                ? _buildWelcomeScreen()
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: aiGuidanceState.messages.length,
-                    itemBuilder: (context, index) {
-                      final message = aiGuidanceState.messages[index];
-                      return _buildChatMessage(message);
-                    },
-                  ),
           ),
 
           // Input area
-          _buildMessageInput(aiGuidanceState.isLoading),
+          _buildMessageInput(chatState.isLoading),
         ],
       ),
     );
@@ -217,19 +237,14 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
     );
   }
 
-  Widget _buildChatMessage(ChatMessage message) {
+  Widget _buildChatMessage(ChatMessageModel message) {
     final isUser = message.isUserMessage;
-    final isPending = message.isPending;
-    final isError = message.isError;
 
     // Choose colors based on sender
-    final backgroundColor = isUser
-        ? Colors.blue.shade100
-        : (isError ? Colors.red.shade50 : Colors.grey.shade100);
+    final backgroundColor =
+        isUser ? Colors.blue.shade100 : Colors.grey.shade100;
 
-    final textColor = isUser
-        ? Colors.blue.shade900
-        : (isError ? Colors.red.shade900 : Colors.black87);
+    final textColor = isUser ? Colors.blue.shade900 : Colors.black87;
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -247,43 +262,34 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Message Content
-            if (isPending)
-              const Center(
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              )
-            else
-              Text(
-                message.content,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 16,
-                ),
+            Text(
+              message.content,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 16,
               ),
+            ),
 
             // Timestamp
             const SizedBox(height: 4),
             Text(
               DateFormatter.formatTime(message.timestamp),
               style: TextStyle(
-                color: textColor.withValues(alpha: 0.6),
+                color: textColor.withOpacity(0.6),
                 fontSize: 12,
               ),
             ),
 
             // Feedback buttons for AI messages
-            if (!isUser && !isPending && !isError)
+            if (!isUser)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.thumb_up_outlined, size: 16),
                     onPressed: () {
-                      ref.read(aiGuidanceProvider.notifier).rateResponse(
-                            message.id,
+                      ref.read(chatProvider.notifier).rateResponse(
+                            message.uid,
                             true,
                           );
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -301,8 +307,8 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
                   IconButton(
                     icon: const Icon(Icons.thumb_down_outlined, size: 16),
                     onPressed: () {
-                      ref.read(aiGuidanceProvider.notifier).rateResponse(
-                            message.id,
+                      ref.read(chatProvider.notifier).rateResponse(
+                            message.uid,
                             false,
                           );
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -332,7 +338,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, -1),
           ),
@@ -385,7 +391,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   void _sendMessage() {
     final message = _messageController.text.trim();
     if (message.isNotEmpty) {
-      ref.read(aiGuidanceProvider.notifier).sendMessage(message);
+      ref.read(chatProvider.notifier).sendMessage(message);
       _messageController.clear();
     }
   }
@@ -405,7 +411,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
           ),
           TextButton(
             onPressed: () {
-              ref.read(aiGuidanceProvider.notifier).clearChatHistory();
+              ref.read(chatProvider.notifier).clearChatHistory();
               Navigator.of(ctx).pop();
             },
             child: const Text('CLEAR'),

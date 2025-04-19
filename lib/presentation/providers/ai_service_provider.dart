@@ -1,11 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-enum AIServiceType {
-  openAI,
-  anthropic,
-  openRouter,
-  offline,
-}
+import '../../data/models/ai_models.dart' as models;
 
 /// Chat history settings
 class ChatHistorySettings {
@@ -35,7 +29,7 @@ class ChatHistorySettings {
 
 /// Configuration for an AI service
 class AIServiceConfig {
-  final AIServiceType serviceType;
+  final models.AIServiceType serviceType;
   final String? apiKey;
   final String? preferredModel;
   final bool allowDataTraining;
@@ -51,7 +45,7 @@ class AIServiceConfig {
 
   /// Create a copy with updated values
   AIServiceConfig copyWith({
-    AIServiceType? serviceType,
+    models.AIServiceType? serviceType,
     String? apiKey,
     String? preferredModel,
     bool? allowDataTraining,
@@ -99,13 +93,13 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       : super(
           AIServiceState(
             config: const AIServiceConfig(
-              serviceType: AIServiceType.offline,
+              serviceType: models.AIServiceType.offline,
             ),
           ),
         );
 
   /// Set the service type
-  void setServiceType(AIServiceType type) {
+  void setServiceType(models.AIServiceType type) {
     state = state.copyWith(
       config: state.config.copyWith(
         serviceType: type,
@@ -114,7 +108,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   }
 
   /// Alias for setServiceType for the settings screen
-  void updateServiceType(AIServiceType type) => setServiceType(type);
+  void updateServiceType(models.AIServiceType type) => setServiceType(type);
 
   /// Set the API key
   void setApiKey(String apiKey) {

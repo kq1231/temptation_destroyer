@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/models/ai_models.dart' hide AIServiceType;
+import '../../data/models/ai_models.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../providers/ai_service_provider.dart';
 import '../../domain/usecases/ai/generate_ai_guidance_usecase.dart';

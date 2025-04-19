@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../presentation/providers/ai_service_provider.dart';
 import '../../widgets/common/loading_indicator.dart';
+import '../../../data/models/ai_models.dart' as models;
 
 class AISettingsScreen extends ConsumerWidget {
   const AISettingsScreen({super.key});
@@ -21,7 +22,7 @@ class AISettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildServiceTypeSelector(context, ref, aiServiceState),
+                  _buildServiceTypeSelector(context, ref),
                   const SizedBox(height: 24),
                   _buildApiKeySection(context, ref, aiServiceState),
                   const SizedBox(height: 24),
@@ -35,92 +36,76 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildServiceTypeSelector(
-    BuildContext context,
-    WidgetRef ref,
-    AIServiceState state,
-  ) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'AI Service Provider',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Choose which AI service to use for generating guidance:',
-              style: TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<AIServiceType>(
-              value: state.config.serviceType,
-              isExpanded: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              ),
-              items: [
-                DropdownMenuItem(
-                  value: AIServiceType.openAI,
-                  child: _buildServiceOption(
-                    'OpenAI',
-                    'GPT models (ChatGPT, GPT-4)',
-                    Icons.smart_toy,
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: AIServiceType.anthropic,
-                  child: _buildServiceOption(
-                    'Anthropic',
-                    'Claude models',
-                    Icons.psychology,
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: AIServiceType.openRouter,
-                  child: _buildServiceOption(
-                    'Open Router',
-                    'Multiple models through one API',
-                    Icons.router,
-                  ),
-                ),
-                DropdownMenuItem(
-                  value: AIServiceType.offline,
-                  child: _buildServiceOption(
-                    'Offline Mode',
-                    'No API key required',
-                    Icons.wifi_off,
-                  ),
-                ),
-              ],
-              onChanged: (value) {
-                if (value != null) {
-                  ref.read(aiServiceProvider.notifier).updateServiceType(value);
-                }
-              },
-            ),
-          ],
+  Widget _buildServiceTypeSelector(BuildContext context, WidgetRef ref) {
+    final currentType = ref.watch(
+      aiServiceProvider.select((state) => state.config.serviceType),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Select AI Service',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+        const SizedBox(height: 16),
+        _buildServiceOption(
+          context,
+          ref,
+          models.AIServiceType.openAI,
+          'OpenAI',
+          'Access GPT-3.5 and GPT-4',
+          currentType == models.AIServiceType.openAI,
+        ),
+        _buildServiceOption(
+          context,
+          ref,
+          models.AIServiceType.anthropic,
+          'Anthropic',
+          'Access Claude models',
+          currentType == models.AIServiceType.anthropic,
+        ),
+        _buildServiceOption(
+          context,
+          ref,
+          models.AIServiceType.openRouter,
+          'OpenRouter',
+          'Access multiple AI providers',
+          currentType == models.AIServiceType.openRouter,
+        ),
+        _buildServiceOption(
+          context,
+          ref,
+          models.AIServiceType.offline,
+          'Offline Mode',
+          'Basic guidance without AI',
+          currentType == models.AIServiceType.offline,
+        ),
+      ],
     );
   }
 
-  Widget _buildServiceOption(String title, String subtitle, IconData icon) {
+  Widget _buildServiceOption(
+    BuildContext context,
+    WidgetRef ref,
+    models.AIServiceType type,
+    String title,
+    String subtitle,
+    bool isSelected,
+  ) {
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 40),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 24),
+          Icon(
+            _getIconForServiceType(type),
+            size: 24,
+            color: isSelected ? Colors.blue : Colors.grey,
+          ),
           const SizedBox(width: 12),
           Flexible(
             child: Column(
@@ -150,12 +135,25 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
+  IconData _getIconForServiceType(models.AIServiceType type) {
+    switch (type) {
+      case models.AIServiceType.openAI:
+        return Icons.smart_toy;
+      case models.AIServiceType.anthropic:
+        return Icons.psychology;
+      case models.AIServiceType.openRouter:
+        return Icons.router;
+      case models.AIServiceType.offline:
+        return Icons.wifi_off;
+    }
+  }
+
   Widget _buildApiKeySection(
     BuildContext context,
     WidgetRef ref,
     AIServiceState state,
   ) {
-    if (state.config.serviceType == AIServiceType.offline) {
+    if (state.config.serviceType == models.AIServiceType.offline) {
       return const SizedBox.shrink();
     }
 
@@ -210,15 +208,16 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _getApiKeyInstructions(AIServiceType serviceType) {
-    switch (serviceType) {
-      case AIServiceType.openAI:
+  String _getApiKeyInstructions(models.AIServiceType serviceType) {
+    final type = models.AIServiceType.values[serviceType.index];
+    switch (type) {
+      case models.AIServiceType.openAI:
         return 'You need an OpenAI API key. Get one from https://platform.openai.com';
-      case AIServiceType.anthropic:
+      case models.AIServiceType.anthropic:
         return 'You need an Anthropic API key. Get one from https://console.anthropic.com';
-      case AIServiceType.openRouter:
+      case models.AIServiceType.openRouter:
         return 'You need an OpenRouter API key. Get one from https://openrouter.ai';
-      case AIServiceType.offline:
+      case models.AIServiceType.offline:
         return 'No API key required for offline mode.';
     }
   }
@@ -294,7 +293,7 @@ class AISettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     AIServiceState state,
   ) {
-    if (state.config.serviceType == AIServiceType.offline) {
+    if (state.config.serviceType == models.AIServiceType.offline) {
       return const SizedBox.shrink();
     }
 
@@ -327,58 +326,62 @@ class AISettingsScreen extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 8),
-            const Text('Preferred Model:'),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<String>(
-              value: state.config.preferredModel ?? 'default',
-              isExpanded: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            if (state.config.serviceType == models.AIServiceType.openRouter)
+              _buildModelSelectionArea(ref, state)
+            else ...[
+              const Text('Preferred Model:'),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: state.config.preferredModel ?? 'default',
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                items: _getModelOptions(state.config.serviceType)
+                    .map((model) => DropdownMenuItem(
+                          value: model.value,
+                          child: Text(
+                            model.label,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(aiServiceProvider.notifier).updatePreferredModel(
+                        value == 'default' ? null : value);
+                  }
+                },
               ),
-              items: _getModelOptions(state.config.serviceType)
-                  .map((model) => DropdownMenuItem(
-                        value: model.value,
-                        child: Text(
-                          model.label,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  ref
-                      .read(aiServiceProvider.notifier)
-                      .updatePreferredModel(value == 'default' ? null : value);
-                }
-              },
-            ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  List<ModelOption> _getModelOptions(AIServiceType serviceType) {
+  List<ModelOption> _getModelOptions(models.AIServiceType serviceType) {
+    final type = models.AIServiceType.values[serviceType.index];
     final defaultOption = ModelOption('default', 'Default (recommended)');
 
-    switch (serviceType) {
-      case AIServiceType.openAI:
+    switch (type) {
+      case models.AIServiceType.openAI:
         return [
           defaultOption,
           ModelOption('gpt-4o', 'GPT-4o (newest)'),
           ModelOption('gpt-4-turbo', 'GPT-4 Turbo'),
           ModelOption('gpt-3.5-turbo', 'GPT-3.5 Turbo (cheaper)'),
         ];
-      case AIServiceType.anthropic:
+      case models.AIServiceType.anthropic:
         return [
           defaultOption,
           ModelOption('claude-3-opus', 'Claude 3 Opus (best quality)'),
           ModelOption('claude-3-sonnet', 'Claude 3 Sonnet (balanced)'),
           ModelOption('claude-3-haiku', 'Claude 3 Haiku (fastest)'),
         ];
-      case AIServiceType.openRouter:
+      case models.AIServiceType.openRouter:
         return [
           defaultOption,
           ModelOption('meta/llama-3', 'Llama 3'),
@@ -386,7 +389,7 @@ class AISettingsScreen extends ConsumerWidget {
           ModelOption('openai/gpt-4o', 'GPT-4o'),
           ModelOption('google/gemini-pro', 'Gemini Pro'),
         ];
-      case AIServiceType.offline:
+      case models.AIServiceType.offline:
         return [defaultOption];
     }
   }
@@ -497,6 +500,322 @@ class AISettingsScreen extends ConsumerWidget {
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('CLEAR'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Expanded list of popular models for OpenRouter
+  static const List<Map<String, String>> openRouterModels = [
+    {'id': 'meta/llama3-70b-instruct', 'name': 'Meta Llama 3 70B'},
+    {'id': 'anthropic/claude-3-opus', 'name': 'Claude 3 Opus'},
+    {'id': 'anthropic/claude-3-sonnet', 'name': 'Claude 3 Sonnet'},
+    {'id': 'anthropic/claude-3-haiku', 'name': 'Claude 3 Haiku'},
+    {'id': 'mistralai/mistral-7b-instruct', 'name': 'Mistral 7B'},
+    {'id': 'google/gemma-7b-it', 'name': 'Google Gemma 7B'},
+    {'id': 'openai/gpt-4', 'name': 'GPT-4'},
+    {'id': 'openai/gpt-4-turbo', 'name': 'GPT-4 Turbo'},
+    {'id': 'openai/gpt-3.5-turbo', 'name': 'GPT-3.5 Turbo'},
+    {'id': 'cohere/command-r', 'name': 'Cohere Command-R'},
+    {'id': 'meta/llama3-8b-instruct', 'name': 'Meta Llama 3 8B'},
+  ];
+
+  Widget _buildModelSelectionArea(WidgetRef ref, AIServiceState state) {
+    // Only show for OpenRouter
+    if (state.config.serviceType != models.AIServiceType.openRouter) {
+      return const SizedBox.shrink();
+    }
+
+    final currentModelId =
+        state.config.preferredModel ?? openRouterModels[0]['id'];
+    final modelInfo = models.modelInfoMap[currentModelId];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Select Model',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Choose a model that best fits your needs. More capable models may be more expensive but provide better guidance.',
+          style: TextStyle(fontSize: 14),
+        ),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          value: openRouterModels.any((m) => m['id'] == currentModelId)
+              ? currentModelId
+              : openRouterModels[0]['id'],
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'AI Model',
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          ),
+          items: openRouterModels.map((model) {
+            return DropdownMenuItem<String>(
+              value: model['id'],
+              child: Text(
+                model['name']!,
+                style: const TextStyle(fontSize: 14),
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
+              ref.read(aiServiceProvider.notifier).updatePreferredModel(value);
+            }
+          },
+        ),
+        if (modelInfo != null) ...[
+          const SizedBox(height: 24),
+          _buildModelInfoCard(modelInfo),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildModelInfoCard(models.ModelInfo info) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              info.name,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              info.description,
+              style: const TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            _buildPricingSection(info.pricing),
+            const SizedBox(height: 16),
+            _buildPerformanceSection(info.performance),
+            const SizedBox(height: 16),
+            _buildRecommendationSection(info.usageRecommendation),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPricingSection(models.ModelPricing pricing) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Pricing',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildPriceInfoCard(
+                'Input',
+                '\$${pricing.promptPricePerToken.toStringAsFixed(4)}',
+                'per 1K tokens',
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildPriceInfoCard(
+                'Output',
+                '\$${pricing.completionPricePerToken.toStringAsFixed(4)}',
+                'per 1K tokens',
+              ),
+            ),
+          ],
+        ),
+        if (pricing.contextWindow != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Context Window: ${pricing.contextWindow} tokens',
+            style: const TextStyle(fontSize: 12),
+          ),
+        ],
+        if (pricing.notes != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            pricing.notes!,
+            style: const TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPriceInfoCard(String title, String price, String subtitle) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            price,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
+            ),
+          ),
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 10),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPerformanceSection(models.ModelPerformance performance) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Performance',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: _buildPerformanceMetric(
+                'Response Time',
+                '${performance.averageResponseTime}s',
+                Icons.timer,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: _buildPerformanceMetric(
+                'Quality',
+                '${performance.qualityRating}/5',
+                Icons.star,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildStrengthsLimitations(
+          performance.strengths,
+          performance.limitations,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPerformanceMetric(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStrengthsLimitations(String strengths, String limitations) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 16),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                strengths,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            const Icon(Icons.info, color: Colors.orange, size: 16),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                limitations,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecommendationSection(String recommendation) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.lightbulb, color: Colors.blue, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              recommendation,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.blue,
+              ),
+            ),
           ),
         ],
       ),
