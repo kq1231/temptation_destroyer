@@ -1055,4 +1055,58 @@ The user should be able to use voice input throughout the app to reduce friction
 - Basic AI chat works for guidance
 - App runs offline with core functionality
 
-With Allah's help, we will focus on these essentials to create a functional MVP today. Later we can enhance it with additional features like voice transcription and more advanced functionality. 
+With Allah's help, we will focus on these essentials to create a functional MVP today. Later we can enhance it with additional features like voice transcription and more advanced functionality.
+
+## Voice Integration Phase (2025-04-20 to 2025-04-22)
+
+### Day 1 (Sunday, 2025-04-20)
+
+#### 1. Habib Voice Agent Integration
+- Configure Habib's personality and prompts
+- Set up voice and model settings
+- Implement error handling
+- Test voice quality and responses
+
+#### 2. Speech-to-Text Services
+- Integrate multiple STT providers:
+  * Whisper (offline processing)
+  * LemonFox (real-time)
+  * Assembly AI (high accuracy)
+- Create service fallback chain
+- Add offline support with caching
+- Implement language detection
+
+#### 3. Bug Fixes & Testing
+- Fix ObjectBox model issues
+- Test VAPI integration
+- Verify UI and animations
+- Test error handling
+
+### Day 2 (Monday, 2025-04-22)
+
+#### 1. Voice Feature Enhancement
+- Voice agent customization
+- Voice preferences system
+- Command system implementation
+- Voice shortcuts creation
+
+#### 2. Testing & Integration
+- End-to-end voice testing
+- Performance optimization
+- Load testing
+- Error recovery verification
+
+#### 3. Documentation
+- Voice configuration docs
+- User guide creation
+- Debugging documentation
+- Performance optimization guide
+
+Success Criteria:
+- Smooth voice interaction
+- Reliable STT across services
+- Proper error handling
+- Good offline support
+- Clear documentation
+
+Ya Allah, guide us in implementing these features effectively and help us create a system that truly benefits Your servants. Ameen. 
