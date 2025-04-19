@@ -5,7 +5,21 @@ import '../models/user_model.dart';
 import '../../core/utils/object_box_manager.dart';
 import '../../core/utils/encryption_service.dart';
 
-/// Repository for handling user authentication
+/// Repository for handling user authentication and password management.
+///
+/// IMPORTANT SECURITY DISTINCTION:
+/// 1. Password Hashing: Uses salt + password for secure password storage.
+///    - Salt is stored in the database (this is safe and standard practice)
+///    - Used only for verifying login attempts
+///    - Cannot be used to decrypt user data
+///
+/// 2. Data Encryption: Uses raw password as encryption key
+///    - Password is never stored, only used in memory
+///    - Required for decrypting user data
+///    - Salt is never used for data encryption
+///
+/// This separation ensures that even if someone accesses the database,
+/// they cannot decrypt user data without the actual password.
 class AuthRepository {
   /// Get the user instance, creating it if it doesn't exist
   Future<User> getUser() async {
@@ -26,7 +40,11 @@ class AuthRepository {
 
   /// Save a password for the user
   ///
-  /// This hashes the password before storing it
+  /// This method handles two separate security mechanisms:
+  /// 1. Password Hashing: Creates a salt and hashes password+salt for secure storage
+  /// 2. Data Encryption: Uses the raw password (not salt) to initialize encryption
+  ///
+  /// The salt is only used for password verification and NEVER for data encryption.
   Future<bool> savePassword(String password) async {
     try {
       final userBox = ObjectBoxManager.instance.box<User>();
@@ -649,6 +667,9 @@ class AuthRepository {
   }
 
   /// Helper function to hash a password with a salt
+  ///
+  /// This is used ONLY for password verification, not for data encryption.
+  /// The salt makes rainbow table attacks ineffective against stored password hashes.
   String _hashPassword(String password, String salt) {
     final bytes = utf8.encode(password + salt);
     final digest = sha256.convert(bytes);

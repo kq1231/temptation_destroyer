@@ -1057,56 +1057,62 @@ The user should be able to use voice input throughout the app to reduce friction
 
 With Allah's help, we will focus on these essentials to create a functional MVP today. Later we can enhance it with additional features like voice transcription and more advanced functionality.
 
-## Voice Integration Phase (2025-04-20 to 2025-04-22)
+## Voice Integration Phase (2025-04-20 to 2025-04-23)
 
-### Day 1 (Sunday, 2025-04-20)
+### Day 1 - Testing Day (Sunday, 2025-04-20)
+1. **LLM Integration Testing**
+   - Test all LLM providers thoroughly
+   - Verify API key management
+   - Test chat pagination
+   - Check context management
+   - Test emergency mode
 
-#### 1. Habib Voice Agent Integration
-- Configure Habib's personality and prompts
-- Set up voice and model settings
-- Implement error handling
-- Test voice quality and responses
+2. **Bug Fixes & Optimization**
+   - Fix ObjectBox models
+   - Address UI issues
+   - Test offline mode
+   - Verify encryption
+   - Test recovery system
 
-#### 2. Speech-to-Text Services
-- Integrate multiple STT providers:
-  * Whisper (offline processing)
-  * LemonFox (real-time)
-  * Assembly AI (high accuracy)
-- Create service fallback chain
-- Add offline support with caching
-- Implement language detection
+3. **Performance Testing**
+   - Load testing
+   - Memory optimization
+   - Response time testing
+   - Battery impact testing
 
-#### 3. Bug Fixes & Testing
-- Fix ObjectBox model issues
-- Test VAPI integration
-- Verify UI and animations
-- Test error handling
+### Day 2 - Voice Integration Part 1 (Monday, 2025-04-22)
+1. **Speech-to-Text Implementation**
+   - Multiple STT services setup
+   - Fallback chain creation
+   - Offline support
+   - Language detection
 
-### Day 2 (Monday, 2025-04-22)
+2. **Voice Agent Setup**
+   - Habib configuration
+   - Voice settings
+   - Error handling
+   - Response testing
 
-#### 1. Voice Feature Enhancement
-- Voice agent customization
-- Voice preferences system
-- Command system implementation
-- Voice shortcuts creation
+### Day 3 - Voice Integration Part 2 (Tuesday, 2025-04-23)
+1. **Enhanced Voice Features**
+   - Agent customization
+   - Preferences system
+   - Command system
+   - Voice shortcuts
 
-#### 2. Testing & Integration
-- End-to-end voice testing
-- Performance optimization
-- Load testing
-- Error recovery verification
-
-#### 3. Documentation
-- Voice configuration docs
-- User guide creation
-- Debugging documentation
-- Performance optimization guide
+2. **Final Integration**
+   - End-to-end testing
+   - Performance optimization
+   - Load testing
+   - Documentation
 
 Success Criteria:
+- All LLM features working correctly
+- No critical bugs or issues
 - Smooth voice interaction
 - Reliable STT across services
 - Proper error handling
 - Good offline support
 - Clear documentation
 
-Ya Allah, guide us in implementing these features effectively and help us create a system that truly benefits Your servants. Ameen. 
+Ya Allah, guide us in testing and implementing these features effectively. Help us create a system that truly benefits Your servants. Ameen. 
