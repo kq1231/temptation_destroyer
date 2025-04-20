@@ -26,7 +26,7 @@ class SoundService {
     try {
       // Set global settings
       await _player.setReleaseMode(ReleaseMode.release);
-      await _player.setSourceAsset('sounds/message_sent.mp3');
+      await _player.setSourceAsset('assets/sounds/message_sent.mp3');
     } catch (e) {
       debugPrint('Error initializing sound service: $e');
     }
@@ -41,19 +41,19 @@ class SoundService {
 
       switch (effect) {
         case SoundEffect.messageSent:
-          assetPath = 'sounds/message_sent.mp3';
+          assetPath = 'assets/sounds/message_sent.mp3';
           break;
         case SoundEffect.messageReceived:
-          assetPath = 'sounds/message_received.mp3';
+          assetPath = 'assets/sounds/message_received.mp3';
           break;
         case SoundEffect.notification:
-          assetPath = 'sounds/notification.mp3';
+          assetPath = 'assets/sounds/notification.mp3';
           break;
         case SoundEffect.success:
-          assetPath = 'sounds/success.mp3';
+          assetPath = 'assets/sounds/success.mp3';
           break;
         case SoundEffect.error:
-          assetPath = 'sounds/error.mp3';
+          assetPath = 'assets/sounds/error.mp3';
           break;
       }
 
