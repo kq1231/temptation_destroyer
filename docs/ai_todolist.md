@@ -87,4 +87,6 @@
   - Use a conversational tone that's relatable and non-judgmental
   - Ensure the content is supportive and encouraging, not just informative
 
+- Riverpod intitialization flow
+
 > If possible can you make the llms context a bit more humanistic and friendly/personal. This rn seems very ai ish. The words and sentences are way too perfect and formal to be able to make someone feel relaxed. Should definitely speak like a best friend who cares about you and is not just giving advice for advice

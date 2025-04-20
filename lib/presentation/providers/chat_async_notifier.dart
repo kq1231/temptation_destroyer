@@ -3,6 +3,7 @@ import 'package:temptation_destroyer/presentation/providers/ai_service_provider.
 import '../../data/models/ai_models.dart';
 import '../../data/models/chat_session_model.dart';
 import '../../core/context/context_manager.dart';
+import '../../core/services/sound_service.dart';
 import '../../data/repositories/ai_repository.dart';
 import 'chat_state.dart';
 
@@ -11,6 +12,7 @@ final chatProvider =
 
 class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
   final ContextManager _contextManager = ContextManager();
+  final SoundService _soundService = SoundService();
   late final AIRepository _repository;
 
   @override
@@ -93,6 +95,9 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
     // Get the current config from the service provider
     final config = ref.read(aiServiceProvider).config;
 
+    // Play message sent sound
+    _soundService.playSound(SoundEffect.messageSent);
+
     // Check if this is an emergency message
     final isEmergency = _contextManager.isEmergencyContext(content);
 
@@ -162,12 +167,18 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
       // Store AI message (encryption handled in storeMessageAsync)
       await _repository.storeMessageAsync(aiMessage);
 
+      // Play message received sound
+      _soundService.playSound(SoundEffect.messageReceived);
+
       // Update state with both messages, removing loading message
       final finalMessages = [...currentState.messages, newMessage, aiMessage];
       state = AsyncValue.data(currentState.copyWith(
         messages: finalMessages,
       ));
     } catch (error) {
+      // Play error sound
+      _soundService.playSound(SoundEffect.error);
+
       // On error, keep the user's message but remove loading state
       final messagesWithoutLoading = [...currentState.messages, newMessage];
       state = AsyncValue.data(currentState.copyWith(
@@ -209,6 +220,9 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
       // Store AI message (encryption handled in storeMessageAsync)
       await _repository.storeMessageAsync(aiMessage);
 
+      // Play emergency sound (notification sound for emergencies)
+      _soundService.playSound(SoundEffect.notification);
+
       // Update state with both messages, removing loading message
       final messagesWithoutLoading = currentState.messages
           .where((m) => !m.isUserMessage || m.content.isNotEmpty)
@@ -217,6 +231,9 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
         messages: [...messagesWithoutLoading, aiMessage],
       ));
     } catch (error) {
+      // Play error sound
+      _soundService.playSound(SoundEffect.error);
+
       // On error, remove loading state
       final messagesWithoutLoading = currentState.messages
           .where((m) => !m.isUserMessage || m.content.isNotEmpty)

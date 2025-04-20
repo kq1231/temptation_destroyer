@@ -4,6 +4,7 @@ import '../../../presentation/providers/ai_service_provider.dart';
 import '../../widgets/common/loading_indicator.dart';
 import '../../../data/models/ai_models.dart' as models;
 import '../../../core/security/secure_storage_service.dart';
+import '../../providers/settings_provider.dart';
 
 class AISettingsScreen extends ConsumerWidget {
   const AISettingsScreen({super.key});
@@ -30,6 +31,8 @@ class AISettingsScreen extends ConsumerWidget {
                   _buildSettingsSection(context, ref, aiServiceState),
                   const SizedBox(height: 24),
                   _buildHistorySection(context, ref, aiServiceState),
+                  const SizedBox(height: 24),
+                  _buildSoundSettingsSection(context, ref),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -858,6 +861,39 @@ class AISettingsScreen extends ConsumerWidget {
     final modelOptions = _getModelOptions(models.AIServiceType.openAI);
     final validValues = modelOptions.map((option) => option.value).toList();
     return validValues.contains(currentValue) ? currentValue! : 'default';
+  }
+
+  Widget _buildSoundSettingsSection(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Sound Settings',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SwitchListTile(
+              title: const Text('Enable Sound Effects'),
+              subtitle:
+                  const Text('Play sounds for messages and notifications'),
+              value: settings.soundEnabled,
+              onChanged: (_) {
+                ref.read(settingsProvider.notifier).toggleSound();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

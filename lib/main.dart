@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/utils/object_box_manager.dart';
+import 'core/services/sound_service.dart';
 import 'presentation/app.dart';
 
 void main() async {
@@ -9,6 +10,9 @@ void main() async {
 
   // Initialize ObjectBox
   await ObjectBoxManager.initialize();
+
+  // Initialize sound service
+  await SoundService().initialize();
 
   runApp(
     // Wrap the app with ProviderScope for Riverpod
