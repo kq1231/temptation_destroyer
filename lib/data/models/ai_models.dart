@@ -54,7 +54,7 @@ class ChatMessageModel {
   })  : uid = uid ?? const Uuid().v4(),
         role = role ?? (isUserMessage ? 'user' : 'assistant'),
         timestamp = timestamp ?? DateTime.now(),
-        wasHelpful = wasHelpful ?? false {
+        wasHelpful = wasHelpful {
     if (session != null) {
       this.session.target = session;
     }

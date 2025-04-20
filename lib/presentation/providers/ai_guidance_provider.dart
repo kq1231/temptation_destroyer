@@ -12,7 +12,7 @@ class ChatMessage {
   final DateTime timestamp;
   final bool isPending;
   final bool isError;
-  final bool wasHelpful;
+  final bool? wasHelpful;
 
   ChatMessage({
     required this.id,
@@ -21,7 +21,7 @@ class ChatMessage {
     DateTime? timestamp,
     this.isPending = false,
     this.isError = false,
-    this.wasHelpful = false,
+    this.wasHelpful,
   }) : timestamp = timestamp ?? DateTime.now();
 
   /// Convert to model for storage
@@ -31,6 +31,7 @@ class ChatMessage {
       content: content,
       isUserMessage: isUserMessage,
       timestamp: timestamp,
+      wasHelpful: wasHelpful,
     );
   }
 
@@ -41,6 +42,7 @@ class ChatMessage {
       content: model.content,
       isUserMessage: model.isUserMessage,
       timestamp: model.timestamp,
+      wasHelpful: model.wasHelpful,
     );
   }
 

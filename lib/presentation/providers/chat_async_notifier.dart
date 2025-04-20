@@ -156,7 +156,7 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
         content: aiResponse.content,
         isUserMessage: false,
         session: currentState.currentSession,
-        wasHelpful: false,
+        wasHelpful: null,
       );
 
       // Store AI message (encryption handled in storeMessageAsync)
@@ -203,7 +203,7 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
         content: aiResponse.content,
         isUserMessage: false,
         session: currentState.currentSession,
-        wasHelpful: false,
+        wasHelpful: null,
       );
 
       // Store AI message (encryption handled in storeMessageAsync)

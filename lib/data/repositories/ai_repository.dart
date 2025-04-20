@@ -632,6 +632,7 @@ class AIRepository {
       content: responses[Random().nextInt(responses.length)],
       isUserMessage: false,
       role: 'assistant',
+      wasHelpful: null,
       session: session,
     );
 
