@@ -10,63 +10,6 @@ enum AIServiceType {
   openRouter,
 }
 
-/// AI Response Model that stores AI responses with metadata
-@Entity()
-class AIResponseModel {
-  @Id()
-  int id = 0;
-
-  /// Unique identifier for the response
-  @Unique()
-  final String uid;
-
-  /// The context provided to the AI
-  String context;
-
-  /// The actual response from AI
-  String response;
-
-  /// When the response was generated
-  @Property(type: PropertyType.date)
-  DateTime timestamp;
-
-  /// Whether the user marked this response as helpful
-  bool wasHelpful;
-
-  /// For encrypted storage
-  bool isEncrypted = false;
-
-  AIResponseModel({
-    this.id = 0,
-    String? uid,
-    required this.context,
-    required this.response,
-    DateTime? timestamp,
-    this.wasHelpful = false,
-  })  : uid = uid ?? const Uuid().v4(),
-        timestamp = timestamp ?? DateTime.now();
-
-  /// Create a copy with updated values
-  AIResponseModel copyWith({
-    int? id,
-    String? uid,
-    String? context,
-    String? response,
-    DateTime? timestamp,
-    bool? wasHelpful,
-    bool? isEncrypted,
-  }) {
-    return AIResponseModel(
-      id: id ?? this.id,
-      uid: uid ?? this.uid,
-      context: context ?? this.context,
-      response: response ?? this.response,
-      timestamp: timestamp ?? this.timestamp,
-      wasHelpful: wasHelpful ?? this.wasHelpful,
-    )..isEncrypted = isEncrypted ?? this.isEncrypted;
-  }
-}
-
 /// Chat Message Model that represents a single message in a conversation
 @Entity()
 class ChatMessageModel {
@@ -94,7 +37,7 @@ class ChatMessageModel {
   bool isEncrypted = false;
 
   /// Whether the user marked this message as helpful
-  bool wasHelpful = false;
+  bool? wasHelpful;
 
   /// The session this message belongs to
   final ToOne<ChatSession> session = ToOne<ChatSession>();
@@ -183,106 +126,37 @@ class ChatHistorySettings {
   }
 }
 
-/// AI Service Configuration model
-@Entity()
-class AIServiceConfig {
-  @Id()
-  int id = 0;
+/// Simple runtime configuration for AI services (not persisted)
+class AIServiceSettings {
+  final AIServiceType serviceType;
+  final String? preferredModel;
+  final bool allowDataTraining;
+  final double temperature;
+  final int maxTokens;
 
-  @Unique()
-  final String uid;
-
-  /// The actual enum type as a transient property
-  @Transient()
-  AIServiceType? _serviceType;
-
-  /// The service type is stored as an integer in the database
-  int? get dbServiceType {
-    _ensureStableEnumValues();
-    return _serviceType?.index;
-  }
-
-  /// Setter for the service type integer
-  set dbServiceType(int? value) {
-    _ensureStableEnumValues();
-    if (value == null) {
-      _serviceType = null;
-    } else {
-      if (value >= 0 && value < AIServiceType.values.length) {
-        _serviceType = AIServiceType.values[value];
-      } else {
-        _serviceType = AIServiceType.offline;
-      }
-    }
-  }
-
-  /// API key for the service
-  String? apiKey;
-
-  /// Preferred model for the service (e.g., gpt-4, claude-3, etc.)
-  String? preferredModel;
-
-  /// Whether to allow data to be used for training
-  bool allowDataTraining;
-
-  /// For encrypted storage
-  bool isEncrypted = false;
-
-  double temperature;
-  int maxTokens;
-
-  AIServiceConfig({
-    this.id = 0,
-    String? uid,
-    AIServiceType serviceType = AIServiceType.offline,
-    this.apiKey,
+  const AIServiceSettings({
+    this.serviceType = AIServiceType.offline,
     this.preferredModel,
     this.allowDataTraining = false,
-    this.temperature = 0.7,
+    this.temperature = 1.0,
     this.maxTokens = 8096,
-  }) : uid = uid ?? const Uuid().v4() {
-    _serviceType = serviceType;
-  }
-
-  /// Get the service type as enum
-  AIServiceType get serviceType => _serviceType ?? AIServiceType.offline;
-
-  /// Set the service type from enum
-  set serviceType(AIServiceType value) {
-    _ensureStableEnumValues();
-    _serviceType = value;
-  }
+  });
 
   /// Create a copy with updated values
-  AIServiceConfig copyWith({
-    int? id,
-    String? uid,
+  AIServiceSettings copyWith({
     AIServiceType? serviceType,
-    String? apiKey,
     String? preferredModel,
     bool? allowDataTraining,
-    bool? isEncrypted,
     double? temperature,
     int? maxTokens,
   }) {
-    return AIServiceConfig(
-      id: id ?? this.id,
-      uid: uid ?? this.uid,
+    return AIServiceSettings(
       serviceType: serviceType ?? this.serviceType,
-      apiKey: apiKey ?? this.apiKey,
       preferredModel: preferredModel ?? this.preferredModel,
       allowDataTraining: allowDataTraining ?? this.allowDataTraining,
       temperature: temperature ?? this.temperature,
       maxTokens: maxTokens ?? this.maxTokens,
-    )..isEncrypted = isEncrypted ?? this.isEncrypted;
-  }
-
-  /// Ensure enum values have stable indices
-  void _ensureStableEnumValues() {
-    assert(AIServiceType.offline.index == 0);
-    assert(AIServiceType.openAI.index == 1);
-    assert(AIServiceType.anthropic.index == 2);
-    assert(AIServiceType.openRouter.index == 3);
+    );
   }
 }
 

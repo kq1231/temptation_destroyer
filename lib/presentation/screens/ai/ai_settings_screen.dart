@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../presentation/providers/ai_service_provider.dart';
 import '../../widgets/common/loading_indicator.dart';
 import '../../../data/models/ai_models.dart' as models;
+import '../../../core/security/secure_storage_service.dart';
 
 class AISettingsScreen extends ConsumerWidget {
   const AISettingsScreen({super.key});
@@ -237,6 +238,7 @@ class AISettingsScreen extends ConsumerWidget {
     AIServiceState state,
   ) {
     final apiKeyController = TextEditingController(text: state.config.apiKey);
+    final secureStorage = SecureStorageService.instance;
 
     showDialog(
       context: context,
@@ -267,20 +269,32 @@ class AISettingsScreen extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final apiKey = apiKeyController.text.trim();
               if (apiKey.isNotEmpty) {
-                ref.read(aiServiceProvider.notifier).setApiKey(apiKey);
-                Navigator.of(context).pop();
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      '${_getServiceName(state.config.serviceType)} API key saved successfully',
-                    ),
-                    backgroundColor: Colors.green,
-                  ),
+                // Store the API key securely with the service type as identifier
+                // Not awaiting this to avoid blocking the UI
+                // Very important for smooth user experience
+                secureStorage.storeKey(
+                  state.config.serviceType.toString(),
+                  apiKey,
                 );
+
+                // Update the provider state
+                ref.read(aiServiceProvider.notifier).setApiKey(apiKey);
+
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        '${_getServiceName(state.config.serviceType)} API key saved successfully',
+                      ),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
               }
             },
             child: const Text('Save'),

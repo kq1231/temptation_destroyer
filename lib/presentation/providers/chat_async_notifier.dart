@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:temptation_destroyer/presentation/providers/ai_service_provider.dart';
 import '../../data/models/ai_models.dart';
 import '../../data/models/chat_session_model.dart';
 import '../../core/context/context_manager.dart';
@@ -14,7 +15,7 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
 
   @override
   Future<ChatState> build() async {
-    _repository = AIRepository();
+    _repository = AIRepository(ref);
     return const ChatState();
   }
 
@@ -89,6 +90,9 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
     final currentState = state.value;
     if (currentState == null) return;
 
+    // Get the current config from the service provider
+    final config = ref.read(aiServiceProvider).config;
+
     // Check if this is an emergency message
     final isEmergency = _contextManager.isEmergencyContext(content);
 
@@ -118,7 +122,7 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
     ));
 
     try {
-      // Store the message
+      // Store the user message (encryption handled in storeMessageAsync)
       await _repository.storeMessageAsync(newMessage);
 
       // If this is an emergency, use special handling
@@ -128,7 +132,6 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
       }
 
       // Get AI response with context management
-      final config = _repository.getServiceConfig();
       final availableTokens = _contextManager.getAvailableContextSize(
         config.serviceType,
         config.preferredModel,
@@ -148,14 +151,15 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
         config: config,
       );
 
-      // Create and store AI message
+      // Create AI message
       final aiMessage = ChatMessageModel(
-        content: aiResponse.response,
+        content: aiResponse.content,
         isUserMessage: false,
         session: currentState.currentSession,
         wasHelpful: false,
       );
 
+      // Store AI message (encryption handled in storeMessageAsync)
       await _repository.storeMessageAsync(aiMessage);
 
       // Update state with both messages, removing loading message
@@ -177,6 +181,9 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
     final currentState = state.value;
     if (currentState == null) return;
 
+    // Get the current config from the service provider
+    final config = ref.read(aiServiceProvider).config;
+
     try {
       // Use emergency system prompt
       final emergencyPrompt = _contextManager.getEmergencySystemPrompt();
@@ -185,20 +192,21 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
       final aiResponse = await _repository.generateResponse(
         userInput: content,
         context: emergencyPrompt,
-        config: _repository.getServiceConfig().copyWith(
-              temperature: 0.3, // Lower temperature for more focused response
-              maxTokens: 300, // Shorter response for immediate help
-            ),
+        config: config.copyWith(
+          temperature: 0.3, // Lower temperature for more focused response
+          maxTokens: 300, // Shorter response for immediate help
+        ),
       );
 
-      // Create and store emergency AI message
+      // Create emergency AI message
       final aiMessage = ChatMessageModel(
-        content: aiResponse.response,
+        content: aiResponse.content,
         isUserMessage: false,
         session: currentState.currentSession,
         wasHelpful: false,
       );
 
+      // Store AI message (encryption handled in storeMessageAsync)
       await _repository.storeMessageAsync(aiMessage);
 
       // Update state with both messages, removing loading message
@@ -223,7 +231,7 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
   Future<void> clearChatHistory() async {
     state = const AsyncValue.loading();
     try {
-      await _repository.clearChatHistory();
+      _repository.clearChatHistory();
       state = const AsyncValue.data(ChatState());
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);

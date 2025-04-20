@@ -5,6 +5,7 @@ import 'package:temptation_destroyer/core/constants/app_strings.dart';
 import 'package:temptation_destroyer/data/models/ai_models.dart';
 import 'package:temptation_destroyer/data/repositories/ai_repository.dart';
 import 'package:temptation_destroyer/presentation/providers/auth_provider.dart';
+import 'package:temptation_destroyer/core/security/secure_storage_service.dart';
 
 class ApiKeySetupScreen extends ConsumerStatefulWidget {
   const ApiKeySetupScreen({super.key});
@@ -38,7 +39,7 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
   @override
   void initState() {
     super.initState();
-    _repository = AIRepository();
+    _repository = AIRepository(ref as Ref);
     _checkForExistingKeys();
   }
 
@@ -46,6 +47,8 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
     setState(() => _isLoading = true);
 
     try {
+      final secureStorage = SecureStorageService.instance;
+
       // Get current service config
       final config = _repository.getServiceConfig();
 
@@ -60,8 +63,7 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
       }
 
       // Check if there's a key for the selected provider
-      // Use the existing config to check for an API key
-      final apiKey = config.apiKey;
+      final apiKey = await secureStorage.getKey(_selectedProvider);
 
       setState(() {
         _hasStoredKey = apiKey != null && apiKey.isNotEmpty;
@@ -99,12 +101,16 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
     try {
       final apiKey = _apiKeyController.text.trim();
       final serviceType = _serviceTypeMap[_selectedProvider]!;
+      final secureStorage = SecureStorageService.instance;
+
+      // Store the API key securely
+      await secureStorage.storeKey(_selectedProvider, apiKey);
 
       // Get current config and update it
       final config = _repository.getServiceConfig();
       final updatedConfig = config.copyWith(
         serviceType: serviceType,
-        apiKey: apiKey,
+        apiKey: apiKey, // We still keep this in config for immediate use
       );
 
       // Save to repository
@@ -147,6 +153,11 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
     });
 
     try {
+      final secureStorage = SecureStorageService.instance;
+
+      // Delete the API key from secure storage
+      await secureStorage.deleteKey(_selectedProvider);
+
       // Get current config and clear the API key
       final config = _repository.getServiceConfig();
       final updatedConfig = config.copyWith(

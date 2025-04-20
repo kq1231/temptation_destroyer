@@ -52,7 +52,7 @@ class ChatMessageBubble extends StatelessWidget {
             if (_isLoading)
               LoadingAnimationWidget.staggeredDotsWave(
                 color: isUserMessage
-                    ? Colors.white
+                    ? Colors.black
                     : Theme.of(context).primaryColor,
                 size: 30,
               )

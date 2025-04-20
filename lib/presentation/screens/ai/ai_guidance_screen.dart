@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../presentation/providers/ai_service_provider.dart';
 import '../../../presentation/providers/chat_provider.dart';
-import '../../../core/utils/date_formatter.dart';
 import '../../../data/models/ai_models.dart';
 import '../../widgets/app_loading_indicator.dart';
 import '../../widgets/emergency_chat_widget.dart';
+import '../../widgets/chat/chat_message_bubble.dart';
 import '../../../core/context/context_manager.dart';
 
 class AIGuidanceScreen extends ConsumerStatefulWidget {
@@ -50,7 +50,8 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.atEdge) {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
       print('Loading more messages');
       ref.read(chatProvider.notifier).loadMoreMessages();
     }
@@ -273,96 +274,22 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   }
 
   Widget _buildChatMessage(ChatMessageModel message) {
-    final isUser = message.isUserMessage;
-
-    // Choose colors based on sender
-    final backgroundColor =
-        isUser ? Colors.blue.shade100 : Colors.grey.shade100;
-
-    final textColor = isUser ? Colors.blue.shade900 : Colors.black87;
-
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Message Content
-            Text(
-              message.content,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 16,
-              ),
-            ),
-
-            // Timestamp
-            const SizedBox(height: 4),
-            Text(
-              DateFormatter.formatTime(message.timestamp),
-              style: TextStyle(
-                color: textColor.withOpacity(0.6),
-                fontSize: 12,
-              ),
-            ),
-
-            // Feedback buttons for AI messages
-            if (!isUser)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.thumb_up_outlined, size: 16),
-                    onPressed: () {
-                      ref.read(chatProvider.notifier).rateResponse(
-                            message.uid,
-                            true,
-                          );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Thank you for your feedback!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    tooltip: 'Helpful',
-                    color: Colors.green,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(maxHeight: 24),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.thumb_down_outlined, size: 16),
-                    onPressed: () {
-                      ref.read(chatProvider.notifier).rateResponse(
-                            message.uid,
-                            false,
-                          );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Thank you for your feedback!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    tooltip: 'Not helpful',
-                    color: Colors.red,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(maxHeight: 24),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
+    return ChatMessageBubble(
+      message: message.content,
+      isUserMessage: message.isUserMessage,
+      wasHelpful: message.wasHelpful,
+      onRateResponse: (bool helpful) {
+        ref.read(chatProvider.notifier).rateResponse(
+              message.uid,
+              helpful,
+            );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Thank you for your feedback!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      },
     );
   }
 
@@ -382,8 +309,8 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
       child: Row(
         children: [
           // Voice input button (disabled for now)
-          IconButton(
-            icon: const Icon(Icons.mic),
+          const IconButton(
+            icon: Icon(Icons.mic),
             onPressed: null, // TODO: Implement voice input
             color: Colors.grey,
           ),
@@ -409,6 +336,9 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
               maxLines: 5,
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: isLoading ? null : (_) => _sendMessage(),
+              // Add key event handling
+              onEditingComplete: isLoading ? null : _sendMessage,
+              textInputAction: TextInputAction.send,
             ),
           ),
 

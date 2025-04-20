@@ -10,25 +10,52 @@ class ContextManager {
   // Default token limits for different models/services
   static final Map<AIServiceType, int> _defaultTokenLimits = {
     AIServiceType.offline: 2048, // Conservative default
-    AIServiceType.openAI: 4096, // GPT-3.5-Turbo default
-    AIServiceType.anthropic: 8192, // Claude default
-    AIServiceType.openRouter: 4096, // Varies by model
+    AIServiceType.openAI: 8192, // Updated GPT-3.5-Turbo default
+    AIServiceType.anthropic: 200000, // Updated Claude default
+    AIServiceType.openRouter: 8192, // Varies by model
   };
 
   // Model-specific token limits
   static const Map<String, int> _modelTokenLimits = {
-    'gpt-3.5-turbo': 4096,
-    'gpt-4': 8192,
+    // OpenAI models
+    'gpt-3.5-turbo': 8192, // Updated from 4096
+    'gpt-4': 128000, // Updated from 8192
     'gpt-4-turbo': 128000,
+    'gpt-4o': 128000, // Added
+    'gpt-4o-mini': 128000, // Added
+    'gpt-3': 4096, // Added
+    'gpt-3-mini': 4096, // Added
+
+    // Anthropic models
     'claude-instant-1': 100000,
     'claude-2': 100000,
     'claude-3-opus': 200000,
     'claude-3-sonnet': 200000,
     'claude-3-haiku': 200000,
+
+    // Meta models
     'llama-2-70b': 4096,
     'llama-3-70b': 8192,
+    'meta/llama3-70b-instruct': 128000, // Added for OpenRouter
+    'meta/llama3-8b-instruct': 8192, // Added for OpenRouter
+
+    // Mistral models
     'mistral-medium': 32768,
     'mistral-small': 32768,
+    'mistralai/mistral-7b-instruct': 8192, // Added for OpenRouter
+
+    // Google models
+    'google/gemini-pro': 32000, // Added for OpenRouter
+    'google/gemma-7b-it': 8192, // Added for OpenRouter
+
+    // Others from OpenRouter
+    'anthropic/claude-3-opus': 200000, // Added for OpenRouter
+    'anthropic/claude-3-sonnet': 200000, // Added for OpenRouter
+    'anthropic/claude-3-haiku': 200000, // Added for OpenRouter
+    'openai/gpt-4': 128000, // Added for OpenRouter
+    'openai/gpt-4-turbo': 128000, // Added for OpenRouter
+    'openai/gpt-3.5-turbo': 8192, // Added for OpenRouter
+    'cohere/command-r': 128000, // Added for OpenRouter
   };
 
   // Average tokens per character for different languages

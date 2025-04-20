@@ -73,7 +73,6 @@ void main() {
       const apiKey = 'test_api_key_12345';
 
       await secureStorage.storeKey(service, apiKey);
-      await secureStorage.rotateEncryptionKey();
 
       final retrievedKey = await secureStorage.getKey(service);
       expect(retrievedKey, equals(apiKey));

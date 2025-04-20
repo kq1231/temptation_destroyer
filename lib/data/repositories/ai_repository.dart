@@ -4,31 +4,35 @@ import 'dart:math';
 
 import '../../core/utils/object_box_manager.dart';
 import '../../core/security/secure_storage_service.dart';
+import '../../core/utils/encryption_service.dart';
 import '../models/ai_models.dart';
 import '../models/chat_session_model.dart';
+import '../models/chat_history_settings_model.dart';
 import '../../objectbox.g.dart';
+import '../../core/config/ai_service_config.dart' as config;
+import '../../presentation/providers/ai_service_settings_provider.dart';
 
 /// Repository for handling AI-related operations
 class AIRepository {
   final SecureStorageService _secureStorage;
-  final Box<AIResponseModel> _responseBox;
   final Box<ChatMessageModel> _chatBox;
-  final Box<ChatHistorySettings> _settingsBox;
-  final Box<AIServiceConfig> _configBox;
+  final Box<ChatHistorySettingsModel> _settingsBox;
   final Dio _dio;
+  final EncryptionService _encryptionService = EncryptionService.instance;
+  final dynamic _ref;
 
   // Rate limiting configuration
   static const _maxRequestsPerMinute = 60;
   final Map<AIServiceType, List<DateTime>> _requestTimestamps = {};
 
   /// Constructor
-  AIRepository()
+  AIRepository(dynamic ref)
       : _secureStorage = SecureStorageService.instance,
-        _responseBox = ObjectBoxManager.instance.box<AIResponseModel>(),
         _chatBox = ObjectBoxManager.instance.box<ChatMessageModel>(),
-        _settingsBox = ObjectBoxManager.instance.box<ChatHistorySettings>(),
-        _configBox = ObjectBoxManager.instance.box<AIServiceConfig>(),
-        _dio = Dio() {
+        _settingsBox =
+            ObjectBoxManager.instance.box<ChatHistorySettingsModel>(),
+        _dio = Dio(),
+        _ref = ref {
     _initializeRequestTracking();
   }
 
@@ -109,10 +113,11 @@ class AIRepository {
   }
 
   /// Generate a response from the AI
-  Future<AIResponseModel> generateResponse({
+  Future<ChatMessageModel> generateResponse({
     required String userInput,
     required String context,
-    AIServiceConfig? config,
+    config.AIServiceConfig? config,
+    ChatSession? session,
   }) async {
     print('\n=== AI Repository: Generating Response ===');
     print('User input length: ${userInput.length}');
@@ -128,7 +133,7 @@ class AIRepository {
     // Don't check for API key if we're in offline mode
     if (serviceConfig.serviceType == AIServiceType.offline) {
       print('Using offline mode');
-      return _getFallbackResponse(userInput, context);
+      return await _getFallbackResponse(userInput, context, session);
     }
 
     try {
@@ -136,14 +141,14 @@ class AIRepository {
       final apiKey = await _getSecureApiKey(serviceConfig.serviceType);
       if (apiKey == null || apiKey.isEmpty) {
         print('No API key found, falling back to offline mode');
-        return _getFallbackResponse(userInput, context);
+        return await _getFallbackResponse(userInput, context, session);
       }
 
       // Validate API key
       final isValid = await _validateApiKey(serviceConfig.serviceType, apiKey);
       if (!isValid) {
         print('Invalid API key, falling back to offline mode');
-        return _getFallbackResponse(userInput, context);
+        return await _getFallbackResponse(userInput, context, session);
       }
 
       // Check rate limiting
@@ -164,22 +169,24 @@ class AIRepository {
       );
       print('Received response of length: ${response.length}');
 
-      // Create and save the AI response
-      final aiResponse = AIResponseModel(
-        context: context,
-        response: response,
-        wasHelpful: false, // Will be updated by user feedback
+      // Create the AI response
+      final chatMessage = ChatMessageModel(
+        content: response,
+        isUserMessage: false,
+        role: 'assistant',
+        wasHelpful: null,
+        session: session,
       );
 
-      // Cache the response for offline use if needed
-      _cacheResponse(aiResponse);
+      // Save the message using storeMessageAsync to ensure encryption
+      await storeMessageAsync(chatMessage);
 
       print('=== AI Repository: Response Generation Complete ===\n');
-      return aiResponse;
+      return chatMessage;
     } catch (e) {
       print('Error generating AI response: $e');
       // Return a fallback response on error
-      return _getFallbackResponse(userInput, context);
+      return await _getFallbackResponse(userInput, context, session);
     }
   }
 
@@ -187,7 +194,7 @@ class AIRepository {
   Future<String> _sendRequestToAIService({
     required String userInput,
     required String context,
-    required AIServiceConfig config,
+    required config.AIServiceConfig config,
   }) async {
     print('\n=== Sending Request to AI Service ===');
     print('Service type: ${config.serviceType}');
@@ -200,6 +207,7 @@ class AIRepository {
     while (retryCount < maxRetries) {
       try {
         String response;
+
         switch (config.serviceType) {
           case AIServiceType.openAI:
             print('Sending request to OpenAI...');
@@ -238,7 +246,7 @@ class AIRepository {
 
   /// Send a request to OpenAI
   Future<String> _sendOpenAIRequest(
-      String userInput, String context, AIServiceConfig config) async {
+      String userInput, String context, config.AIServiceConfig config) async {
     try {
       final apiKey = await _getSecureApiKey(AIServiceType.openAI);
       if (apiKey == null) {
@@ -251,13 +259,20 @@ class AIRepository {
 
       final selectedModel =
           await _selectOptimalModel(userInput, context, config);
-      final maxRetries = 3;
+      const maxRetries = 3;
       var retryCount = 0;
       var backoffDelay = const Duration(seconds: 1);
 
       // Debug print the context being sent
       print('Context being sent to OpenAI:');
       print(context);
+
+      // Add logging for OpenAI request parameters
+      print('OpenAI Request Parameters:');
+      print('Model: ' + selectedModel);
+      print('Messages: ' + buildContextMessages(context).toString());
+      print('Temperature: ' + config.temperature.toString());
+      print('Max Tokens: ' + config.maxTokens.toString());
 
       while (retryCount <= maxRetries) {
         try {
@@ -393,7 +408,7 @@ class AIRepository {
 
   /// Send a request to Anthropic
   Future<String> _sendAnthropicRequest(
-      String userInput, String context, AIServiceConfig config) async {
+      String userInput, String context, config.AIServiceConfig config) async {
     try {
       final apiKey = await _getSecureApiKey(AIServiceType.anthropic);
       if (apiKey == null) {
@@ -406,9 +421,17 @@ class AIRepository {
 
       final selectedModel =
           await _selectOptimalModel(userInput, context, config);
-      final maxRetries = 3;
+      const maxRetries = 3;
       var retryCount = 0;
       var backoffDelay = const Duration(seconds: 1);
+
+      // Add logging for Anthropic request parameters
+      print('Anthropic Request Parameters:');
+      print('Model: ' + selectedModel);
+      print('Messages: ' +
+          '[{"role": "user", "content": "$context\n\n$userInput"}]');
+      print('Temperature: ' + config.temperature.toString());
+      print('Max Tokens: ' + config.maxTokens.toString());
 
       while (retryCount <= maxRetries) {
         try {
@@ -457,7 +480,7 @@ class AIRepository {
 
   /// Send a request to OpenRouter with enhanced error handling and model selection
   Future<String> _sendOpenRouterRequest(
-      String userInput, String context, AIServiceConfig config) async {
+      String userInput, String context, config.AIServiceConfig config) async {
     try {
       final apiKey = await _getSecureApiKey(AIServiceType.openRouter);
       if (apiKey == null) {
@@ -470,7 +493,7 @@ class AIRepository {
 
       final selectedModel =
           await _selectOptimalModel(userInput, context, config);
-      final maxRetries = 3;
+      const maxRetries = 3;
       var retryCount = 0;
       var backoffDelay = const Duration(seconds: 1);
 
@@ -486,6 +509,14 @@ class AIRepository {
       } else if (selectedModel.contains('llama3-70b')) {
         maxTokens = 600; // Llama models get moderate tokens
       }
+
+      // Add logging for OpenRouter request parameters
+      print('OpenRouter Request Parameters:');
+      print('Model: ' + selectedModel);
+      print('Messages: ' +
+          '[{"role": "system", "content": "You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment. Keep responses concise but helpful."}, {"role": "user", "content": "Context about my situation: $context"}, {"role": "user", "content": "$userInput"}]');
+      print('Temperature: ' + temperature.toString());
+      print('Max Tokens: ' + maxTokens.toString());
 
       while (retryCount <= maxRetries) {
         try {
@@ -545,7 +576,7 @@ class AIRepository {
 
   /// Select the optimal model based on input complexity and availability
   Future<String> _selectOptimalModel(
-      String userInput, String context, AIServiceConfig config) async {
+      String userInput, String context, config.AIServiceConfig config) async {
     // If user has specified a model, use it
     if (config.preferredModel != null &&
         getAvailableModels(config.serviceType)
@@ -588,122 +619,78 @@ class AIRepository {
     }
   }
 
-  /// Cache the AI response for offline use
-  void _cacheResponse(AIResponseModel response) {
-    if (response.isEncrypted) {
-      saveAIResponse(response);
-    } else {
-      // Only encrypt if we're using encryption
-      if (ObjectBoxManager.instance.isEncrypted) {
-        // Encrypt sensitive fields
-        response.context = ObjectBoxManager.encryptString(response.context);
-        response.response = ObjectBoxManager.encryptString(response.response);
-        response.isEncrypted = true;
-      }
-
-      saveAIResponse(response);
-    }
-  }
-
-  /// Save an AI response to the database
-  int saveAIResponse(AIResponseModel response) {
-    return _responseBox.put(response);
-  }
-
-  /// Get a specific AI response by ID
-  AIResponseModel? getAIResponse(int id) {
-    final response = _responseBox.get(id);
-    return _decryptAIResponseIfNeeded(response);
-  }
-
-  /// Update an AI response (e.g., to mark it as helpful)
-  bool updateAIResponse(AIResponseModel response) {
-    // Encrypt if needed
-    if (!response.isEncrypted && ObjectBoxManager.instance.isEncrypted) {
-      response.context = ObjectBoxManager.encryptString(response.context);
-      response.response = ObjectBoxManager.encryptString(response.response);
-      response.isEncrypted = true;
-    }
-
-    return _responseBox.put(response) > 0;
-  }
-
-  /// Get a fallback response when offline or on error
-  AIResponseModel _getFallbackResponse(String userInput, String context) {
-    // Create list of fallback responses for different scenarios
-    final fallbackResponses = [
-      "Remember that Allah is with those who are patient. Whatever challenge you're facing, try to seek refuge in prayer and dhikr. The Prophet Muhammad (peace be upon him) said: 'Whoever Allah wishes good for, He puts them to trial.'",
-      "In times of difficulty, try to remember the verse: 'And Allah is with you wherever you are.' (Qur'an 57:4). Perhaps taking a moment for deep breathing, prayer, or reaching out to a trusted friend could help.",
-      "The Prophet (peace be upon him) taught us to say 'Astaghfirullah' (I seek forgiveness from Allah) when we're struggling. Combined with practical actions like changing your environment or engaging in a beneficial activity, this can help overcome the current challenge.",
-      "Consider taking a few moments to pray two raka'at of voluntary prayer. The Prophet (peace be upon him) would turn to prayer in times of distress. After prayer, try to engage in a hobby or activity that brings you joy and keeps you away from temptation.",
-      "When facing a trial, remember the hadith: 'Wonderful is the affair of the believer, for there is good in every affair of his.' Try to identify what this situation is teaching you, and take practical steps to protect yourself.",
+  /// Get a fallback response when AI services are unavailable
+  Future<ChatMessageModel> _getFallbackResponse(
+      String userInput, String context, ChatSession? session) async {
+    final responses = [
+      'I apologize, but I am currently in offline mode. Please try again later when online services are available.',
+      'I am currently operating in offline mode. Please check your internet connection and API settings.',
+      'Sorry, I cannot provide a detailed response at the moment as I am in offline mode.',
     ];
 
-    // Try to match the input with a relevant response
-    String fallbackResponse;
-    if (userInput.contains('urgent') || context.contains('emergency')) {
-      fallbackResponse =
-          "During urgent moments of temptation, immediately change your environment. Step outside, call someone trustworthy, or engage in dhikr. Remember that immediate distraction followed by prayer is one of the most effective strategies the Prophet (peace be upon him) taught us for overcoming temptation.";
-    } else if (userInput.contains('sad') ||
-        userInput.contains('depress') ||
-        context.contains('sad') ||
-        context.contains('depress')) {
-      fallbackResponse =
-          "During times of sadness, remember the Prophet's (peace be upon him) dua: 'O Allah, I seek refuge in You from anxiety and grief.' Consider speaking to a trusted friend or counselor about your feelings. Combining spiritual practices with social support and possibly professional help is an approach aligned with Islamic principles of comprehensive wellbeing.";
-    } else {
-      // Select a random fallback response if no specific match
-      fallbackResponse = fallbackResponses[
-          DateTime.now().millisecondsSinceEpoch % fallbackResponses.length];
-    }
-
-    return AIResponseModel(
-      context: context,
-      response: fallbackResponse,
-      wasHelpful: false,
+    final message = ChatMessageModel(
+      content: responses[Random().nextInt(responses.length)],
+      isUserMessage: false,
+      role: 'assistant',
+      session: session,
     );
+
+    // Ensure fallback responses are also encrypted
+    await storeMessageAsync(message);
+
+    return message;
   }
 
-  /// Decrypt AI response if needed
-  AIResponseModel? _decryptAIResponseIfNeeded(AIResponseModel? response) {
-    if (response == null) return null;
+  /// Save a chat message
+  int saveChatMessage(ChatMessageModel message) {
+    if (_encryptionService.isInitialized) {
+      final encryptedContent = _encryptionService.encrypt(message.content);
+      message = message.copyWith(
+        content: encryptedContent,
+        isEncrypted: true,
+      );
+    }
+    return _chatBox.put(message);
+  }
 
-    if (response.isEncrypted) {
-      // Create a decrypted copy
-      final decrypted = response.copyWith(
-        context: ObjectBoxManager.decryptString(response.context),
-        response: ObjectBoxManager.decryptString(response.response),
+  /// Get a chat message by ID
+  ChatMessageModel? getChatMessage(int id) {
+    final message = _chatBox.get(id);
+    if (message != null &&
+        message.isEncrypted &&
+        _encryptionService.isInitialized) {
+      final decryptedContent = _encryptionService.decrypt(message.content);
+      return message.copyWith(
+        content: decryptedContent,
         isEncrypted: false,
       );
-      return decrypted;
     }
-
-    return response;
+    return message;
   }
 
-  /// Get all AI responses
-  List<AIResponseModel> getAllAIResponses() {
-    final responses = _responseBox.getAll();
-    return responses
-        .map((response) => _decryptAIResponseIfNeeded(response)!)
-        .toList();
+  /// Update a chat message
+  bool updateChatMessage(ChatMessageModel message) {
+    return _chatBox.put(message) > 0;
   }
 
-  /// Store a chat message
-  int storeChatMessage(ChatMessageModel message) {
-    if (!message.isEncrypted && ObjectBoxManager.instance.isEncrypted) {
-      message.content = ObjectBoxManager.encryptString(message.content);
-      message.isEncrypted = true;
-    }
-
-    return _chatBox.put(message);
+  /// Get all chat messages
+  List<ChatMessageModel> getAllChatMessages() {
+    return _chatBox.getAll();
   }
 
   /// Get chat history
   List<ChatMessageModel> getChatHistory() {
     final messages = _chatBox.getAll();
-    return messages
-        .map((message) => _decryptChatMessageIfNeeded(message)!)
-        .toList();
+    return messages.map((message) {
+      if (message.isEncrypted && _encryptionService.isInitialized) {
+        final decryptedContent = _encryptionService.decrypt(message.content);
+        return message.copyWith(
+          content: decryptedContent,
+          isEncrypted: false,
+        );
+      }
+      return message;
+    }).toList();
   }
 
   /// Get recent chat history limited by count
@@ -720,25 +707,21 @@ class AIRepository {
     // Sort chronologically (oldest first)
     messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
-    return messages
-        .map((message) => _decryptChatMessageIfNeeded(message)!)
-        .toList();
-  }
-
-  /// Decrypt chat message if needed
-  ChatMessageModel? _decryptChatMessageIfNeeded(ChatMessageModel? message) {
-    if (message == null) return null;
-
-    if (message.isEncrypted) {
-      // Create a decrypted copy
-      final decrypted = message.copyWith(
-        content: ObjectBoxManager.decryptString(message.content),
-        isEncrypted: false,
-      );
-      return decrypted;
+    // Decrypt messages if encryption is initialized
+    if (_encryptionService.isInitialized) {
+      return messages.map((message) {
+        if (message.isEncrypted) {
+          final decryptedContent = _encryptionService.decrypt(message.content);
+          return message.copyWith(
+            content: decryptedContent,
+            isEncrypted: false,
+          );
+        }
+        return message;
+      }).toList();
     }
 
-    return message;
+    return messages;
   }
 
   /// Delete chat messages older than specified days
@@ -764,86 +747,94 @@ class AIRepository {
   }
 
   /// Get chat history settings
-  ChatHistorySettings getChatHistorySettings() {
+  config.ChatHistorySettings getChatHistorySettings() {
     final allSettings = _settingsBox.getAll();
 
     if (allSettings.isEmpty) {
       // Create default settings if none exist
-      final defaultSettings = ChatHistorySettings();
+      final defaultSettings = ChatHistorySettingsModel();
       _settingsBox.put(defaultSettings);
-      return defaultSettings;
+      return config.ChatHistorySettings(
+        storeChatHistory: defaultSettings.storeChatHistory,
+        autoDeleteAfterDays: defaultSettings.autoDeleteAfterDays,
+        lastCleared: defaultSettings.lastCleared,
+      );
     }
 
-    return allSettings.first;
+    final dbSettings = allSettings.first;
+    return config.ChatHistorySettings(
+      storeChatHistory: dbSettings.storeChatHistory,
+      autoDeleteAfterDays: dbSettings.autoDeleteAfterDays,
+      lastCleared: dbSettings.lastCleared,
+    );
   }
 
   /// Update chat history settings
-  void updateChatHistorySettings(ChatHistorySettings settings) {
-    _settingsBox.put(settings);
+  void updateChatHistorySettings(config.ChatHistorySettings settings) {
+    // Get existing settings or create new
+    var existingSettings =
+        _settingsBox.getAll().firstOrNull ?? ChatHistorySettingsModel();
+
+    // Update settings using copyWith
+    existingSettings = existingSettings.copyWith(
+      storeChatHistory: settings.storeChatHistory,
+      autoDeleteAfterDays: settings.autoDeleteAfterDays,
+      lastCleared: settings.lastCleared,
+    );
+    _settingsBox.put(existingSettings);
+  }
+
+  /// Clear chat history and update last cleared timestamp
+  void clearChatHistory() {
+    // Get existing settings or create new
+    var dbSettings =
+        _settingsBox.getAll().firstOrNull ?? ChatHistorySettingsModel();
+
+    // Update last cleared timestamp
+    dbSettings = dbSettings.copyWith(
+      lastCleared: DateTime.now(),
+    );
+    _settingsBox.put(dbSettings);
+
+    // Clear messages
+    _chatBox.removeAll();
+
+    // Also update the current config with new settings
+    saveServiceConfig(getServiceConfig().copyWith(
+      settings: config.ChatHistorySettings(
+        storeChatHistory: dbSettings.storeChatHistory,
+        autoDeleteAfterDays: dbSettings.autoDeleteAfterDays,
+        lastCleared: dbSettings.lastCleared,
+      ),
+    ));
   }
 
   /// Get the AI service configuration
-  AIServiceConfig getServiceConfig() {
-    try {
-      final query = _configBox.query();
-
-      final builtQuery = query.build();
-      final configs = builtQuery.find();
-      builtQuery.close();
-
-      if (configs.isEmpty) {
-        // Create default config if none exists
-        final defaultConfig = AIServiceConfig();
-        _configBox.put(defaultConfig);
-        return defaultConfig;
-      }
-
-      final config = configs.first;
-      if (config.isEncrypted) {
-        // Decrypt API key if encrypted
-        return config.copyWith(
-          apiKey: config.apiKey != null
-              ? ObjectBoxManager.decryptString(config.apiKey!)
-              : null,
-          isEncrypted: false,
-        );
-      }
-
-      return config;
-    } catch (e) {
-      debugPrint('Error getting service config: $e');
-      return AIServiceConfig(); // Return default offline config
-    }
-  }
+  config.AIServiceConfig getServiceConfig() =>
+      _ref.read(aiServiceSettingsProvider);
 
   /// Save the AI service configuration
-  void saveServiceConfig(AIServiceConfig config) {
-    try {
-      // Remove any existing configs first
-      final query = _configBox.query();
-      final builtQuery = query.build();
-      final existingConfigs = builtQuery.find();
-      builtQuery.close();
-
-      for (final existing in existingConfigs) {
-        _configBox.remove(existing.id);
-      }
-
-      // Encrypt API key if needed
-      if (!config.isEncrypted &&
-          ObjectBoxManager.instance.isEncrypted &&
-          config.apiKey != null) {
-        config = config.copyWith(
-          apiKey: ObjectBoxManager.encryptString(config.apiKey!),
-          isEncrypted: true,
-        );
-      }
-
-      // Save the new config
-      _configBox.put(config);
-    } catch (e) {
-      debugPrint('Error saving service config: $e');
+  void saveServiceConfig(config.AIServiceConfig config) {
+    _ref
+        .read(aiServiceSettingsProvider.notifier)
+        .setServiceType(config.serviceType);
+    if (config.apiKey != null) {
+      _ref.read(aiServiceSettingsProvider.notifier).setApiKey(config.apiKey!);
     }
+    if (config.preferredModel != null) {
+      _ref
+          .read(aiServiceSettingsProvider.notifier)
+          .setPreferredModel(config.preferredModel);
+    }
+    _ref
+        .read(aiServiceSettingsProvider.notifier)
+        .setAllowDataTraining(config.allowDataTraining);
+    _ref
+        .read(aiServiceSettingsProvider.notifier)
+        .setTemperature(config.temperature);
+    _ref
+        .read(aiServiceSettingsProvider.notifier)
+        .setMaxTokens(config.maxTokens);
   }
 
   /// Get available models for the selected service with pricing info
@@ -938,13 +929,22 @@ class AIRepository {
 
   /// Delete all AI data (responses and chat history)
   void deleteAllAIData() {
-    _responseBox.removeAll();
     _chatBox.removeAll();
 
     // Update lastCleared in settings
-    final settings = getChatHistorySettings();
-    settings.lastCleared = DateTime.now();
-    _settingsBox.put(settings);
+    var dbSettings =
+        _settingsBox.getAll().firstOrNull ?? ChatHistorySettingsModel();
+    dbSettings = dbSettings.copyWith(lastCleared: DateTime.now());
+    _settingsBox.put(dbSettings);
+
+    // Update config settings to match
+    saveServiceConfig(getServiceConfig().copyWith(
+      settings: config.ChatHistorySettings(
+        storeChatHistory: dbSettings.storeChatHistory,
+        autoDeleteAfterDays: dbSettings.autoDeleteAfterDays,
+        lastCleared: dbSettings.lastCleared,
+      ),
+    ));
   }
 
   /// Get chat messages with pagination
@@ -969,6 +969,21 @@ class AIRepository {
       builtQuery.limit = limit;
       final messages = builtQuery.find().reversed.toList();
       builtQuery.close();
+
+      // Decrypt messages if encryption is initialized
+      if (_encryptionService.isInitialized) {
+        return messages.map((message) {
+          if (message.isEncrypted) {
+            final decryptedContent =
+                _encryptionService.decrypt(message.content);
+            return message.copyWith(
+              content: decryptedContent,
+              isEncrypted: false,
+            );
+          }
+          return message;
+        }).toList();
+      }
 
       return messages;
     } catch (e) {
@@ -1000,6 +1015,14 @@ class AIRepository {
   /// Store a chat message (async version)
   Future<void> storeMessageAsync(ChatMessageModel message) async {
     try {
+      if (_encryptionService.isInitialized) {
+        // Encrypt the message content
+        final encryptedContent = _encryptionService.encrypt(message.content);
+        message = message.copyWith(
+          content: encryptedContent,
+          isEncrypted: true,
+        );
+      }
       _chatBox.put(message);
     } catch (e) {
       debugPrint('Error storing chat message: $e');
@@ -1111,18 +1134,6 @@ class AIRepository {
     }
   }
 
-  /// Clear all chat history
-  Future<void> clearChatHistory() async {
-    try {
-      _chatBox.removeAll();
-      final sessionBox = ObjectBoxManager.instance.box<ChatSession>();
-      sessionBox.removeAll();
-    } catch (e) {
-      debugPrint('Error clearing chat history: $e');
-      rethrow;
-    }
-  }
-
   /// Update message rating
   Future<void> updateMessageRating(String messageId, bool wasHelpful) async {
     try {
@@ -1132,8 +1143,16 @@ class AIRepository {
       query.close();
 
       if (message != null) {
-        message.wasHelpful = wasHelpful;
-        _chatBox.put(message);
+        // Create updated message with rating
+        final updatedMessage = message.copyWith(wasHelpful: wasHelpful);
+
+        // If the message is already encrypted, ensure we maintain encryption
+        if (message.isEncrypted && _encryptionService.isInitialized) {
+          _chatBox.put(updatedMessage);
+        } else {
+          // Otherwise use storeMessageAsync to handle encryption
+          await storeMessageAsync(updatedMessage);
+        }
       }
     } catch (e) {
       debugPrint('Error updating message rating: $e');

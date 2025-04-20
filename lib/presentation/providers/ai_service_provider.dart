@@ -1,66 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/ai_models.dart' as models;
 import '../../data/repositories/ai_repository.dart';
+import '../../core/config/ai_service_config.dart';
+import '../../core/security/secure_storage_service.dart';
 
-/// Chat history settings
-class ChatHistorySettings {
-  final bool storeChatHistory;
-  final int autoDeleteAfterDays;
-  final DateTime? lastCleared;
-
-  const ChatHistorySettings({
-    this.storeChatHistory = false,
-    this.autoDeleteAfterDays = 30,
-    this.lastCleared,
-  });
-
-  /// Create a copy with updated values
-  ChatHistorySettings copyWith({
-    bool? storeChatHistory,
-    int? autoDeleteAfterDays,
-    DateTime? lastCleared,
-  }) {
-    return ChatHistorySettings(
-      storeChatHistory: storeChatHistory ?? this.storeChatHistory,
-      autoDeleteAfterDays: autoDeleteAfterDays ?? this.autoDeleteAfterDays,
-      lastCleared: lastCleared ?? this.lastCleared,
-    );
-  }
-}
-
-/// Configuration for an AI service
-class AIServiceConfig {
-  final models.AIServiceType serviceType;
-  final String? apiKey;
-  final String? preferredModel;
-  final bool allowDataTraining;
-  final ChatHistorySettings settings;
-
-  const AIServiceConfig({
-    required this.serviceType,
-    this.apiKey,
-    this.preferredModel,
-    this.allowDataTraining = false,
-    this.settings = const ChatHistorySettings(),
-  });
-
-  /// Create a copy with updated values
-  AIServiceConfig copyWith({
-    models.AIServiceType? serviceType,
-    String? apiKey,
-    String? preferredModel,
-    bool? allowDataTraining,
-    ChatHistorySettings? settings,
-  }) {
-    return AIServiceConfig(
-      serviceType: serviceType ?? this.serviceType,
-      apiKey: apiKey ?? this.apiKey,
-      preferredModel: preferredModel ?? this.preferredModel,
-      allowDataTraining: allowDataTraining ?? this.allowDataTraining,
-      settings: settings ?? this.settings,
-    );
-  }
-}
+/// Provider for the AI repository
+final aiRepositoryProvider = Provider((ref) => AIRepository(ref));
 
 /// AI Service state
 class AIServiceState {
@@ -90,9 +35,10 @@ class AIServiceState {
 
 /// AI Service notifier
 class AIServiceNotifier extends StateNotifier<AIServiceState> {
-  final AIRepository _repository = AIRepository();
+  final AIRepository _repository;
+  final SecureStorageService _secureStorage = SecureStorageService.instance;
 
-  AIServiceNotifier()
+  AIServiceNotifier(this._repository)
       : super(
           AIServiceState(
             config: const AIServiceConfig(
@@ -107,16 +53,24 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   Future<void> _initialize() async {
     state = state.copyWith(isLoading: true);
     try {
-      // Load saved settings from repository
-      final savedConfig = _repository.getServiceConfig();
+      final config = AIServiceConfig(
+        serviceType: models.AIServiceType.openAI,
+        apiKey: await _secureStorage.getKey(
+          models.AIServiceType.openAI.toString(),
+        ),
+      );
+
+      // Get API key from secure storage
+      final apiKey = await _secureStorage.getKey(config.serviceType.toString());
+
+      print('API Key: $apiKey');
+
+      // Update config with API key
+      final updatedConfig = config.copyWith(apiKey: apiKey);
+
       state = state.copyWith(
         isLoading: false,
-        config: AIServiceConfig(
-          serviceType: savedConfig.serviceType,
-          apiKey: savedConfig.apiKey,
-          preferredModel: savedConfig.preferredModel,
-          allowDataTraining: savedConfig.allowDataTraining,
-        ),
+        config: updatedConfig,
       );
     } catch (e) {
       state = state.copyWith(
@@ -130,24 +84,16 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   void setServiceType(models.AIServiceType type) {
     try {
       // Create new config with updated service type
-      final newConfig = models.AIServiceConfig(
+      final newConfig = state.config.copyWith(
         serviceType: type,
-        apiKey: state.config.apiKey,
-        preferredModel: state.config.preferredModel,
-        allowDataTraining: state.config.allowDataTraining,
+        apiKey: null, // Clear API key when switching services
       );
 
       // Save to repository
       _repository.saveServiceConfig(newConfig);
 
       // Update state
-      state = state.copyWith(
-        config: state.config.copyWith(
-          serviceType: type,
-          // Clear API key when switching services
-          apiKey: null,
-        ),
-      );
+      state = state.copyWith(config: newConfig);
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to save service type: $e',
@@ -159,13 +105,12 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   Future<void> setApiKey(String apiKey) async {
     state = state.copyWith(isLoading: true);
     try {
+      // Store API key in secure storage
+      await _secureStorage.storeKey(
+          state.config.serviceType.toString(), apiKey);
+
       // Create new config with updated API key
-      final newConfig = models.AIServiceConfig(
-        serviceType: state.config.serviceType,
-        apiKey: apiKey,
-        preferredModel: state.config.preferredModel,
-        allowDataTraining: state.config.allowDataTraining,
-      );
+      final newConfig = state.config.copyWith(apiKey: apiKey);
 
       // Save to repository
       _repository.saveServiceConfig(newConfig);
@@ -173,9 +118,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       // Update state
       state = state.copyWith(
         isLoading: false,
-        config: state.config.copyWith(
-          apiKey: apiKey,
-        ),
+        config: newConfig,
       );
     } catch (e) {
       state = state.copyWith(
@@ -189,22 +132,13 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   void setPreferredModel(String? model) {
     try {
       // Create new config with updated model
-      final newConfig = models.AIServiceConfig(
-        serviceType: state.config.serviceType,
-        apiKey: state.config.apiKey,
-        preferredModel: model,
-        allowDataTraining: state.config.allowDataTraining,
-      );
+      final newConfig = state.config.copyWith(preferredModel: model);
 
       // Save to repository
       _repository.saveServiceConfig(newConfig);
 
       // Update state
-      state = state.copyWith(
-        config: state.config.copyWith(
-          preferredModel: model,
-        ),
-      );
+      state = state.copyWith(config: newConfig);
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to save preferred model: $e',
@@ -218,10 +152,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       final newAllowDataTraining = !state.config.allowDataTraining;
 
       // Create new config with updated data training setting
-      final newConfig = models.AIServiceConfig(
-        serviceType: state.config.serviceType,
-        apiKey: state.config.apiKey,
-        preferredModel: state.config.preferredModel,
+      final newConfig = state.config.copyWith(
         allowDataTraining: newAllowDataTraining,
       );
 
@@ -230,9 +161,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
 
       // Update state
       state = state.copyWith(
-        config: state.config.copyWith(
-          allowDataTraining: newAllowDataTraining,
-        ),
+        config: newConfig,
       );
     } catch (e) {
       state = state.copyWith(
@@ -249,11 +178,8 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       );
 
       // Create new config with updated settings
-      final newConfig = models.AIServiceConfig(
-        serviceType: state.config.serviceType,
-        apiKey: state.config.apiKey,
-        preferredModel: state.config.preferredModel,
-        allowDataTraining: state.config.allowDataTraining,
+      final newConfig = state.config.copyWith(
+        settings: newSettings,
       );
 
       // Save to repository
@@ -261,9 +187,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
 
       // Update state
       state = state.copyWith(
-        config: state.config.copyWith(
-          settings: newSettings,
-        ),
+        config: newConfig,
       );
     } catch (e) {
       state = state.copyWith(
@@ -280,11 +204,8 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       );
 
       // Create new config with updated settings
-      final newConfig = models.AIServiceConfig(
-        serviceType: state.config.serviceType,
-        apiKey: state.config.apiKey,
-        preferredModel: state.config.preferredModel,
-        allowDataTraining: state.config.allowDataTraining,
+      final newConfig = state.config.copyWith(
+        settings: newSettings,
       );
 
       // Save to repository
@@ -292,9 +213,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
 
       // Update state
       state = state.copyWith(
-        config: state.config.copyWith(
-          settings: newSettings,
-        ),
+        config: newConfig,
       );
     } catch (e) {
       state = state.copyWith(
@@ -311,11 +230,8 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       );
 
       // Create new config with updated settings
-      final newConfig = models.AIServiceConfig(
-        serviceType: state.config.serviceType,
-        apiKey: state.config.apiKey,
-        preferredModel: state.config.preferredModel,
-        allowDataTraining: state.config.allowDataTraining,
+      final newConfig = state.config.copyWith(
+        settings: newSettings,
       );
 
       // Save to repository
@@ -323,9 +239,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
 
       // Update state
       state = state.copyWith(
-        config: state.config.copyWith(
-          settings: newSettings,
-        ),
+        config: newConfig,
       );
     } catch (e) {
       state = state.copyWith(
@@ -338,5 +252,6 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
 /// Provider for AI service
 final aiServiceProvider =
     StateNotifierProvider<AIServiceNotifier, AIServiceState>((ref) {
-  return AIServiceNotifier();
+  final repository = ref.watch(aiRepositoryProvider);
+  return AIServiceNotifier(repository);
 });

@@ -18,7 +18,7 @@ class GenerateAIGuidanceUseCase {
         context: context ?? 'General guidance request',
       );
 
-      return aiResponse.response;
+      return aiResponse.content;
     } catch (e) {
       // If there's an error, return a fallback response
       return "I apologize, but I'm having trouble generating a response right now. "

@@ -19,6 +19,7 @@ import 'data/models/achievement_model.dart';
 import 'data/models/ai_models.dart';
 import 'data/models/aspiration_model.dart';
 import 'data/models/challenge_model.dart';
+import 'data/models/chat_history_settings_model.dart';
 import 'data/models/chat_session_model.dart';
 import 'data/models/emergency_session_model.dart';
 import 'data/models/hadith_model.dart';
@@ -31,106 +32,6 @@ import 'data/models/user_model.dart';
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
 final _entities = <obx_int.ModelEntity>[
-  obx_int.ModelEntity(
-      id: const obx_int.IdUid(4, 5382531126528966459),
-      name: 'AIResponseModel',
-      lastPropertyId: const obx_int.IdUid(7, 7284077518790205545),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 2065960333714854431),
-            name: 'id',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 8060149680020338552),
-            name: 'uid',
-            type: 9,
-            flags: 2080,
-            indexId: const obx_int.IdUid(3, 7712359689618131082)),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 554570590989212876),
-            name: 'context',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 9172255039743366101),
-            name: 'response',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 3422233065008435390),
-            name: 'timestamp',
-            type: 10,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 9010034396928681793),
-            name: 'wasHelpful',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 7284077518790205545),
-            name: 'isEncrypted',
-            type: 1,
-            flags: 0)
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[]),
-  obx_int.ModelEntity(
-      id: const obx_int.IdUid(5, 6684572823739821310),
-      name: 'AIServiceConfig',
-      lastPropertyId: const obx_int.IdUid(13, 735994827260583777),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 8039466220283059300),
-            name: 'id',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 1185105766014409847),
-            name: 'uid',
-            type: 9,
-            flags: 2080,
-            indexId: const obx_int.IdUid(4, 1273605320268502310)),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 2355316464666904892),
-            name: 'apiKey',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 6112304331995016060),
-            name: 'preferredModel',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 6049819857264738469),
-            name: 'allowDataTraining',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 2219895886433063406),
-            name: 'isEncrypted',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(11, 8067232528677260136),
-            name: 'dbServiceType',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(12, 6408614864208921134),
-            name: 'temperature',
-            type: 8,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(13, 735994827260583777),
-            name: 'maxTokens',
-            type: 6,
-            flags: 0)
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[]),
   obx_int.ModelEntity(
       id: const obx_int.IdUid(6, 8038929499369523082),
       name: 'AspirationModel',
@@ -975,6 +876,35 @@ final _entities = <obx_int.ModelEntity>[
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
+      backlinks: <obx_int.ModelBacklink>[]),
+  obx_int.ModelEntity(
+      id: const obx_int.IdUid(20, 4435633126864489129),
+      name: 'ChatHistorySettingsModel',
+      lastPropertyId: const obx_int.IdUid(4, 9036995426304390336),
+      flags: 0,
+      properties: <obx_int.ModelProperty>[
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(1, 5837366745104670180),
+            name: 'id',
+            type: 6,
+            flags: 1),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(2, 3772452937078425619),
+            name: 'storeChatHistory',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(3, 5925583620411210632),
+            name: 'autoDeleteAfterDays',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(4, 9036995426304390336),
+            name: 'lastCleared',
+            type: 10,
+            flags: 0)
+      ],
+      relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[])
 ];
 
@@ -1013,7 +943,7 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(19, 7809979764960026324),
+      lastEntityId: const obx_int.IdUid(20, 4435633126864489129),
       lastIndexId: const obx_int.IdUid(11, 1698625639249539995),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
@@ -1021,7 +951,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         565911162749560298,
         8755138201011373113,
         4857296881808942799,
-        195410999980337083
+        195410999980337083,
+        5382531126528966459,
+        6684572823739821310
       ],
       retiredIndexUids: const [],
       retiredPropertyUids: const [
@@ -1080,7 +1012,23 @@ obx_int.ModelDefinition getObjectBoxModel() {
         1057345135502437387,
         5067274015992965940,
         4342891463210118895,
-        2914712536729965648
+        2914712536729965648,
+        2065960333714854431,
+        8060149680020338552,
+        554570590989212876,
+        9172255039743366101,
+        3422233065008435390,
+        9010034396928681793,
+        7284077518790205545,
+        8039466220283059300,
+        1185105766014409847,
+        2355316464666904892,
+        6112304331995016060,
+        6049819857264738469,
+        2219895886433063406,
+        8067232528677260136,
+        6408614864208921134,
+        735994827260583777
       ],
       retiredRelationUids: const [],
       modelVersion: 5,
@@ -1088,119 +1036,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
       version: 1);
 
   final bindings = <Type, obx_int.EntityDefinition>{
-    AIResponseModel: obx_int.EntityDefinition<AIResponseModel>(
-        model: _entities[0],
-        toOneRelations: (AIResponseModel object) => [],
-        toManyRelations: (AIResponseModel object) => {},
-        getId: (AIResponseModel object) => object.id,
-        setId: (AIResponseModel object, int id) {
-          object.id = id;
-        },
-        objectToFB: (AIResponseModel object, fb.Builder fbb) {
-          final uidOffset = fbb.writeString(object.uid);
-          final contextOffset = fbb.writeString(object.context);
-          final responseOffset = fbb.writeString(object.response);
-          fbb.startTable(8);
-          fbb.addInt64(0, object.id);
-          fbb.addOffset(1, uidOffset);
-          fbb.addOffset(2, contextOffset);
-          fbb.addOffset(3, responseOffset);
-          fbb.addInt64(4, object.timestamp.millisecondsSinceEpoch);
-          fbb.addBool(5, object.wasHelpful);
-          fbb.addBool(6, object.isEncrypted);
-          fbb.finish(fbb.endTable());
-          return object.id;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
-          final idParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          final uidParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 6, '');
-          final contextParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 8, '');
-          final responseParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 10, '');
-          final timestampParam = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
-          final wasHelpfulParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
-          final object = AIResponseModel(
-              id: idParam,
-              uid: uidParam,
-              context: contextParam,
-              response: responseParam,
-              timestamp: timestampParam,
-              wasHelpful: wasHelpfulParam)
-            ..isEncrypted =
-                const fb.BoolReader().vTableGet(buffer, rootOffset, 16, false);
-
-          return object;
-        }),
-    AIServiceConfig: obx_int.EntityDefinition<AIServiceConfig>(
-        model: _entities[1],
-        toOneRelations: (AIServiceConfig object) => [],
-        toManyRelations: (AIServiceConfig object) => {},
-        getId: (AIServiceConfig object) => object.id,
-        setId: (AIServiceConfig object, int id) {
-          object.id = id;
-        },
-        objectToFB: (AIServiceConfig object, fb.Builder fbb) {
-          final uidOffset = fbb.writeString(object.uid);
-          final apiKeyOffset =
-              object.apiKey == null ? null : fbb.writeString(object.apiKey!);
-          final preferredModelOffset = object.preferredModel == null
-              ? null
-              : fbb.writeString(object.preferredModel!);
-          fbb.startTable(14);
-          fbb.addInt64(0, object.id);
-          fbb.addOffset(1, uidOffset);
-          fbb.addOffset(3, apiKeyOffset);
-          fbb.addOffset(4, preferredModelOffset);
-          fbb.addBool(5, object.allowDataTraining);
-          fbb.addBool(6, object.isEncrypted);
-          fbb.addInt64(10, object.dbServiceType);
-          fbb.addFloat64(11, object.temperature);
-          fbb.addInt64(12, object.maxTokens);
-          fbb.finish(fbb.endTable());
-          return object.id;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
-          final idParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
-          final uidParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGet(buffer, rootOffset, 6, '');
-          final apiKeyParam = const fb.StringReader(asciiOptimization: true)
-              .vTableGetNullable(buffer, rootOffset, 10);
-          final preferredModelParam =
-              const fb.StringReader(asciiOptimization: true)
-                  .vTableGetNullable(buffer, rootOffset, 12);
-          final allowDataTrainingParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
-          final temperatureParam =
-              const fb.Float64Reader().vTableGet(buffer, rootOffset, 26, 0);
-          final maxTokensParam =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 28, 0);
-          final object = AIServiceConfig(
-              id: idParam,
-              uid: uidParam,
-              apiKey: apiKeyParam,
-              preferredModel: preferredModelParam,
-              allowDataTraining: allowDataTrainingParam,
-              temperature: temperatureParam,
-              maxTokens: maxTokensParam)
-            ..isEncrypted =
-                const fb.BoolReader().vTableGet(buffer, rootOffset, 16, false)
-            ..dbServiceType = const fb.Int64Reader()
-                .vTableGetNullable(buffer, rootOffset, 24);
-
-          return object;
-        }),
     AspirationModel: obx_int.EntityDefinition<AspirationModel>(
-        model: _entities[2],
+        model: _entities[0],
         toOneRelations: (AspirationModel object) => [],
         toManyRelations: (AspirationModel object) => {},
         getId: (AspirationModel object) => object.id,
@@ -1268,7 +1105,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     ChatHistorySettings: obx_int.EntityDefinition<ChatHistorySettings>(
-        model: _entities[3],
+        model: _entities[1],
         toOneRelations: (ChatHistorySettings object) => [],
         toManyRelations: (ChatHistorySettings object) => {},
         getId: (ChatHistorySettings object) => object.id,
@@ -1304,7 +1141,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     ChatMessageModel: obx_int.EntityDefinition<ChatMessageModel>(
-        model: _entities[4],
+        model: _entities[2],
         toOneRelations: (ChatMessageModel object) => [object.session],
         toManyRelations: (ChatMessageModel object) => {},
         getId: (ChatMessageModel object) => object.id,
@@ -1344,7 +1181,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final timestampParam = DateTime.fromMillisecondsSinceEpoch(
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
           final wasHelpfulParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 18, false);
+              const fb.BoolReader().vTableGetNullable(buffer, rootOffset, 18);
           final object = ChatMessageModel(
               id: idParam,
               uid: uidParam,
@@ -1361,7 +1198,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     EmergencySession: obx_int.EntityDefinition<EmergencySession>(
-        model: _entities[5],
+        model: _entities[3],
         toOneRelations: (EmergencySession object) => [],
         toManyRelations: (EmergencySession object) => {},
         getId: (EmergencySession object) => object.id,
@@ -1435,7 +1272,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     HobbyModel: obx_int.EntityDefinition<HobbyModel>(
-        model: _entities[6],
+        model: _entities[4],
         toOneRelations: (HobbyModel object) => [],
         toManyRelations: (HobbyModel object) => {},
         getId: (HobbyModel object) => object.id,
@@ -1510,7 +1347,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     Trigger: obx_int.EntityDefinition<Trigger>(
-        model: _entities[7],
+        model: _entities[5],
         toOneRelations: (Trigger object) => [],
         toManyRelations: (Trigger object) => {},
         getId: (Trigger object) => object.id,
@@ -1591,7 +1428,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     User: obx_int.EntityDefinition<User>(
-        model: _entities[8],
+        model: _entities[6],
         toOneRelations: (User object) => [],
         toManyRelations: (User object) => {},
         getId: (User object) => object.id,
@@ -1686,7 +1523,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     AchievementModel: obx_int.EntityDefinition<AchievementModel>(
-        model: _entities[9],
+        model: _entities[7],
         toOneRelations: (AchievementModel object) => [],
         toManyRelations: (AchievementModel object) => {},
         getId: (AchievementModel object) => object.id,
@@ -1755,7 +1592,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     IslamicContentModel: obx_int.EntityDefinition<IslamicContentModel>(
-        model: _entities[10],
+        model: _entities[8],
         toOneRelations: (IslamicContentModel object) => [],
         toManyRelations: (IslamicContentModel object) => {},
         getId: (IslamicContentModel object) => object.id,
@@ -1847,7 +1684,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     StatisticsModel: obx_int.EntityDefinition<StatisticsModel>(
-        model: _entities[11],
+        model: _entities[9],
         toOneRelations: (StatisticsModel object) => [],
         toManyRelations: (StatisticsModel object) => {},
         getId: (StatisticsModel object) => object.id,
@@ -1939,7 +1776,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     ChallengeModel: obx_int.EntityDefinition<ChallengeModel>(
-        model: _entities[12],
+        model: _entities[10],
         toOneRelations: (ChallengeModel object) => [],
         toManyRelations: (ChallengeModel object) => {},
         getId: (ChallengeModel object) => object.id,
@@ -2018,7 +1855,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     HadithModel: obx_int.EntityDefinition<HadithModel>(
-        model: _entities[13],
+        model: _entities[11],
         toOneRelations: (HadithModel object) => [],
         toManyRelations: (HadithModel object) => {},
         getId: (HadithModel object) => object.id,
@@ -2089,7 +1926,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           return object;
         }),
     ChatSession: obx_int.EntityDefinition<ChatSession>(
-        model: _entities[14],
+        model: _entities[12],
         toOneRelations: (ChatSession object) => [],
         toManyRelations: (ChatSession object) => {},
         getId: (ChatSession object) => object.id,
@@ -2188,692 +2025,680 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 .vTableGetNullable(buffer, rootOffset, 34);
 
           return object;
-        })
+        }),
+    ChatHistorySettingsModel:
+        obx_int.EntityDefinition<ChatHistorySettingsModel>(
+            model: _entities[13],
+            toOneRelations: (ChatHistorySettingsModel object) => [],
+            toManyRelations: (ChatHistorySettingsModel object) => {},
+            getId: (ChatHistorySettingsModel object) => object.id,
+            setId: (ChatHistorySettingsModel object, int id) {
+              object.id = id;
+            },
+            objectToFB: (ChatHistorySettingsModel object, fb.Builder fbb) {
+              fbb.startTable(5);
+              fbb.addInt64(0, object.id);
+              fbb.addBool(1, object.storeChatHistory);
+              fbb.addInt64(2, object.autoDeleteAfterDays);
+              fbb.addInt64(3, object.lastCleared.millisecondsSinceEpoch);
+              fbb.finish(fbb.endTable());
+              return object.id;
+            },
+            objectFromFB: (obx.Store store, ByteData fbData) {
+              final buffer = fb.BufferContext(fbData);
+              final rootOffset = buffer.derefObject(0);
+              final idParam =
+                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+              final storeChatHistoryParam =
+                  const fb.BoolReader().vTableGet(buffer, rootOffset, 6, false);
+              final autoDeleteAfterDaysParam =
+                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0);
+              final lastClearedParam = DateTime.fromMillisecondsSinceEpoch(
+                  const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+              final object = ChatHistorySettingsModel(
+                  id: idParam,
+                  storeChatHistory: storeChatHistoryParam,
+                  autoDeleteAfterDays: autoDeleteAfterDaysParam,
+                  lastCleared: lastClearedParam);
+
+              return object;
+            })
   };
 
   return obx_int.ModelDefinition(model, bindings);
-}
-
-/// [AIResponseModel] entity fields to define ObjectBox queries.
-class AIResponseModel_ {
-  /// see [AIResponseModel.id]
-  static final id =
-      obx.QueryIntegerProperty<AIResponseModel>(_entities[0].properties[0]);
-
-  /// see [AIResponseModel.uid]
-  static final uid =
-      obx.QueryStringProperty<AIResponseModel>(_entities[0].properties[1]);
-
-  /// see [AIResponseModel.context]
-  static final context =
-      obx.QueryStringProperty<AIResponseModel>(_entities[0].properties[2]);
-
-  /// see [AIResponseModel.response]
-  static final response =
-      obx.QueryStringProperty<AIResponseModel>(_entities[0].properties[3]);
-
-  /// see [AIResponseModel.timestamp]
-  static final timestamp =
-      obx.QueryDateProperty<AIResponseModel>(_entities[0].properties[4]);
-
-  /// see [AIResponseModel.wasHelpful]
-  static final wasHelpful =
-      obx.QueryBooleanProperty<AIResponseModel>(_entities[0].properties[5]);
-
-  /// see [AIResponseModel.isEncrypted]
-  static final isEncrypted =
-      obx.QueryBooleanProperty<AIResponseModel>(_entities[0].properties[6]);
-}
-
-/// [AIServiceConfig] entity fields to define ObjectBox queries.
-class AIServiceConfig_ {
-  /// see [AIServiceConfig.id]
-  static final id =
-      obx.QueryIntegerProperty<AIServiceConfig>(_entities[1].properties[0]);
-
-  /// see [AIServiceConfig.uid]
-  static final uid =
-      obx.QueryStringProperty<AIServiceConfig>(_entities[1].properties[1]);
-
-  /// see [AIServiceConfig.apiKey]
-  static final apiKey =
-      obx.QueryStringProperty<AIServiceConfig>(_entities[1].properties[2]);
-
-  /// see [AIServiceConfig.preferredModel]
-  static final preferredModel =
-      obx.QueryStringProperty<AIServiceConfig>(_entities[1].properties[3]);
-
-  /// see [AIServiceConfig.allowDataTraining]
-  static final allowDataTraining =
-      obx.QueryBooleanProperty<AIServiceConfig>(_entities[1].properties[4]);
-
-  /// see [AIServiceConfig.isEncrypted]
-  static final isEncrypted =
-      obx.QueryBooleanProperty<AIServiceConfig>(_entities[1].properties[5]);
-
-  /// see [AIServiceConfig.dbServiceType]
-  static final dbServiceType =
-      obx.QueryIntegerProperty<AIServiceConfig>(_entities[1].properties[6]);
-
-  /// see [AIServiceConfig.temperature]
-  static final temperature =
-      obx.QueryDoubleProperty<AIServiceConfig>(_entities[1].properties[7]);
-
-  /// see [AIServiceConfig.maxTokens]
-  static final maxTokens =
-      obx.QueryIntegerProperty<AIServiceConfig>(_entities[1].properties[8]);
 }
 
 /// [AspirationModel] entity fields to define ObjectBox queries.
 class AspirationModel_ {
   /// see [AspirationModel.id]
   static final id =
-      obx.QueryIntegerProperty<AspirationModel>(_entities[2].properties[0]);
+      obx.QueryIntegerProperty<AspirationModel>(_entities[0].properties[0]);
 
   /// see [AspirationModel.uid]
   static final uid =
-      obx.QueryStringProperty<AspirationModel>(_entities[2].properties[1]);
+      obx.QueryStringProperty<AspirationModel>(_entities[0].properties[1]);
 
   /// see [AspirationModel.dua]
   static final dua =
-      obx.QueryStringProperty<AspirationModel>(_entities[2].properties[2]);
+      obx.QueryStringProperty<AspirationModel>(_entities[0].properties[2]);
 
   /// see [AspirationModel.isAchieved]
   static final isAchieved =
-      obx.QueryBooleanProperty<AspirationModel>(_entities[2].properties[3]);
+      obx.QueryBooleanProperty<AspirationModel>(_entities[0].properties[3]);
 
   /// see [AspirationModel.targetDate]
   static final targetDate =
-      obx.QueryDateProperty<AspirationModel>(_entities[2].properties[4]);
+      obx.QueryDateProperty<AspirationModel>(_entities[0].properties[4]);
 
   /// see [AspirationModel.note]
   static final note =
-      obx.QueryStringProperty<AspirationModel>(_entities[2].properties[5]);
+      obx.QueryStringProperty<AspirationModel>(_entities[0].properties[5]);
 
   /// see [AspirationModel.createdAt]
   static final createdAt =
-      obx.QueryDateProperty<AspirationModel>(_entities[2].properties[6]);
+      obx.QueryDateProperty<AspirationModel>(_entities[0].properties[6]);
 
   /// see [AspirationModel.achievedDate]
   static final achievedDate =
-      obx.QueryDateProperty<AspirationModel>(_entities[2].properties[7]);
+      obx.QueryDateProperty<AspirationModel>(_entities[0].properties[7]);
 
   /// see [AspirationModel.isEncrypted]
   static final isEncrypted =
-      obx.QueryBooleanProperty<AspirationModel>(_entities[2].properties[8]);
+      obx.QueryBooleanProperty<AspirationModel>(_entities[0].properties[8]);
 
   /// see [AspirationModel.dbCategory]
   static final dbCategory =
-      obx.QueryIntegerProperty<AspirationModel>(_entities[2].properties[9]);
+      obx.QueryIntegerProperty<AspirationModel>(_entities[0].properties[9]);
 }
 
 /// [ChatHistorySettings] entity fields to define ObjectBox queries.
 class ChatHistorySettings_ {
   /// see [ChatHistorySettings.id]
   static final id =
-      obx.QueryIntegerProperty<ChatHistorySettings>(_entities[3].properties[0]);
+      obx.QueryIntegerProperty<ChatHistorySettings>(_entities[1].properties[0]);
 
   /// see [ChatHistorySettings.storeChatHistory]
   static final storeChatHistory =
-      obx.QueryBooleanProperty<ChatHistorySettings>(_entities[3].properties[1]);
+      obx.QueryBooleanProperty<ChatHistorySettings>(_entities[1].properties[1]);
 
   /// see [ChatHistorySettings.autoDeleteAfterDays]
   static final autoDeleteAfterDays =
-      obx.QueryIntegerProperty<ChatHistorySettings>(_entities[3].properties[2]);
+      obx.QueryIntegerProperty<ChatHistorySettings>(_entities[1].properties[2]);
 
   /// see [ChatHistorySettings.lastCleared]
   static final lastCleared =
-      obx.QueryDateProperty<ChatHistorySettings>(_entities[3].properties[3]);
+      obx.QueryDateProperty<ChatHistorySettings>(_entities[1].properties[3]);
 }
 
 /// [ChatMessageModel] entity fields to define ObjectBox queries.
 class ChatMessageModel_ {
   /// see [ChatMessageModel.id]
   static final id =
-      obx.QueryIntegerProperty<ChatMessageModel>(_entities[4].properties[0]);
+      obx.QueryIntegerProperty<ChatMessageModel>(_entities[2].properties[0]);
 
   /// see [ChatMessageModel.uid]
   static final uid =
-      obx.QueryStringProperty<ChatMessageModel>(_entities[4].properties[1]);
+      obx.QueryStringProperty<ChatMessageModel>(_entities[2].properties[1]);
 
   /// see [ChatMessageModel.content]
   static final content =
-      obx.QueryStringProperty<ChatMessageModel>(_entities[4].properties[2]);
+      obx.QueryStringProperty<ChatMessageModel>(_entities[2].properties[2]);
 
   /// see [ChatMessageModel.isUserMessage]
   static final isUserMessage =
-      obx.QueryBooleanProperty<ChatMessageModel>(_entities[4].properties[3]);
+      obx.QueryBooleanProperty<ChatMessageModel>(_entities[2].properties[3]);
 
   /// see [ChatMessageModel.timestamp]
   static final timestamp =
-      obx.QueryDateProperty<ChatMessageModel>(_entities[4].properties[4]);
+      obx.QueryDateProperty<ChatMessageModel>(_entities[2].properties[4]);
 
   /// see [ChatMessageModel.isEncrypted]
   static final isEncrypted =
-      obx.QueryBooleanProperty<ChatMessageModel>(_entities[4].properties[5]);
+      obx.QueryBooleanProperty<ChatMessageModel>(_entities[2].properties[5]);
 
   /// see [ChatMessageModel.role]
   static final role =
-      obx.QueryStringProperty<ChatMessageModel>(_entities[4].properties[6]);
+      obx.QueryStringProperty<ChatMessageModel>(_entities[2].properties[6]);
 
   /// see [ChatMessageModel.wasHelpful]
   static final wasHelpful =
-      obx.QueryBooleanProperty<ChatMessageModel>(_entities[4].properties[7]);
+      obx.QueryBooleanProperty<ChatMessageModel>(_entities[2].properties[7]);
 
   /// see [ChatMessageModel.session]
   static final session = obx.QueryRelationToOne<ChatMessageModel, ChatSession>(
-      _entities[4].properties[8]);
+      _entities[2].properties[8]);
 }
 
 /// [EmergencySession] entity fields to define ObjectBox queries.
 class EmergencySession_ {
   /// see [EmergencySession.id]
   static final id =
-      obx.QueryIntegerProperty<EmergencySession>(_entities[5].properties[0]);
+      obx.QueryIntegerProperty<EmergencySession>(_entities[3].properties[0]);
 
   /// see [EmergencySession.sessionId]
   static final sessionId =
-      obx.QueryStringProperty<EmergencySession>(_entities[5].properties[1]);
+      obx.QueryStringProperty<EmergencySession>(_entities[3].properties[1]);
 
   /// see [EmergencySession.startTime]
   static final startTime =
-      obx.QueryDateProperty<EmergencySession>(_entities[5].properties[2]);
+      obx.QueryDateProperty<EmergencySession>(_entities[3].properties[2]);
 
   /// see [EmergencySession.endTime]
   static final endTime =
-      obx.QueryDateProperty<EmergencySession>(_entities[5].properties[3]);
+      obx.QueryDateProperty<EmergencySession>(_entities[3].properties[3]);
 
   /// see [EmergencySession.activeTriggerIds]
   static final activeTriggerIds =
-      obx.QueryStringProperty<EmergencySession>(_entities[5].properties[4]);
+      obx.QueryStringProperty<EmergencySession>(_entities[3].properties[4]);
 
   /// see [EmergencySession.wasAIGuidanceShown]
   static final wasAIGuidanceShown =
-      obx.QueryBooleanProperty<EmergencySession>(_entities[5].properties[5]);
+      obx.QueryBooleanProperty<EmergencySession>(_entities[3].properties[5]);
 
   /// see [EmergencySession.notes]
   static final notes =
-      obx.QueryStringProperty<EmergencySession>(_entities[5].properties[6]);
+      obx.QueryStringProperty<EmergencySession>(_entities[3].properties[6]);
 
   /// see [EmergencySession.intensity]
   static final intensity =
-      obx.QueryIntegerProperty<EmergencySession>(_entities[5].properties[7]);
+      obx.QueryIntegerProperty<EmergencySession>(_entities[3].properties[7]);
 
   /// see [EmergencySession.wasSuccessful]
   static final wasSuccessful =
-      obx.QueryBooleanProperty<EmergencySession>(_entities[5].properties[8]);
+      obx.QueryBooleanProperty<EmergencySession>(_entities[3].properties[8]);
 
   /// see [EmergencySession.helpfulStrategies]
   static final helpfulStrategies =
-      obx.QueryStringProperty<EmergencySession>(_entities[5].properties[9]);
+      obx.QueryStringProperty<EmergencySession>(_entities[3].properties[9]);
 }
 
 /// [HobbyModel] entity fields to define ObjectBox queries.
 class HobbyModel_ {
   /// see [HobbyModel.id]
   static final id =
-      obx.QueryIntegerProperty<HobbyModel>(_entities[6].properties[0]);
+      obx.QueryIntegerProperty<HobbyModel>(_entities[4].properties[0]);
 
   /// see [HobbyModel.uid]
   static final uid =
-      obx.QueryStringProperty<HobbyModel>(_entities[6].properties[1]);
+      obx.QueryStringProperty<HobbyModel>(_entities[4].properties[1]);
 
   /// see [HobbyModel.name]
   static final name =
-      obx.QueryStringProperty<HobbyModel>(_entities[6].properties[2]);
+      obx.QueryStringProperty<HobbyModel>(_entities[4].properties[2]);
 
   /// see [HobbyModel.description]
   static final description =
-      obx.QueryStringProperty<HobbyModel>(_entities[6].properties[3]);
+      obx.QueryStringProperty<HobbyModel>(_entities[4].properties[3]);
 
   /// see [HobbyModel.createdAt]
   static final createdAt =
-      obx.QueryDateProperty<HobbyModel>(_entities[6].properties[4]);
+      obx.QueryDateProperty<HobbyModel>(_entities[4].properties[4]);
 
   /// see [HobbyModel.isEncrypted]
   static final isEncrypted =
-      obx.QueryBooleanProperty<HobbyModel>(_entities[6].properties[5]);
+      obx.QueryBooleanProperty<HobbyModel>(_entities[4].properties[5]);
 
   /// see [HobbyModel.frequencyGoal]
   static final frequencyGoal =
-      obx.QueryStringProperty<HobbyModel>(_entities[6].properties[6]);
+      obx.QueryStringProperty<HobbyModel>(_entities[4].properties[6]);
 
   /// see [HobbyModel.durationGoalMinutes]
   static final durationGoalMinutes =
-      obx.QueryIntegerProperty<HobbyModel>(_entities[6].properties[7]);
+      obx.QueryIntegerProperty<HobbyModel>(_entities[4].properties[7]);
 
   /// see [HobbyModel.satisfactionRating]
   static final satisfactionRating =
-      obx.QueryIntegerProperty<HobbyModel>(_entities[6].properties[8]);
+      obx.QueryIntegerProperty<HobbyModel>(_entities[4].properties[8]);
 
   /// see [HobbyModel.lastPracticedAt]
   static final lastPracticedAt =
-      obx.QueryDateProperty<HobbyModel>(_entities[6].properties[9]);
+      obx.QueryDateProperty<HobbyModel>(_entities[4].properties[9]);
 
   /// see [HobbyModel.dbCategory]
   static final dbCategory =
-      obx.QueryIntegerProperty<HobbyModel>(_entities[6].properties[10]);
+      obx.QueryIntegerProperty<HobbyModel>(_entities[4].properties[10]);
 }
 
 /// [Trigger] entity fields to define ObjectBox queries.
 class Trigger_ {
   /// see [Trigger.id]
   static final id =
-      obx.QueryIntegerProperty<Trigger>(_entities[7].properties[0]);
+      obx.QueryIntegerProperty<Trigger>(_entities[5].properties[0]);
 
   /// see [Trigger.triggerId]
   static final triggerId =
-      obx.QueryStringProperty<Trigger>(_entities[7].properties[1]);
+      obx.QueryStringProperty<Trigger>(_entities[5].properties[1]);
 
   /// see [Trigger.description]
   static final description =
-      obx.QueryStringProperty<Trigger>(_entities[7].properties[2]);
+      obx.QueryStringProperty<Trigger>(_entities[5].properties[2]);
 
   /// see [Trigger.intensity]
   static final intensity =
-      obx.QueryIntegerProperty<Trigger>(_entities[7].properties[3]);
+      obx.QueryIntegerProperty<Trigger>(_entities[5].properties[3]);
 
   /// see [Trigger.createdAt]
   static final createdAt =
-      obx.QueryDateProperty<Trigger>(_entities[7].properties[4]);
+      obx.QueryDateProperty<Trigger>(_entities[5].properties[4]);
 
   /// see [Trigger.notes]
   static final notes =
-      obx.QueryStringProperty<Trigger>(_entities[7].properties[5]);
+      obx.QueryStringProperty<Trigger>(_entities[5].properties[5]);
 
   /// see [Trigger.activeTimes]
   static final activeTimes =
-      obx.QueryStringProperty<Trigger>(_entities[7].properties[6]);
+      obx.QueryStringProperty<Trigger>(_entities[5].properties[6]);
 
   /// see [Trigger.activeDays]
   static final activeDays =
-      obx.QueryStringProperty<Trigger>(_entities[7].properties[7]);
+      obx.QueryStringProperty<Trigger>(_entities[5].properties[7]);
 
   /// see [Trigger.activeTimesList]
   static final activeTimesList =
-      obx.QueryStringVectorProperty<Trigger>(_entities[7].properties[8]);
+      obx.QueryStringVectorProperty<Trigger>(_entities[5].properties[8]);
 
   /// see [Trigger.activeDaysList]
   static final activeDaysList =
-      obx.QueryIntegerVectorProperty<Trigger>(_entities[7].properties[9]);
+      obx.QueryIntegerVectorProperty<Trigger>(_entities[5].properties[9]);
 
   /// see [Trigger.dbTriggerType]
   static final dbTriggerType =
-      obx.QueryIntegerProperty<Trigger>(_entities[7].properties[10]);
+      obx.QueryIntegerProperty<Trigger>(_entities[5].properties[10]);
 }
 
 /// [User] entity fields to define ObjectBox queries.
 class User_ {
   /// see [User.id]
-  static final id = obx.QueryIntegerProperty<User>(_entities[8].properties[0]);
+  static final id = obx.QueryIntegerProperty<User>(_entities[6].properties[0]);
 
   /// see [User.hashedPassword]
   static final hashedPassword =
-      obx.QueryStringProperty<User>(_entities[8].properties[1]);
+      obx.QueryStringProperty<User>(_entities[6].properties[1]);
 
   /// see [User.passwordSalt]
   static final passwordSalt =
-      obx.QueryStringProperty<User>(_entities[8].properties[2]);
+      obx.QueryStringProperty<User>(_entities[6].properties[2]);
 
   /// see [User.lastLoginDate]
   static final lastLoginDate =
-      obx.QueryDateProperty<User>(_entities[8].properties[3]);
+      obx.QueryDateProperty<User>(_entities[6].properties[3]);
 
   /// see [User.securityQuestions]
   static final securityQuestions =
-      obx.QueryStringProperty<User>(_entities[8].properties[4]);
+      obx.QueryStringProperty<User>(_entities[6].properties[4]);
 
   /// see [User.recoveryCodes]
   static final recoveryCodes =
-      obx.QueryStringProperty<User>(_entities[8].properties[5]);
+      obx.QueryStringProperty<User>(_entities[6].properties[5]);
 
   /// see [User.customApiKey]
   static final customApiKey =
-      obx.QueryStringProperty<User>(_entities[8].properties[6]);
+      obx.QueryStringProperty<User>(_entities[6].properties[6]);
 
   /// see [User.apiServiceType]
   static final apiServiceType =
-      obx.QueryStringProperty<User>(_entities[8].properties[7]);
+      obx.QueryStringProperty<User>(_entities[6].properties[7]);
 
   /// see [User.isFirstLogin]
   static final isFirstLogin =
-      obx.QueryBooleanProperty<User>(_entities[8].properties[8]);
+      obx.QueryBooleanProperty<User>(_entities[6].properties[8]);
 
   /// see [User.failedRecoveryAttempts]
   static final failedRecoveryAttempts =
-      obx.QueryIntegerProperty<User>(_entities[8].properties[9]);
+      obx.QueryIntegerProperty<User>(_entities[6].properties[9]);
 
   /// see [User.lastFailedRecoveryAttempt]
   static final lastFailedRecoveryAttempt =
-      obx.QueryDateProperty<User>(_entities[8].properties[10]);
+      obx.QueryDateProperty<User>(_entities[6].properties[10]);
 }
 
 /// [AchievementModel] entity fields to define ObjectBox queries.
 class AchievementModel_ {
   /// see [AchievementModel.id]
   static final id =
-      obx.QueryIntegerProperty<AchievementModel>(_entities[9].properties[0]);
+      obx.QueryIntegerProperty<AchievementModel>(_entities[7].properties[0]);
 
   /// see [AchievementModel.title]
   static final title =
-      obx.QueryStringProperty<AchievementModel>(_entities[9].properties[1]);
+      obx.QueryStringProperty<AchievementModel>(_entities[7].properties[1]);
 
   /// see [AchievementModel.description]
   static final description =
-      obx.QueryStringProperty<AchievementModel>(_entities[9].properties[2]);
+      obx.QueryStringProperty<AchievementModel>(_entities[7].properties[2]);
 
   /// see [AchievementModel.iconName]
   static final iconName =
-      obx.QueryStringProperty<AchievementModel>(_entities[9].properties[3]);
+      obx.QueryStringProperty<AchievementModel>(_entities[7].properties[3]);
 
   /// see [AchievementModel.pointValue]
   static final pointValue =
-      obx.QueryIntegerProperty<AchievementModel>(_entities[9].properties[4]);
+      obx.QueryIntegerProperty<AchievementModel>(_entities[7].properties[4]);
 
   /// see [AchievementModel.progressCurrent]
   static final progressCurrent =
-      obx.QueryIntegerProperty<AchievementModel>(_entities[9].properties[5]);
+      obx.QueryIntegerProperty<AchievementModel>(_entities[7].properties[5]);
 
   /// see [AchievementModel.progressTarget]
   static final progressTarget =
-      obx.QueryIntegerProperty<AchievementModel>(_entities[9].properties[6]);
+      obx.QueryIntegerProperty<AchievementModel>(_entities[7].properties[6]);
 
   /// see [AchievementModel.isUnlocked]
   static final isUnlocked =
-      obx.QueryBooleanProperty<AchievementModel>(_entities[9].properties[7]);
+      obx.QueryBooleanProperty<AchievementModel>(_entities[7].properties[7]);
 
   /// see [AchievementModel.unlockedDate]
   static final unlockedDate =
-      obx.QueryDateProperty<AchievementModel>(_entities[9].properties[8]);
+      obx.QueryDateProperty<AchievementModel>(_entities[7].properties[8]);
 
   /// see [AchievementModel.dbType]
   static final dbType =
-      obx.QueryIntegerProperty<AchievementModel>(_entities[9].properties[9]);
+      obx.QueryIntegerProperty<AchievementModel>(_entities[7].properties[9]);
 
   /// see [AchievementModel.dbRarity]
   static final dbRarity =
-      obx.QueryIntegerProperty<AchievementModel>(_entities[9].properties[10]);
+      obx.QueryIntegerProperty<AchievementModel>(_entities[7].properties[10]);
 }
 
 /// [IslamicContentModel] entity fields to define ObjectBox queries.
 class IslamicContentModel_ {
   /// see [IslamicContentModel.id]
-  static final id = obx.QueryIntegerProperty<IslamicContentModel>(
-      _entities[10].properties[0]);
+  static final id =
+      obx.QueryIntegerProperty<IslamicContentModel>(_entities[8].properties[0]);
 
   /// see [IslamicContentModel.content]
   static final content =
-      obx.QueryStringProperty<IslamicContentModel>(_entities[10].properties[1]);
+      obx.QueryStringProperty<IslamicContentModel>(_entities[8].properties[1]);
 
   /// see [IslamicContentModel.source]
   static final source =
-      obx.QueryStringProperty<IslamicContentModel>(_entities[10].properties[2]);
+      obx.QueryStringProperty<IslamicContentModel>(_entities[8].properties[2]);
 
   /// see [IslamicContentModel.reference]
   static final reference =
-      obx.QueryStringProperty<IslamicContentModel>(_entities[10].properties[3]);
+      obx.QueryStringProperty<IslamicContentModel>(_entities[8].properties[3]);
 
   /// see [IslamicContentModel.translation]
   static final translation =
-      obx.QueryStringProperty<IslamicContentModel>(_entities[10].properties[4]);
+      obx.QueryStringProperty<IslamicContentModel>(_entities[8].properties[4]);
 
   /// see [IslamicContentModel.explanation]
   static final explanation =
-      obx.QueryStringProperty<IslamicContentModel>(_entities[10].properties[5]);
+      obx.QueryStringProperty<IslamicContentModel>(_entities[8].properties[5]);
 
   /// see [IslamicContentModel.isFavorite]
-  static final isFavorite = obx.QueryBooleanProperty<IslamicContentModel>(
-      _entities[10].properties[6]);
+  static final isFavorite =
+      obx.QueryBooleanProperty<IslamicContentModel>(_entities[8].properties[6]);
 
   /// see [IslamicContentModel.dateAdded]
   static final dateAdded =
-      obx.QueryDateProperty<IslamicContentModel>(_entities[10].properties[7]);
+      obx.QueryDateProperty<IslamicContentModel>(_entities[8].properties[7]);
 
   /// see [IslamicContentModel.lastDisplayed]
   static final lastDisplayed =
-      obx.QueryDateProperty<IslamicContentModel>(_entities[10].properties[8]);
+      obx.QueryDateProperty<IslamicContentModel>(_entities[8].properties[8]);
 
   /// see [IslamicContentModel.displayCount]
-  static final displayCount = obx.QueryIntegerProperty<IslamicContentModel>(
-      _entities[10].properties[9]);
+  static final displayCount =
+      obx.QueryIntegerProperty<IslamicContentModel>(_entities[8].properties[9]);
 
   /// see [IslamicContentModel.tags]
-  static final tags = obx.QueryStringProperty<IslamicContentModel>(
-      _entities[10].properties[10]);
+  static final tags =
+      obx.QueryStringProperty<IslamicContentModel>(_entities[8].properties[10]);
 
   /// see [IslamicContentModel.tagsList]
   static final tagsList = obx.QueryStringVectorProperty<IslamicContentModel>(
-      _entities[10].properties[11]);
+      _entities[8].properties[11]);
 
   /// see [IslamicContentModel.dbContentType]
   static final dbContentType = obx.QueryIntegerProperty<IslamicContentModel>(
-      _entities[10].properties[12]);
+      _entities[8].properties[12]);
 
   /// see [IslamicContentModel.dbCategory]
   static final dbCategory = obx.QueryIntegerProperty<IslamicContentModel>(
-      _entities[10].properties[13]);
+      _entities[8].properties[13]);
 }
 
 /// [StatisticsModel] entity fields to define ObjectBox queries.
 class StatisticsModel_ {
   /// see [StatisticsModel.id]
   static final id =
-      obx.QueryIntegerProperty<StatisticsModel>(_entities[11].properties[0]);
+      obx.QueryIntegerProperty<StatisticsModel>(_entities[9].properties[0]);
 
   /// see [StatisticsModel.currentStreak]
   static final currentStreak =
-      obx.QueryIntegerProperty<StatisticsModel>(_entities[11].properties[1]);
+      obx.QueryIntegerProperty<StatisticsModel>(_entities[9].properties[1]);
 
   /// see [StatisticsModel.bestStreak]
   static final bestStreak =
-      obx.QueryIntegerProperty<StatisticsModel>(_entities[11].properties[2]);
+      obx.QueryIntegerProperty<StatisticsModel>(_entities[9].properties[2]);
 
   /// see [StatisticsModel.streakStartDate]
   static final streakStartDate =
-      obx.QueryDateProperty<StatisticsModel>(_entities[11].properties[3]);
+      obx.QueryDateProperty<StatisticsModel>(_entities[9].properties[3]);
 
   /// see [StatisticsModel.lastUpdatedDate]
   static final lastUpdatedDate =
-      obx.QueryDateProperty<StatisticsModel>(_entities[11].properties[4]);
+      obx.QueryDateProperty<StatisticsModel>(_entities[9].properties[4]);
 
   /// see [StatisticsModel.triggerDatesJson]
   static final triggerDatesJson =
-      obx.QueryStringProperty<StatisticsModel>(_entities[11].properties[5]);
+      obx.QueryStringProperty<StatisticsModel>(_entities[9].properties[5]);
 
   /// see [StatisticsModel.slipDatesJson]
   static final slipDatesJson =
-      obx.QueryStringProperty<StatisticsModel>(_entities[11].properties[6]);
+      obx.QueryStringProperty<StatisticsModel>(_entities[9].properties[6]);
 
   /// see [StatisticsModel.milestoneDatesJson]
   static final milestoneDatesJson =
-      obx.QueryStringProperty<StatisticsModel>(_entities[11].properties[7]);
+      obx.QueryStringProperty<StatisticsModel>(_entities[9].properties[7]);
 
   /// see [StatisticsModel.totalEmergenciesSurvived]
   static final totalEmergenciesSurvived =
-      obx.QueryIntegerProperty<StatisticsModel>(_entities[11].properties[8]);
+      obx.QueryIntegerProperty<StatisticsModel>(_entities[9].properties[8]);
 
   /// see [StatisticsModel.totalChallengesCompleted]
   static final totalChallengesCompleted =
-      obx.QueryIntegerProperty<StatisticsModel>(_entities[11].properties[9]);
+      obx.QueryIntegerProperty<StatisticsModel>(_entities[9].properties[9]);
 
   /// see [StatisticsModel.weeklyImprovement]
   static final weeklyImprovement =
-      obx.QueryDoubleProperty<StatisticsModel>(_entities[11].properties[10]);
+      obx.QueryDoubleProperty<StatisticsModel>(_entities[9].properties[10]);
 
   /// see [StatisticsModel.monthlyImprovement]
   static final monthlyImprovement =
-      obx.QueryDoubleProperty<StatisticsModel>(_entities[11].properties[11]);
+      obx.QueryDoubleProperty<StatisticsModel>(_entities[9].properties[11]);
 
   /// see [StatisticsModel.triggerPatternJson]
   static final triggerPatternJson =
-      obx.QueryStringProperty<StatisticsModel>(_entities[11].properties[12]);
+      obx.QueryStringProperty<StatisticsModel>(_entities[9].properties[12]);
 
   /// see [StatisticsModel.timePatternJson]
   static final timePatternJson =
-      obx.QueryStringProperty<StatisticsModel>(_entities[11].properties[13]);
+      obx.QueryStringProperty<StatisticsModel>(_entities[9].properties[13]);
 }
 
 /// [ChallengeModel] entity fields to define ObjectBox queries.
 class ChallengeModel_ {
   /// see [ChallengeModel.id]
   static final id =
-      obx.QueryIntegerProperty<ChallengeModel>(_entities[12].properties[0]);
+      obx.QueryIntegerProperty<ChallengeModel>(_entities[10].properties[0]);
 
   /// see [ChallengeModel.title]
   static final title =
-      obx.QueryStringProperty<ChallengeModel>(_entities[12].properties[1]);
+      obx.QueryStringProperty<ChallengeModel>(_entities[10].properties[1]);
 
   /// see [ChallengeModel.description]
   static final description =
-      obx.QueryStringProperty<ChallengeModel>(_entities[12].properties[2]);
+      obx.QueryStringProperty<ChallengeModel>(_entities[10].properties[2]);
 
   /// see [ChallengeModel.dbCategory]
   static final dbCategory =
-      obx.QueryIntegerProperty<ChallengeModel>(_entities[12].properties[3]);
+      obx.QueryIntegerProperty<ChallengeModel>(_entities[10].properties[3]);
 
   /// see [ChallengeModel.dbDifficulty]
   static final dbDifficulty =
-      obx.QueryIntegerProperty<ChallengeModel>(_entities[12].properties[4]);
+      obx.QueryIntegerProperty<ChallengeModel>(_entities[10].properties[4]);
 
   /// see [ChallengeModel.dbStatus]
   static final dbStatus =
-      obx.QueryIntegerProperty<ChallengeModel>(_entities[12].properties[5]);
+      obx.QueryIntegerProperty<ChallengeModel>(_entities[10].properties[5]);
 
   /// see [ChallengeModel.assignedDate]
   static final assignedDate =
-      obx.QueryDateProperty<ChallengeModel>(_entities[12].properties[6]);
+      obx.QueryDateProperty<ChallengeModel>(_entities[10].properties[6]);
 
   /// see [ChallengeModel.completedDate]
   static final completedDate =
-      obx.QueryDateProperty<ChallengeModel>(_entities[12].properties[7]);
+      obx.QueryDateProperty<ChallengeModel>(_entities[10].properties[7]);
 
   /// see [ChallengeModel.isCustom]
   static final isCustom =
-      obx.QueryBooleanProperty<ChallengeModel>(_entities[12].properties[8]);
+      obx.QueryBooleanProperty<ChallengeModel>(_entities[10].properties[8]);
 
   /// see [ChallengeModel.pointValue]
   static final pointValue =
-      obx.QueryIntegerProperty<ChallengeModel>(_entities[12].properties[9]);
+      obx.QueryIntegerProperty<ChallengeModel>(_entities[10].properties[9]);
 
   /// see [ChallengeModel.verificationSteps]
   static final verificationSteps =
-      obx.QueryStringProperty<ChallengeModel>(_entities[12].properties[10]);
+      obx.QueryStringProperty<ChallengeModel>(_entities[10].properties[10]);
 
   /// see [ChallengeModel.dbCategoryValue]
   static final dbCategoryValue =
-      obx.QueryIntegerProperty<ChallengeModel>(_entities[12].properties[11]);
+      obx.QueryIntegerProperty<ChallengeModel>(_entities[10].properties[11]);
 
   /// see [ChallengeModel.dbDifficultyValue]
   static final dbDifficultyValue =
-      obx.QueryIntegerProperty<ChallengeModel>(_entities[12].properties[12]);
+      obx.QueryIntegerProperty<ChallengeModel>(_entities[10].properties[12]);
 
   /// see [ChallengeModel.dbStatusValue]
   static final dbStatusValue =
-      obx.QueryIntegerProperty<ChallengeModel>(_entities[12].properties[13]);
+      obx.QueryIntegerProperty<ChallengeModel>(_entities[10].properties[13]);
 }
 
 /// [HadithModel] entity fields to define ObjectBox queries.
 class HadithModel_ {
   /// see [HadithModel.id]
   static final id =
-      obx.QueryIntegerProperty<HadithModel>(_entities[13].properties[0]);
+      obx.QueryIntegerProperty<HadithModel>(_entities[11].properties[0]);
 
   /// see [HadithModel.text]
   static final text =
-      obx.QueryStringProperty<HadithModel>(_entities[13].properties[1]);
+      obx.QueryStringProperty<HadithModel>(_entities[11].properties[1]);
 
   /// see [HadithModel.narrator]
   static final narrator =
-      obx.QueryStringProperty<HadithModel>(_entities[13].properties[2]);
+      obx.QueryStringProperty<HadithModel>(_entities[11].properties[2]);
 
   /// see [HadithModel.source]
   static final source =
-      obx.QueryStringProperty<HadithModel>(_entities[13].properties[3]);
+      obx.QueryStringProperty<HadithModel>(_entities[11].properties[3]);
 
   /// see [HadithModel.reference]
   static final reference =
-      obx.QueryStringProperty<HadithModel>(_entities[13].properties[4]);
+      obx.QueryStringProperty<HadithModel>(_entities[11].properties[4]);
 
   /// see [HadithModel.translation]
   static final translation =
-      obx.QueryStringProperty<HadithModel>(_entities[13].properties[5]);
+      obx.QueryStringProperty<HadithModel>(_entities[11].properties[5]);
 
   /// see [HadithModel.explanation]
   static final explanation =
-      obx.QueryStringProperty<HadithModel>(_entities[13].properties[6]);
+      obx.QueryStringProperty<HadithModel>(_entities[11].properties[6]);
 
   /// see [HadithModel.isFavorite]
   static final isFavorite =
-      obx.QueryBooleanProperty<HadithModel>(_entities[13].properties[7]);
+      obx.QueryBooleanProperty<HadithModel>(_entities[11].properties[7]);
 
   /// see [HadithModel.lastShownDate]
   static final lastShownDate =
-      obx.QueryDateProperty<HadithModel>(_entities[13].properties[8]);
+      obx.QueryDateProperty<HadithModel>(_entities[11].properties[8]);
 }
 
 /// [ChatSession] entity fields to define ObjectBox queries.
 class ChatSession_ {
   /// see [ChatSession.id]
   static final id =
-      obx.QueryIntegerProperty<ChatSession>(_entities[14].properties[0]);
+      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[0]);
 
   /// see [ChatSession.uid]
   static final uid =
-      obx.QueryStringProperty<ChatSession>(_entities[14].properties[1]);
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[1]);
 
   /// see [ChatSession.title]
   static final title =
-      obx.QueryStringProperty<ChatSession>(_entities[14].properties[2]);
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[2]);
 
   /// see [ChatSession.createdAt]
   static final createdAt =
-      obx.QueryDateProperty<ChatSession>(_entities[14].properties[3]);
+      obx.QueryDateProperty<ChatSession>(_entities[12].properties[3]);
 
   /// see [ChatSession.lastModified]
   static final lastModified =
-      obx.QueryDateProperty<ChatSession>(_entities[14].properties[4]);
+      obx.QueryDateProperty<ChatSession>(_entities[12].properties[4]);
 
   /// see [ChatSession.topic]
   static final topic =
-      obx.QueryStringProperty<ChatSession>(_entities[14].properties[5]);
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[5]);
 
   /// see [ChatSession.messageCount]
   static final messageCount =
-      obx.QueryIntegerProperty<ChatSession>(_entities[14].properties[6]);
+      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[6]);
 
   /// see [ChatSession.isEncrypted]
   static final isEncrypted =
-      obx.QueryBooleanProperty<ChatSession>(_entities[14].properties[7]);
+      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[7]);
 
   /// see [ChatSession.encryptionKey]
   static final encryptionKey =
-      obx.QueryStringProperty<ChatSession>(_entities[14].properties[8]);
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[8]);
 
   /// see [ChatSession.tags]
   static final tags =
-      obx.QueryStringVectorProperty<ChatSession>(_entities[14].properties[9]);
+      obx.QueryStringVectorProperty<ChatSession>(_entities[12].properties[9]);
 
   /// see [ChatSession.selectedModel]
   static final selectedModel =
-      obx.QueryStringProperty<ChatSession>(_entities[14].properties[10]);
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[10]);
 
   /// see [ChatSession.isArchived]
   static final isArchived =
-      obx.QueryBooleanProperty<ChatSession>(_entities[14].properties[11]);
+      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[11]);
 
   /// see [ChatSession.isFavorite]
   static final isFavorite =
-      obx.QueryBooleanProperty<ChatSession>(_entities[14].properties[12]);
+      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[12]);
 
   /// see [ChatSession.metadata]
   static final metadata =
-      obx.QueryStringProperty<ChatSession>(_entities[14].properties[13]);
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[13]);
 
   /// see [ChatSession.dbSessionType]
   static final dbSessionType =
-      obx.QueryIntegerProperty<ChatSession>(_entities[14].properties[14]);
+      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[14]);
 
   /// see [ChatSession.dbServiceType]
   static final dbServiceType =
-      obx.QueryIntegerProperty<ChatSession>(_entities[14].properties[15]);
+      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[15]);
+}
+
+/// [ChatHistorySettingsModel] entity fields to define ObjectBox queries.
+class ChatHistorySettingsModel_ {
+  /// see [ChatHistorySettingsModel.id]
+  static final id = obx.QueryIntegerProperty<ChatHistorySettingsModel>(
+      _entities[13].properties[0]);
+
+  /// see [ChatHistorySettingsModel.storeChatHistory]
+  static final storeChatHistory =
+      obx.QueryBooleanProperty<ChatHistorySettingsModel>(
+          _entities[13].properties[1]);
+
+  /// see [ChatHistorySettingsModel.autoDeleteAfterDays]
+  static final autoDeleteAfterDays =
+      obx.QueryIntegerProperty<ChatHistorySettingsModel>(
+          _entities[13].properties[2]);
+
+  /// see [ChatHistorySettingsModel.lastCleared]
+  static final lastCleared = obx.QueryDateProperty<ChatHistorySettingsModel>(
+      _entities[13].properties[3]);
 }

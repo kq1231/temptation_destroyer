@@ -12,6 +12,7 @@ class ChatMessage {
   final DateTime timestamp;
   final bool isPending;
   final bool isError;
+  final bool wasHelpful;
 
   ChatMessage({
     required this.id,
@@ -20,6 +21,7 @@ class ChatMessage {
     DateTime? timestamp,
     this.isPending = false,
     this.isError = false,
+    this.wasHelpful = false,
   }) : timestamp = timestamp ?? DateTime.now();
 
   /// Convert to model for storage
@@ -50,6 +52,7 @@ class ChatMessage {
     DateTime? timestamp,
     bool? isPending,
     bool? isError,
+    bool? wasHelpful,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -58,6 +61,7 @@ class ChatMessage {
       timestamp: timestamp ?? this.timestamp,
       isPending: isPending ?? this.isPending,
       isError: isError ?? this.isError,
+      wasHelpful: wasHelpful ?? this.wasHelpful,
     );
   }
 }
@@ -154,7 +158,7 @@ class AIGuidanceNotifier extends StateNotifier<AIGuidanceState> {
       );
 
       // Save user message to chat history
-      _aiRepository.storeChatMessage(userMessage.toModel());
+      _aiRepository.saveChatMessage(userMessage.toModel());
 
       // Generate AI response with pending state
       final pendingAiMessage = ChatMessage(
@@ -188,7 +192,7 @@ class AIGuidanceNotifier extends StateNotifier<AIGuidanceState> {
       );
 
       // Save AI message to chat history
-      _aiRepository.storeChatMessage(aiMessage.toModel());
+      _aiRepository.saveChatMessage(aiMessage.toModel());
     } catch (e) {
       // Update the pending message to show an error
       final updatedMessages = state.messages.map((m) {
@@ -237,21 +241,27 @@ class AIGuidanceNotifier extends StateNotifier<AIGuidanceState> {
   }
 
   /// Rate AI response
-  Future<void> rateResponse(String responseId, bool wasHelpful) async {
+  Future<void> rateResponse(String messageId, bool wasHelpful) async {
     try {
-      // Find the corresponding stored AI response
-      final aiResponses = _aiRepository.getAllAIResponses();
-      final aiResponse = aiResponses.firstWhere(
-        (response) => response.uid == responseId,
-        orElse: () => throw Exception('AI response not found'),
-      );
+      // Find the message and update its rating
+      final messages = state.messages.map((message) {
+        if (message.id == messageId) {
+          return message.copyWith(wasHelpful: wasHelpful);
+        }
+        return message;
+      }).toList();
+
+      state = state.copyWith(messages: messages);
 
       // Update the rating in the database
-      aiResponse.wasHelpful = wasHelpful;
-      _aiRepository.updateAIResponse(aiResponse);
+      final chatMessage = _aiRepository.getChatMessage(int.parse(messageId));
+      if (chatMessage != null) {
+        chatMessage.wasHelpful = wasHelpful;
+        _aiRepository.updateChatMessage(chatMessage);
+      }
     } catch (e) {
       state = state.copyWith(
-        errorMessage: 'Failed to rate response: $e',
+        errorMessage: 'Failed to rate message: $e',
       );
     }
   }
@@ -274,7 +284,8 @@ final aiGuidanceProvider =
 
 /// Repository provider
 final aiRepositoryProvider = Provider<AIRepository>((ref) {
-  return AIRepository();
+  final repository = AIRepository(ref);
+  return repository;
 });
 
 /// Use case provider
