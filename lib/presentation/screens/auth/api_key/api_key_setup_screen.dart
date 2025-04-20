@@ -39,7 +39,7 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
   @override
   void initState() {
     super.initState();
-    _repository = AIRepository(ref as Ref);
+    _repository = AIRepository(ref);
     _checkForExistingKeys();
   }
 
