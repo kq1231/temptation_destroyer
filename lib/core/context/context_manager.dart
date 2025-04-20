@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:tiktoken/tiktoken.dart';
 import '../../data/models/ai_models.dart';
 
 /// Manages the context window for AI chat interactions, including:
@@ -58,9 +59,8 @@ class ContextManager {
     'cohere/command-r': 128000, // Added for OpenRouter
   };
 
-  // Average tokens per character for different languages
-  static const double _englishTokensPerChar = 0.25;
-  static const double _arabicTokensPerChar = 0.2;
+  // Mapping of model types to tiktoken encodings
+  final Map<String, Tiktoken?> _encodingCache = {};
 
   // Token overhead for system messages
   static const int _systemPromptOverhead = 200;
@@ -68,19 +68,85 @@ class ContextManager {
   // Maximum percentage of context to use for history (rest reserved for response)
   static const double _maxContextPercentage = 0.8;
 
-  /// Estimates the number of tokens in a given text
-  /// This is a simple estimation - for precise counting, use a tokenizer library
-  int estimateTokenCount(String text) {
+  /// Gets the appropriate encoding for a model
+  Tiktoken? _getEncodingForModel(String? modelId, AIServiceType serviceType) {
+    // Return from cache if already loaded
+    if (modelId != null && _encodingCache.containsKey(modelId)) {
+      return _encodingCache[modelId];
+    }
+
+    try {
+      // Get the appropriate encoding based on model or service type
+      Tiktoken? encoding;
+
+      if (modelId != null) {
+        // Try to get encoding for the specific model
+        try {
+          encoding = encodingForModel(modelId);
+          _encodingCache[modelId] = encoding;
+          return encoding;
+        } catch (e) {
+          // Model not supported, will fall back to service type
+        }
+      }
+
+      // Fall back to service type based encoding
+      switch (serviceType) {
+        case AIServiceType.openAI:
+          encoding = getEncoding("cl100k_base"); // For newer GPT models
+          break;
+        case AIServiceType.anthropic:
+          encoding =
+              getEncoding("cl100k_base"); // Claude uses similar tokenization
+          break;
+        case AIServiceType.openRouter:
+          encoding = getEncoding("cl100k_base"); // Most models use this
+          break;
+        case AIServiceType.offline:
+          encoding = getEncoding("r50k_base"); // Fallback option
+          break;
+      }
+
+      if (modelId != null) {
+        _encodingCache[modelId] = encoding;
+      }
+
+      return encoding;
+    } catch (e) {
+      // If any error occurs, return null and we'll use fallback estimation
+      return null;
+    }
+  }
+
+  /// Counts tokens accurately using tiktoken
+  /// Falls back to estimation if tiktoken fails
+  int estimateTokenCount(String text,
+      {String? modelId, AIServiceType? serviceType}) {
     if (text.isEmpty) return 0;
 
+    // Try to use tiktoken for accurate counting
+    if (modelId != null || serviceType != null) {
+      final encoding =
+          _getEncodingForModel(modelId, serviceType ?? AIServiceType.openAI);
+
+      if (encoding != null) {
+        try {
+          final tokens = encoding.encode(text);
+          return tokens.length;
+        } catch (e) {
+          // Fall back to estimation if tiktoken fails
+        }
+      }
+    }
+
+    // Fallback: estimate based on character count and language
     // Check if text contains significant Arabic content
     final arabicPattern = RegExp(r'[\u0600-\u06FF]');
     final arabicMatchCount = arabicPattern.allMatches(text).length;
     final arabicRatio = arabicMatchCount / text.length;
 
     // Use appropriate tokens-per-char ratio based on language composition
-    final tokensPerChar =
-        arabicRatio > 0.5 ? _arabicTokensPerChar : _englishTokensPerChar;
+    final tokensPerChar = arabicRatio > 0.5 ? 0.2 : 0.25;
 
     // Add a small constant for token counting overhead
     return max(1, (text.length * tokensPerChar).ceil());
@@ -103,8 +169,12 @@ class ContextManager {
   int getAvailableContextSize(
       AIServiceType serviceType, String? modelId, int systemPromptLength) {
     final totalTokenLimit = getTokenLimit(serviceType, modelId);
-    final systemOverhead = max(_systemPromptOverhead,
-        estimateTokenCount(systemPromptLength.toString()));
+
+    // Use tiktoken for more accurate system prompt token count if possible
+    final systemOverhead = max(
+        _systemPromptOverhead,
+        estimateTokenCount(systemPromptLength.toString(),
+            modelId: modelId, serviceType: serviceType));
 
     // Reserve space for the response (20% by default)
     final availableForHistory =
@@ -117,12 +187,15 @@ class ContextManager {
   /// Uses a combination of recency and relevance scoring
   List<ChatMessageModel> selectContext(
       List<ChatMessageModel> messages, int availableTokens,
-      {String? currentQuery}) {
+      {String? currentQuery, String? modelId, AIServiceType? serviceType}) {
     if (messages.isEmpty) return [];
 
     // First, estimate token count for each message
     final messagesWithTokens = messages.map((message) {
-      return MapEntry(message, estimateTokenCount(message.content));
+      return MapEntry(
+          message,
+          estimateTokenCount(message.content,
+              modelId: modelId, serviceType: serviceType));
     }).toList();
 
     // Always include the most recent messages
@@ -461,12 +534,16 @@ Your primary goal is to provide immediate support and guide them to professional
 
   /// Compresses the context by summarizing or removing less relevant messages
   List<ChatMessageModel> compressContext(
-      List<ChatMessageModel> messages, int targetTokenCount) {
+      List<ChatMessageModel> messages, int targetTokenCount,
+      {String? modelId, AIServiceType? serviceType}) {
     if (messages.isEmpty) return [];
 
     // First, calculate token count for each message
     final messagesWithTokens = messages.map((message) {
-      return MapEntry(message, estimateTokenCount(message.content));
+      return MapEntry(
+          message,
+          estimateTokenCount(message.content,
+              modelId: modelId, serviceType: serviceType));
     }).toList();
 
     int totalTokens =
@@ -554,16 +631,22 @@ Your primary goal is to provide immediate support and guide them to professional
         getAvailableContextSize(serviceType, modelId, systemPromptLength);
 
     // Select initial context
-    var selectedMessages =
-        selectContext(messages, availableTokens, currentQuery: currentQuery);
+    var selectedMessages = selectContext(messages, availableTokens,
+        currentQuery: currentQuery, modelId: modelId, serviceType: serviceType);
 
     // If we need to compress, do so and generate summary
     final selectedTokenCount = selectedMessages.fold(
-        0, (sum, message) => sum + estimateTokenCount(message.content));
+        0,
+        (sum, message) =>
+            sum +
+            estimateTokenCount(message.content,
+                modelId: modelId, serviceType: serviceType));
+
     if (selectedTokenCount > availableTokens) {
       final removedMessages =
           messages.where((m) => !selectedMessages.contains(m)).toList();
-      selectedMessages = compressContext(selectedMessages, availableTokens);
+      selectedMessages = compressContext(selectedMessages, availableTokens,
+          modelId: modelId, serviceType: serviceType);
       final summary = generateContextSummary(removedMessages);
       return (selectedMessages, summary);
     }
