@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'dart:math';
 
 import '../../core/utils/object_box_manager.dart';
 import '../../core/security/secure_storage_service.dart';
 import '../models/ai_models.dart';
+import '../models/chat_session_model.dart';
 import '../../objectbox.g.dart';
 
 /// Repository for handling AI-related operations
@@ -57,7 +59,35 @@ class AIRepository {
 
   /// Get API key for a service type from secure storage
   Future<String?> _getSecureApiKey(AIServiceType type) async {
-    return _secureStorage.getKey(type.toString());
+    try {
+      // First check if we have a key in the config
+      final config = getServiceConfig();
+      if (config.serviceType == type &&
+          config.apiKey != null &&
+          config.apiKey!.isNotEmpty) {
+        // If the key is encrypted, decrypt it
+        if (config.isEncrypted) {
+          return ObjectBoxManager.decryptString(config.apiKey!);
+        }
+        return config.apiKey;
+      }
+
+      // If no key in config, try secure storage
+      final key = await _secureStorage.getKey(type.toString());
+      if (key != null && key.isNotEmpty) {
+        // Save the key to config for future use
+        final updatedConfig = config.copyWith(
+          apiKey: ObjectBoxManager.encryptString(key),
+          isEncrypted: true,
+        );
+        saveServiceConfig(updatedConfig);
+        return key;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error getting API key: $e');
+      return null;
+    }
   }
 
   /// Validate API key for a service
@@ -84,41 +114,55 @@ class AIRepository {
     required String context,
     AIServiceConfig? config,
   }) async {
+    print('\n=== AI Repository: Generating Response ===');
+    print('User input length: ${userInput.length}');
+    print('Context length: ${context.length}');
+
     // Get the current AI service config if not provided
     final serviceConfig = config ?? getServiceConfig();
+    print('Service type: ${serviceConfig.serviceType}');
+    print('Model: ${serviceConfig.preferredModel ?? "default"}');
+    print('Temperature: ${serviceConfig.temperature}');
+    print('Max tokens: ${serviceConfig.maxTokens}');
 
+    // Don't check for API key if we're in offline mode
     if (serviceConfig.serviceType == AIServiceType.offline) {
-      // Return a fallback response if using offline mode
+      print('Using offline mode');
       return _getFallbackResponse(userInput, context);
-    }
-
-    // Check rate limiting
-    if (!_canMakeRequest(serviceConfig.serviceType)) {
-      throw Exception('Rate limit exceeded for ${serviceConfig.serviceType}');
     }
 
     try {
       // Get API key from secure storage
       final apiKey = await _getSecureApiKey(serviceConfig.serviceType);
-      if (apiKey == null) {
-        throw Exception('No API key found for ${serviceConfig.serviceType}');
+      if (apiKey == null || apiKey.isEmpty) {
+        print('No API key found, falling back to offline mode');
+        return _getFallbackResponse(userInput, context);
       }
 
       // Validate API key
       final isValid = await _validateApiKey(serviceConfig.serviceType, apiKey);
       if (!isValid) {
-        throw Exception('Invalid API key for ${serviceConfig.serviceType}');
+        print('Invalid API key, falling back to offline mode');
+        return _getFallbackResponse(userInput, context);
+      }
+
+      // Check rate limiting
+      if (!_canMakeRequest(serviceConfig.serviceType)) {
+        print('Rate limit exceeded');
+        throw Exception('Rate limit exceeded for ${serviceConfig.serviceType}');
       }
 
       // Create a config copy with the secure API key
       final secureConfig = serviceConfig.copyWith(apiKey: apiKey);
 
+      print('\nSending request to AI service...');
       // Send the request to the appropriate AI service
       final response = await _sendRequestToAIService(
         userInput: userInput,
         context: context,
         config: secureConfig,
       );
+      print('Received response of length: ${response.length}');
 
       // Create and save the AI response
       final aiResponse = AIResponseModel(
@@ -130,9 +174,10 @@ class AIRepository {
       // Cache the response for offline use if needed
       _cacheResponse(aiResponse);
 
+      print('=== AI Repository: Response Generation Complete ===\n');
       return aiResponse;
     } catch (e) {
-      debugPrint('Error generating AI response: $e');
+      print('Error generating AI response: $e');
       // Return a fallback response on error
       return _getFallbackResponse(userInput, context);
     }
@@ -144,29 +189,45 @@ class AIRepository {
     required String context,
     required AIServiceConfig config,
   }) async {
+    print('\n=== Sending Request to AI Service ===');
+    print('Service type: ${config.serviceType}');
+    print('Model: ${config.preferredModel ?? "default"}');
+
     int retryCount = 0;
     const maxRetries = 3;
     Duration retryDelay = const Duration(seconds: 1);
 
     while (retryCount < maxRetries) {
       try {
+        String response;
         switch (config.serviceType) {
           case AIServiceType.openAI:
-            return await _sendOpenAIRequest(userInput, context, config);
+            print('Sending request to OpenAI...');
+            response = await _sendOpenAIRequest(userInput, context, config);
+            break;
           case AIServiceType.anthropic:
-            return await _sendAnthropicRequest(userInput, context, config);
+            print('Sending request to Anthropic...');
+            response = await _sendAnthropicRequest(userInput, context, config);
+            break;
           case AIServiceType.openRouter:
-            return await _sendOpenRouterRequest(userInput, context, config);
+            print('Sending request to OpenRouter...');
+            response = await _sendOpenRouterRequest(userInput, context, config);
+            break;
           case AIServiceType.offline:
+            print('Using offline mode');
             return "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.";
         }
+        print('Request successful!');
+        return response;
       } catch (e) {
         retryCount++;
+        print('Request failed (attempt $retryCount/$maxRetries): $e');
         if (retryCount == maxRetries) {
           // If this was the last retry, rethrow the error
           rethrow;
         }
         // Wait before retrying, with exponential backoff
+        print('Retrying in ${retryDelay.inSeconds} seconds...');
         await Future.delayed(retryDelay);
         retryDelay *= 2;
       }
@@ -194,6 +255,10 @@ class AIRepository {
       var retryCount = 0;
       var backoffDelay = const Duration(seconds: 1);
 
+      // Debug print the context being sent
+      print('Context being sent to OpenAI:');
+      print(context);
+
       while (retryCount <= maxRetries) {
         try {
           final response = await _dio.post(
@@ -201,7 +266,14 @@ class AIRepository {
             data: {
               'model': selectedModel,
               'messages': [
-                {'role': 'system', 'content': context},
+                {
+                  'role': 'system',
+                  'content':
+                      'You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment.'
+                },
+                // Parse the context into previous messages
+                ...buildContextMessages(context),
+                // Add the current user message
                 {'role': 'user', 'content': userInput}
               ],
               'temperature': config.temperature,
@@ -236,6 +308,86 @@ class AIRepository {
       if (e is AIServiceException) rethrow;
       throw AIServiceException(
           'Failed to generate OpenAI response: ${e.toString()}');
+    }
+  }
+
+  /// Build context messages from a string representation of previous messages
+  List<Map<String, String>> buildContextMessages(String context) {
+    if (context.isEmpty) {
+      return [];
+    }
+
+    try {
+      // Try to split the context into separate messages based on typical patterns
+      final messageList = <Map<String, String>>[];
+      final lines = context.split('\n');
+      String currentMessage = '';
+      String currentRole = 'system';
+
+      for (var line in lines) {
+        // Skip empty lines
+        if (line.trim().isEmpty) {
+          continue;
+        }
+
+        // Check for role markers
+        if (line.startsWith('User:') || line.contains('User said:')) {
+          // If we have a current message, add it before starting a new one
+          if (currentMessage.isNotEmpty) {
+            messageList
+                .add({'role': currentRole, 'content': currentMessage.trim()});
+            currentMessage = '';
+          }
+          currentRole = 'user';
+          // Remove the prefix to get just the message content
+          currentMessage =
+              line.replaceAll(RegExp(r'User:?|User said:?'), '').trim();
+        } else if (line.startsWith('Assistant:') ||
+            line.contains('Assistant said:')) {
+          // If we have a current message, add it before starting a new one
+          if (currentMessage.isNotEmpty) {
+            messageList
+                .add({'role': currentRole, 'content': currentMessage.trim()});
+            currentMessage = '';
+          }
+          currentRole = 'assistant';
+          // Remove the prefix to get just the message content
+          currentMessage = line
+              .replaceAll(RegExp(r'Assistant:?|Assistant said:?'), '')
+              .trim();
+        } else {
+          // Continue the current message
+          currentMessage += (currentMessage.isEmpty ? '' : '\n') + line;
+        }
+      }
+
+      // Add the last message if there is one
+      if (currentMessage.isNotEmpty) {
+        messageList
+            .add({'role': currentRole, 'content': currentMessage.trim()});
+      }
+
+      // If we couldn't parse any messages, treat the whole context as a system message
+      if (messageList.isEmpty) {
+        return [
+          {'role': 'system', 'content': context}
+        ];
+      }
+
+      // Debug print the parsed messages
+      print('Parsed ${messageList.length} context messages:');
+      for (var msg in messageList) {
+        print(
+            '${msg['role']}: ${msg['content']?.substring(0, min(30, msg['content']!.length))}...');
+      }
+
+      return messageList;
+    } catch (e) {
+      print('Error parsing context into messages: $e');
+      // If there's an error in parsing, treat the whole context as a system message
+      return [
+        {'role': 'system', 'content': context}
+      ];
     }
   }
 
@@ -396,7 +548,7 @@ class AIRepository {
       String userInput, String context, AIServiceConfig config) async {
     // If user has specified a model, use it
     if (config.preferredModel != null &&
-        getAvailableModels(AIServiceType.openRouter)
+        getAvailableModels(config.serviceType)
             .contains(config.preferredModel)) {
       return config.preferredModel!;
     }
@@ -404,16 +556,35 @@ class AIRepository {
     // Calculate total input length
     final totalLength = userInput.length + context.length;
 
-    // Select model based on complexity
-    if (totalLength > 2000) {
-      // For long/complex inputs, use more capable models
-      return 'claude-3-opus';
-    } else if (totalLength > 500) {
-      // For medium length inputs
-      return 'claude-3-sonnet';
-    } else {
-      // For short/simple inputs
-      return 'claude-3-haiku';
+    // Select model based on service type and complexity
+    switch (config.serviceType) {
+      case AIServiceType.openAI:
+        if (totalLength > 2000) {
+          return 'gpt-4'; // For long/complex inputs
+        } else {
+          return 'gpt-3.5-turbo'; // For shorter inputs
+        }
+
+      case AIServiceType.anthropic:
+        if (totalLength > 2000) {
+          return 'claude-3-opus';
+        } else if (totalLength > 500) {
+          return 'claude-3-sonnet';
+        } else {
+          return 'claude-3-haiku';
+        }
+
+      case AIServiceType.openRouter:
+        if (totalLength > 2000) {
+          return 'claude-3-opus';
+        } else if (totalLength > 500) {
+          return 'claude-3-sonnet';
+        } else {
+          return 'claude-3-haiku';
+        }
+
+      case AIServiceType.offline:
+        return 'offline';
     }
   }
 
@@ -570,16 +741,6 @@ class AIRepository {
     return message;
   }
 
-  /// Clear chat history
-  void clearChatHistory() {
-    _chatBox.removeAll();
-
-    // Update the last cleared date in settings
-    final settings = getChatHistorySettings();
-    settings.lastCleared = DateTime.now();
-    _settingsBox.put(settings);
-  }
-
   /// Delete chat messages older than specified days
   int deleteOldChatMessages(int olderThanDays) {
     final cutoffDate = DateTime.now().subtract(Duration(days: olderThanDays));
@@ -623,44 +784,66 @@ class AIRepository {
 
   /// Get the AI service configuration
   AIServiceConfig getServiceConfig() {
-    final allConfigs = _configBox.getAll();
+    try {
+      final query = _configBox.query();
 
-    if (allConfigs.isEmpty) {
-      // Create default config if none exists
-      final defaultConfig = AIServiceConfig();
-      _configBox.put(defaultConfig);
-      return defaultConfig;
+      final builtQuery = query.build();
+      final configs = builtQuery.find();
+      builtQuery.close();
+
+      if (configs.isEmpty) {
+        // Create default config if none exists
+        final defaultConfig = AIServiceConfig();
+        _configBox.put(defaultConfig);
+        return defaultConfig;
+      }
+
+      final config = configs.first;
+      if (config.isEncrypted) {
+        // Decrypt API key if encrypted
+        return config.copyWith(
+          apiKey: config.apiKey != null
+              ? ObjectBoxManager.decryptString(config.apiKey!)
+              : null,
+          isEncrypted: false,
+        );
+      }
+
+      return config;
+    } catch (e) {
+      debugPrint('Error getting service config: $e');
+      return AIServiceConfig(); // Return default offline config
     }
-
-    final config = allConfigs.first;
-
-    if (config.isEncrypted) {
-      // Decrypt API key if encrypted
-      final decrypted = config.copyWith(
-        apiKey: config.apiKey != null
-            ? ObjectBoxManager.decryptString(config.apiKey!)
-            : null,
-        isEncrypted: false,
-      );
-      return decrypted;
-    }
-
-    return config;
   }
 
   /// Save the AI service configuration
   void saveServiceConfig(AIServiceConfig config) {
-    // Encrypt API key if needed
-    if (!config.isEncrypted &&
-        ObjectBoxManager.instance.isEncrypted &&
-        config.apiKey != null) {
-      config = config.copyWith(
-        apiKey: ObjectBoxManager.encryptString(config.apiKey!),
-        isEncrypted: true,
-      );
-    }
+    try {
+      // Remove any existing configs first
+      final query = _configBox.query();
+      final builtQuery = query.build();
+      final existingConfigs = builtQuery.find();
+      builtQuery.close();
 
-    _configBox.put(config);
+      for (final existing in existingConfigs) {
+        _configBox.remove(existing.id);
+      }
+
+      // Encrypt API key if needed
+      if (!config.isEncrypted &&
+          ObjectBoxManager.instance.isEncrypted &&
+          config.apiKey != null) {
+        config = config.copyWith(
+          apiKey: ObjectBoxManager.encryptString(config.apiKey!),
+          isEncrypted: true,
+        );
+      }
+
+      // Save the new config
+      _configBox.put(config);
+    } catch (e) {
+      debugPrint('Error saving service config: $e');
+    }
   }
 
   /// Get available models for the selected service with pricing info
@@ -762,5 +945,199 @@ class AIRepository {
     final settings = getChatHistorySettings();
     settings.lastCleared = DateTime.now();
     _settingsBox.put(settings);
+  }
+
+  /// Get chat messages with pagination
+  Future<List<ChatMessageModel>> getChatMessages({
+    ChatSession? session,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    try {
+      final query = _chatBox.query()
+        ..order(ChatMessageModel_.timestamp, flags: Order.descending);
+
+      if (session != null) {
+        query.link(
+          ChatMessageModel_.session,
+          ChatSession_.id.equals(session.id),
+        );
+      }
+
+      final builtQuery = query.build();
+      builtQuery.offset = offset;
+      builtQuery.limit = limit;
+      final messages = builtQuery.find().reversed.toList();
+      builtQuery.close();
+
+      return messages;
+    } catch (e) {
+      debugPrint('Error fetching chat messages: $e');
+      return [];
+    }
+  }
+
+  /// Get total count of chat messages
+  Future<int> getChatMessageCount(ChatSession? session) async {
+    try {
+      final query = _chatBox.query();
+      if (session != null) {
+        query.link(
+          ChatMessageModel_.session,
+          ChatSession_.id.equals(session.id),
+        );
+      }
+      final builtQuery = query.build();
+      final count = builtQuery.count();
+      builtQuery.close();
+      return count;
+    } catch (e) {
+      debugPrint('Error getting chat message count: $e');
+      return 0;
+    }
+  }
+
+  /// Store a chat message (async version)
+  Future<void> storeMessageAsync(ChatMessageModel message) async {
+    try {
+      _chatBox.put(message);
+    } catch (e) {
+      debugPrint('Error storing chat message: $e');
+      rethrow;
+    }
+  }
+
+  /// Create a new chat session
+  Future<ChatSession> createChatSession({
+    required String title,
+    ChatSessionType sessionType = ChatSessionType.normal,
+    AIServiceType serviceType = AIServiceType.offline,
+    String? topic,
+  }) async {
+    try {
+      final session = ChatSession(
+        title: title,
+        sessionType: sessionType,
+        serviceType: serviceType,
+        topic: topic,
+      );
+
+      final box = ObjectBoxManager.instance.box<ChatSession>();
+      box.put(session);
+      return session;
+    } catch (e) {
+      debugPrint('Error creating chat session: $e');
+      rethrow;
+    }
+  }
+
+  /// Get a chat session by ID
+  Future<ChatSession?> getChatSession(int id) async {
+    try {
+      final box = ObjectBoxManager.instance.box<ChatSession>();
+      return box.get(id);
+    } catch (e) {
+      debugPrint('Error getting chat session: $e');
+      return null;
+    }
+  }
+
+  /// Get all chat sessions with optional filtering
+  Future<List<ChatSession>> getChatSessions({
+    bool includeArchived = false,
+    ChatSessionType? type,
+    bool onlyEmergency = false,
+  }) async {
+    try {
+      final box = ObjectBoxManager.instance.box<ChatSession>();
+      QueryBuilder<ChatSession> query;
+
+      if (!includeArchived) {
+        query = box.query(ChatSession_.isArchived.equals(false));
+      } else {
+        query = box.query();
+      }
+
+      if (type != null) {
+        final typeQuery =
+            box.query(ChatSession_.dbSessionType.equals(type.index));
+        query = typeQuery;
+      }
+
+      query.order(ChatSession_.lastModified, flags: Order.descending);
+
+      final builtQuery = query.build();
+      final sessions = builtQuery.find();
+      builtQuery.close();
+      return sessions;
+    } catch (e) {
+      debugPrint('Error getting chat sessions: $e');
+      return [];
+    }
+  }
+
+  /// Update a chat session
+  Future<void> updateChatSession(ChatSession session) async {
+    try {
+      final box = ObjectBoxManager.instance.box<ChatSession>();
+      session.touch(); // Update lastModified
+      box.put(session);
+    } catch (e) {
+      debugPrint('Error updating chat session: $e');
+      rethrow;
+    }
+  }
+
+  /// Delete a chat session and its messages
+  Future<void> deleteChatSession(int sessionId) async {
+    try {
+      final box = ObjectBoxManager.instance.box<ChatSession>();
+
+      // Delete associated messages first
+      final messageQuery = _chatBox.query()
+        ..link(
+          ChatMessageModel_.session,
+          ChatSession_.id.equals(sessionId),
+        );
+      final messagesToDelete = messageQuery.build().find();
+
+      _chatBox.removeMany(messagesToDelete.map((m) => m.id).toList());
+
+      // Then delete the session
+      box.remove(sessionId);
+    } catch (e) {
+      debugPrint('Error deleting chat session: $e');
+      rethrow;
+    }
+  }
+
+  /// Clear all chat history
+  Future<void> clearChatHistory() async {
+    try {
+      _chatBox.removeAll();
+      final sessionBox = ObjectBoxManager.instance.box<ChatSession>();
+      sessionBox.removeAll();
+    } catch (e) {
+      debugPrint('Error clearing chat history: $e');
+      rethrow;
+    }
+  }
+
+  /// Update message rating
+  Future<void> updateMessageRating(String messageId, bool wasHelpful) async {
+    try {
+      final query =
+          _chatBox.query(ChatMessageModel_.uid.equals(messageId)).build();
+      final message = query.findFirst();
+      query.close();
+
+      if (message != null) {
+        message.wasHelpful = wasHelpful;
+        _chatBox.put(message);
+      }
+    } catch (e) {
+      debugPrint('Error updating message rating: $e');
+      rethrow;
+    }
   }
 }

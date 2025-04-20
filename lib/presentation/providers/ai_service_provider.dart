@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/ai_models.dart' as models;
+import '../../data/repositories/ai_repository.dart';
 
 /// Chat history settings
 class ChatHistorySettings {
@@ -89,6 +90,8 @@ class AIServiceState {
 
 /// AI Service notifier
 class AIServiceNotifier extends StateNotifier<AIServiceState> {
+  final AIRepository _repository = AIRepository();
+
   AIServiceNotifier()
       : super(
           AIServiceState(
@@ -96,94 +99,239 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
               serviceType: models.AIServiceType.offline,
             ),
           ),
-        );
+        ) {
+    // Initialize the state when created
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      // Load saved settings from repository
+      final savedConfig = _repository.getServiceConfig();
+      state = state.copyWith(
+        isLoading: false,
+        config: AIServiceConfig(
+          serviceType: savedConfig.serviceType,
+          apiKey: savedConfig.apiKey,
+          preferredModel: savedConfig.preferredModel,
+          allowDataTraining: savedConfig.allowDataTraining,
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Failed to load settings: $e',
+      );
+    }
+  }
 
   /// Set the service type
   void setServiceType(models.AIServiceType type) {
-    state = state.copyWith(
-      config: state.config.copyWith(
+    try {
+      // Create new config with updated service type
+      final newConfig = models.AIServiceConfig(
         serviceType: type,
-      ),
-    );
-  }
+        apiKey: state.config.apiKey,
+        preferredModel: state.config.preferredModel,
+        allowDataTraining: state.config.allowDataTraining,
+      );
 
-  /// Alias for setServiceType for the settings screen
-  void updateServiceType(models.AIServiceType type) => setServiceType(type);
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(
+        config: state.config.copyWith(
+          serviceType: type,
+          // Clear API key when switching services
+          apiKey: null,
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to save service type: $e',
+      );
+    }
+  }
 
   /// Set the API key
-  void setApiKey(String apiKey) {
-    state = state.copyWith(
-      config: state.config.copyWith(
+  Future<void> setApiKey(String apiKey) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      // Create new config with updated API key
+      final newConfig = models.AIServiceConfig(
+        serviceType: state.config.serviceType,
         apiKey: apiKey,
-      ),
-    );
-  }
+        preferredModel: state.config.preferredModel,
+        allowDataTraining: state.config.allowDataTraining,
+      );
 
-  /// Alias for setApiKey for the settings screen
-  void updateApiKey(String apiKey) => setApiKey(apiKey);
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(
+        isLoading: false,
+        config: state.config.copyWith(
+          apiKey: apiKey,
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Failed to save API key: $e',
+      );
+    }
+  }
 
   /// Set the preferred model
   void setPreferredModel(String? model) {
-    state = state.copyWith(
-      config: state.config.copyWith(
+    try {
+      // Create new config with updated model
+      final newConfig = models.AIServiceConfig(
+        serviceType: state.config.serviceType,
+        apiKey: state.config.apiKey,
         preferredModel: model,
-      ),
-    );
-  }
+        allowDataTraining: state.config.allowDataTraining,
+      );
 
-  /// Alias for setPreferredModel for the settings screen
-  void updatePreferredModel(String? model) => setPreferredModel(model);
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(
+        config: state.config.copyWith(
+          preferredModel: model,
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to save preferred model: $e',
+      );
+    }
+  }
 
   /// Toggle data training permission
   void toggleDataTraining() {
-    state = state.copyWith(
-      config: state.config.copyWith(
-        allowDataTraining: !state.config.allowDataTraining,
-      ),
-    );
-  }
+    try {
+      final newAllowDataTraining = !state.config.allowDataTraining;
 
-  /// Update data training permission
-  void updateAllowDataTraining(bool allow) {
-    state = state.copyWith(
-      config: state.config.copyWith(
-        allowDataTraining: allow,
-      ),
-    );
+      // Create new config with updated data training setting
+      final newConfig = models.AIServiceConfig(
+        serviceType: state.config.serviceType,
+        apiKey: state.config.apiKey,
+        preferredModel: state.config.preferredModel,
+        allowDataTraining: newAllowDataTraining,
+      );
+
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(
+        config: state.config.copyWith(
+          allowDataTraining: newAllowDataTraining,
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to update data training setting: $e',
+      );
+    }
   }
 
   /// Update chat history storage setting
   void updateStoreChatHistory(bool store) {
-    state = state.copyWith(
-      config: state.config.copyWith(
-        settings: state.config.settings.copyWith(
-          storeChatHistory: store,
+    try {
+      final newSettings = state.config.settings.copyWith(
+        storeChatHistory: store,
+      );
+
+      // Create new config with updated settings
+      final newConfig = models.AIServiceConfig(
+        serviceType: state.config.serviceType,
+        apiKey: state.config.apiKey,
+        preferredModel: state.config.preferredModel,
+        allowDataTraining: state.config.allowDataTraining,
+      );
+
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(
+        config: state.config.copyWith(
+          settings: newSettings,
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to update chat history setting: $e',
+      );
+    }
   }
 
   /// Update auto-delete days
   void updateAutoDeleteDays(int days) {
-    state = state.copyWith(
-      config: state.config.copyWith(
-        settings: state.config.settings.copyWith(
-          autoDeleteAfterDays: days,
+    try {
+      final newSettings = state.config.settings.copyWith(
+        autoDeleteAfterDays: days,
+      );
+
+      // Create new config with updated settings
+      final newConfig = models.AIServiceConfig(
+        serviceType: state.config.serviceType,
+        apiKey: state.config.apiKey,
+        preferredModel: state.config.preferredModel,
+        allowDataTraining: state.config.allowDataTraining,
+      );
+
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(
+        config: state.config.copyWith(
+          settings: newSettings,
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to update auto-delete days: $e',
+      );
+    }
   }
 
   /// Clear chat history
   void clearChatHistory() {
-    state = state.copyWith(
-      config: state.config.copyWith(
-        settings: state.config.settings.copyWith(
-          lastCleared: DateTime.now(),
+    try {
+      final newSettings = state.config.settings.copyWith(
+        lastCleared: DateTime.now(),
+      );
+
+      // Create new config with updated settings
+      final newConfig = models.AIServiceConfig(
+        serviceType: state.config.serviceType,
+        apiKey: state.config.apiKey,
+        preferredModel: state.config.preferredModel,
+        allowDataTraining: state.config.allowDataTraining,
+      );
+
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(
+        config: state.config.copyWith(
+          settings: newSettings,
         ),
-      ),
-    );
-    // In a real implementation, this would also delete the actual chat history
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to update last cleared timestamp: $e',
+      );
+    }
   }
 }
 

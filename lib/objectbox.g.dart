@@ -223,7 +223,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(8, 4131266175279097061),
       name: 'ChatMessageModel',
-      lastPropertyId: const obx_int.IdUid(7, 3666469237871487651),
+      lastPropertyId: const obx_int.IdUid(9, 7516328470501572854),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -261,7 +261,19 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(7, 3666469237871487651),
             name: 'role',
             type: 9,
-            flags: 0)
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 5340697945452502162),
+            name: 'wasHelpful',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(9, 7516328470501572854),
+            name: 'sessionId',
+            type: 11,
+            flags: 520,
+            indexId: const obx_int.IdUid(11, 1698625639249539995),
+            relationTarget: 'ChatSession')
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
@@ -1002,7 +1014,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
       lastEntityId: const obx_int.IdUid(19, 7809979764960026324),
-      lastIndexId: const obx_int.IdUid(10, 2311241240915069713),
+      lastIndexId: const obx_int.IdUid(11, 1698625639249539995),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
       retiredEntityUids: const [
@@ -1293,7 +1305,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         }),
     ChatMessageModel: obx_int.EntityDefinition<ChatMessageModel>(
         model: _entities[4],
-        toOneRelations: (ChatMessageModel object) => [],
+        toOneRelations: (ChatMessageModel object) => [object.session],
         toManyRelations: (ChatMessageModel object) => {},
         getId: (ChatMessageModel object) => object.id,
         setId: (ChatMessageModel object, int id) {
@@ -1303,7 +1315,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final uidOffset = fbb.writeString(object.uid);
           final contentOffset = fbb.writeString(object.content);
           final roleOffset = fbb.writeString(object.role);
-          fbb.startTable(8);
+          fbb.startTable(10);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, uidOffset);
           fbb.addOffset(2, contentOffset);
@@ -1311,6 +1323,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(4, object.timestamp.millisecondsSinceEpoch);
           fbb.addBool(5, object.isEncrypted);
           fbb.addOffset(6, roleOffset);
+          fbb.addBool(7, object.wasHelpful);
+          fbb.addInt64(8, object.session.targetId);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -1329,16 +1343,21 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .vTableGet(buffer, rootOffset, 16, '');
           final timestampParam = DateTime.fromMillisecondsSinceEpoch(
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
+          final wasHelpfulParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 18, false);
           final object = ChatMessageModel(
               id: idParam,
               uid: uidParam,
               content: contentParam,
               isUserMessage: isUserMessageParam,
               role: roleParam,
-              timestamp: timestampParam)
+              timestamp: timestampParam,
+              wasHelpful: wasHelpfulParam)
             ..isEncrypted =
                 const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
-
+          object.session.targetId =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
+          object.session.attach(store);
           return object;
         }),
     EmergencySession: obx_int.EntityDefinition<EmergencySession>(
@@ -2336,6 +2355,14 @@ class ChatMessageModel_ {
   /// see [ChatMessageModel.role]
   static final role =
       obx.QueryStringProperty<ChatMessageModel>(_entities[4].properties[6]);
+
+  /// see [ChatMessageModel.wasHelpful]
+  static final wasHelpful =
+      obx.QueryBooleanProperty<ChatMessageModel>(_entities[4].properties[7]);
+
+  /// see [ChatMessageModel.session]
+  static final session = obx.QueryRelationToOne<ChatMessageModel, ChatSession>(
+      _entities[4].properties[8]);
 }
 
 /// [EmergencySession] entity fields to define ObjectBox queries.

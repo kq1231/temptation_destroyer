@@ -96,41 +96,50 @@ class AISettingsScreen extends ConsumerWidget {
     String subtitle,
     bool isSelected,
   ) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 40),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            _getIconForServiceType(type),
-            size: 24,
-            color: isSelected ? Colors.blue : Colors.grey,
-          ),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
+    return InkWell(
+      onTap: () {
+        ref.read(aiServiceProvider.notifier).setServiceType(type);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 40),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _getIconForServiceType(type),
+                size: 24,
+                color: isSelected ? Colors.blue : Colors.grey,
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isSelected ? Colors.blue : null,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -227,65 +236,71 @@ class AISettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     AIServiceState state,
   ) {
-    final TextEditingController controller = TextEditingController();
-    if (state.config.apiKey != null) {
-      controller.text = state.config.apiKey!;
-    }
+    final apiKeyController = TextEditingController(text: state.config.apiKey);
 
     showDialog(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: Text('Enter ${state.config.serviceType.name} API Key'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'API Key',
-              border: OutlineInputBorder(),
-            ),
-            obscureText: true,
-            autocorrect: false,
-            enableSuggestions: false,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-              child: const Text('CANCEL'),
-            ),
-            if (state.config.apiKey != null && state.config.apiKey!.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  ref.read(aiServiceProvider.notifier).updateApiKey('');
-                  Navigator.of(ctx).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('API key removed'),
-                    ),
-                  );
-                },
-                child: const Text('REMOVE'),
+      builder: (context) => AlertDialog(
+        title:
+            Text('Enter ${_getServiceName(state.config.serviceType)} API Key'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: apiKeyController,
+              decoration: const InputDecoration(
+                labelText: 'API Key',
+                hintText: 'Enter your API key',
               ),
-            TextButton(
-              onPressed: () {
-                final apiKey = controller.text.trim();
-                if (apiKey.isNotEmpty) {
-                  ref.read(aiServiceProvider.notifier).updateApiKey(apiKey);
-                  Navigator.of(ctx).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('API key saved'),
-                    ),
-                  );
-                }
-              },
-              child: const Text('SAVE'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _getApiKeyInstructions(state.config.serviceType),
+              style: const TextStyle(fontSize: 12),
             ),
           ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final apiKey = apiKeyController.text.trim();
+              if (apiKey.isNotEmpty) {
+                ref.read(aiServiceProvider.notifier).setApiKey(apiKey);
+                Navigator.of(context).pop();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${_getServiceName(state.config.serviceType)} API key saved successfully',
+                    ),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
+  }
+
+  String _getServiceName(models.AIServiceType type) {
+    switch (type) {
+      case models.AIServiceType.openAI:
+        return 'OpenAI';
+      case models.AIServiceType.anthropic:
+        return 'Anthropic';
+      case models.AIServiceType.openRouter:
+        return 'OpenRouter';
+      case models.AIServiceType.offline:
+        return 'Offline';
+    }
   }
 
   Widget _buildSettingsSection(
@@ -320,9 +335,7 @@ class AISettingsScreen extends ConsumerWidget {
               ),
               value: state.config.allowDataTraining,
               onChanged: (value) {
-                ref
-                    .read(aiServiceProvider.notifier)
-                    .updateAllowDataTraining(value);
+                ref.read(aiServiceProvider.notifier).toggleDataTraining();
               },
             ),
             const SizedBox(height: 8),
@@ -332,7 +345,7 @@ class AISettingsScreen extends ConsumerWidget {
               const Text('Preferred Model:'),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: state.config.preferredModel ?? 'default',
+                value: _getValidModelValue(state.config.preferredModel),
                 isExpanded: true,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -350,8 +363,9 @@ class AISettingsScreen extends ConsumerWidget {
                     .toList(),
                 onChanged: (value) {
                   if (value != null) {
-                    ref.read(aiServiceProvider.notifier).updatePreferredModel(
-                        value == 'default' ? null : value);
+                    ref
+                        .read(aiServiceProvider.notifier)
+                        .setPreferredModel(value);
                   }
                 },
               ),
@@ -371,8 +385,12 @@ class AISettingsScreen extends ConsumerWidget {
         return [
           defaultOption,
           ModelOption('gpt-4o', 'GPT-4o (newest)'),
-          ModelOption('gpt-4-turbo', 'GPT-4 Turbo'),
+          ModelOption('gpt-4', 'GPT-4 (standard)'),
+          ModelOption('gpt-4-turbo', 'GPT-4 Turbo (fast)'),
           ModelOption('gpt-3.5-turbo', 'GPT-3.5 Turbo (cheaper)'),
+          ModelOption('gpt-3', 'GPT-3 (legacy)'),
+          ModelOption('gpt-3-mini', 'GPT-3 Mini (lightweight)'),
+          ModelOption('gpt-4o-mini', 'GPT-4o Mini (compact)'),
         ];
       case models.AIServiceType.anthropic:
         return [
@@ -568,7 +586,7 @@ class AISettingsScreen extends ConsumerWidget {
           }).toList(),
           onChanged: (value) {
             if (value != null) {
-              ref.read(aiServiceProvider.notifier).updatePreferredModel(value);
+              ref.read(aiServiceProvider.notifier).setPreferredModel(value);
             }
           },
         ),
@@ -820,6 +838,12 @@ class AISettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _getValidModelValue(String? currentValue) {
+    final modelOptions = _getModelOptions(models.AIServiceType.openAI);
+    final validValues = modelOptions.map((option) => option.value).toList();
+    return validValues.contains(currentValue) ? currentValue! : 'default';
   }
 }
 

@@ -2,24 +2,45 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/ai_models.dart';
 import '../../data/models/chat_session_model.dart';
 import '../../core/context/context_manager.dart';
+import '../../data/repositories/ai_repository.dart';
 import 'chat_state.dart';
+
+final chatProvider =
+    AsyncNotifierProvider<ChatAsyncNotifier, ChatState>(ChatAsyncNotifier.new);
 
 class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
   final ContextManager _contextManager = ContextManager();
+  late final AIRepository _repository;
 
   @override
   Future<ChatState> build() async {
+    _repository = AIRepository();
     return const ChatState();
   }
 
-  Future<void> initialize() async {
+  Future<void> initialize({ChatSession? session}) async {
     state = const AsyncValue.loading();
     try {
-      // TODO: Load initial messages and session from repository
-      final initialState = ChatState(
-        messages: [],
-        isInitialized: true,
+      // Load initial messages from repository
+      final messages = await _repository.getChatMessages(
+        session: session,
+        limit: ChatState.messagesPerPage,
       );
+
+      // Get total message count for pagination
+      final totalCount = await _repository.getChatMessageCount(session);
+      final hasMore = messages.length < totalCount;
+
+      // Create initial state
+      final initialState = ChatState(
+        messages: messages,
+        isInitialized: true,
+        isLoading: false,
+        currentPage: 1,
+        hasMore: hasMore,
+        currentSession: session,
+      );
+
       state = AsyncValue.data(initialState);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
@@ -34,25 +55,29 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
       return;
     }
 
-    state = AsyncValue.data(currentState.copyWith(isLoading: true));
-
     try {
-      // TODO: Load messages from repository with pagination
+      state = AsyncValue.data(currentState.copyWith(isLoading: true));
+
       final nextPage = currentState.currentPage + 1;
-      // final startIndex = (nextPage - 1) * ChatState.messagesPerPage;
+      final offset = (nextPage - 1) * ChatState.messagesPerPage;
 
-      // TODO: Replace with actual repository call
-      final newMessages = <ChatMessageModel>[];
+      final newMessages = await _repository.getChatMessages(
+        session: currentState.currentSession,
+        limit: ChatState.messagesPerPage,
+        offset: offset,
+      );
 
-      final hasMore = newMessages.length >= ChatState.messagesPerPage;
+      final totalCount =
+          await _repository.getChatMessageCount(currentState.currentSession);
+      final hasMore = (offset + newMessages.length) < totalCount;
 
       state = AsyncValue.data(currentState.copyWith(
-        messages: [...currentState.messages, ...newMessages],
+        messages: [...newMessages, ...currentState.messages],
         currentPage: nextPage,
         hasMore: hasMore,
         isLoading: false,
       ));
-    } catch (error, _) {
+    } catch (error) {
       state = AsyncValue.data(currentState.copyWith(
         errorMessage: error.toString(),
         isLoading: false,
@@ -70,69 +95,126 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
     final newMessage = ChatMessageModel(
       content: content,
       isUserMessage: true,
+      session: currentState.currentSession,
     );
 
-    // Optimistically add the message
+    // Create a loading message for the AI response
+    final loadingMessage = ChatMessageModel(
+      content: '',
+      isUserMessage: false,
+      session: currentState.currentSession,
+    );
+
+    // Create a new list with the user's message at the end
+    final updatedMessages = [
+      ...currentState.messages,
+      newMessage,
+      loadingMessage
+    ];
+
+    // Update state with user's message and loading state
     state = AsyncValue.data(currentState.copyWith(
-      messages: [newMessage, ...currentState.messages],
+      messages: updatedMessages,
     ));
 
     try {
+      // Store the message
+      await _repository.storeMessageAsync(newMessage);
+
       // If this is an emergency, use special handling
       if (isEmergency) {
         await _handleEmergencyMessage(content);
         return;
       }
 
-      // TODO: Send message through repository
-      // TODO: Get AI response with context management
-      // Use ContextManager to select relevant context from history
-      // final availableTokens = _contextManager.getAvailableContextSize(
-      //   AIServiceType.openRouter, // TODO: Get from actual config
-      //   null,
-      //   500, // System prompt length
-      // );
+      // Get AI response with context management
+      final config = _repository.getServiceConfig();
+      final availableTokens = _contextManager.getAvailableContextSize(
+        config.serviceType,
+        config.preferredModel,
+        500, // System prompt length
+      );
 
-      // final context = _contextManager.selectContext(
-      //   currentState.messages,
-      //   availableTokens,
-      //   currentQuery: content,
-      // );
+      final context = _contextManager.selectContext(
+        updatedMessages,
+        availableTokens,
+        currentQuery: content,
+      );
 
-      // TODO: Send selected context with the query
-      // TODO: Add AI response to messages
-    } catch (error, _) {
+      // Generate AI response
+      final aiResponse = await _repository.generateResponse(
+        userInput: content,
+        context: context.join('\n'),
+        config: config,
+      );
+
+      // Create and store AI message
+      final aiMessage = ChatMessageModel(
+        content: aiResponse.response,
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: false,
+      );
+
+      await _repository.storeMessageAsync(aiMessage);
+
+      // Update state with both messages, removing loading message
+      final finalMessages = [...currentState.messages, newMessage, aiMessage];
       state = AsyncValue.data(currentState.copyWith(
+        messages: finalMessages,
+      ));
+    } catch (error) {
+      // On error, keep the user's message but remove loading state
+      final messagesWithoutLoading = [...currentState.messages, newMessage];
+      state = AsyncValue.data(currentState.copyWith(
+        messages: messagesWithoutLoading,
         errorMessage: error.toString(),
       ));
     }
   }
 
-  /// Handles messages detected as emergency situations
   Future<void> _handleEmergencyMessage(String content) async {
     final currentState = state.value;
     if (currentState == null) return;
 
     try {
       // Use emergency system prompt
-      // final emergencyPrompt = _contextManager.getEmergencySystemPrompt();
+      final emergencyPrompt = _contextManager.getEmergencySystemPrompt();
 
-      // TODO: Send emergency prompt and message to get appropriate response
-      // TODO: Prioritize safety and immediate help resources
-
-      // For now we'll just simulate an AI response
-      final simulatedResponse = ChatMessageModel(
-        content: "I notice you might be in distress. Please know that you're not alone, and there are resources available to help you right now.\n\n" +
-            "If this is an emergency, please contact emergency services immediately at 911 (US) or your local emergency number.\n\n" +
-            "Would you like me to share some immediate resources that might help you in this situation?",
-        isUserMessage: false,
+      // Generate emergency response
+      final aiResponse = await _repository.generateResponse(
+        userInput: content,
+        context: emergencyPrompt,
+        config: _repository.getServiceConfig().copyWith(
+              temperature: 0.3, // Lower temperature for more focused response
+              maxTokens: 300, // Shorter response for immediate help
+            ),
       );
 
+      // Create and store emergency AI message
+      final aiMessage = ChatMessageModel(
+        content: aiResponse.response,
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: false,
+      );
+
+      await _repository.storeMessageAsync(aiMessage);
+
+      // Update state with both messages, removing loading message
+      final messagesWithoutLoading = currentState.messages
+          .where((m) => !m.isUserMessage || m.content.isNotEmpty)
+          .toList();
       state = AsyncValue.data(currentState.copyWith(
-        messages: [simulatedResponse, ...currentState.messages],
+        messages: [...messagesWithoutLoading, aiMessage],
       ));
-    } catch (error, _) {
+    } catch (error) {
+      // On error, remove loading state
+      final messagesWithoutLoading = currentState.messages
+          .where((m) => !m.isUserMessage || m.content.isNotEmpty)
+          .toList();
       state = AsyncValue.data(currentState.copyWith(
+        messages: messagesWithoutLoading,
         errorMessage: error.toString(),
       ));
     }
@@ -141,10 +223,10 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
   Future<void> clearChatHistory() async {
     state = const AsyncValue.loading();
     try {
-      // TODO: Clear chat history in repository
+      await _repository.clearChatHistory();
       state = const AsyncValue.data(ChatState());
-    } catch (error, _) {
-      state = AsyncValue.error(error, _);
+    } catch (error, stackTrace) {
+      state = AsyncValue.error(error, stackTrace);
     }
   }
 
@@ -153,11 +235,11 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
     if (currentState == null) return;
 
     try {
-      // TODO: Update message rating in repository
+      await _repository.updateMessageRating(messageId, wasHelpful);
+
       final updatedMessages = currentState.messages.map((message) {
         if (message.uid == messageId) {
-          // TODO: Update the message with rating
-          return message;
+          return message.copyWith(wasHelpful: wasHelpful);
         }
         return message;
       }).toList();
@@ -165,7 +247,7 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
       state = AsyncValue.data(currentState.copyWith(
         messages: updatedMessages,
       ));
-    } catch (error, _) {
+    } catch (error) {
       state = AsyncValue.data(currentState.copyWith(
         errorMessage: error.toString(),
       ));
@@ -176,19 +258,18 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
     required String title,
     ChatSessionType sessionType = ChatSessionType.normal,
     AIServiceType serviceType = AIServiceType.offline,
-    bool isEmergency = false,
+    String? topic,
   }) async {
     final currentState = state.value;
     if (currentState == null) return;
 
     try {
-      final newSession = ChatSession(
+      final newSession = await _repository.createChatSession(
         title: title,
         sessionType: sessionType,
         serviceType: serviceType,
+        topic: topic,
       );
-
-      // TODO: Save session in repository
 
       state = AsyncValue.data(currentState.copyWith(
         currentSession: newSession,
@@ -196,10 +277,22 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
         currentPage: 1,
         hasMore: false,
       ));
-    } catch (error, _) {
+
+      // Initialize the new session
+      await initialize(session: newSession);
+    } catch (error) {
       state = AsyncValue.data(currentState.copyWith(
         errorMessage: error.toString(),
       ));
     }
+  }
+
+  Future<void> clearError() async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    state = AsyncValue.data(currentState.copyWith(
+      errorMessage: null,
+    ));
   }
 }

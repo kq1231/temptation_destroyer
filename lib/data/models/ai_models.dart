@@ -1,5 +1,6 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:uuid/uuid.dart';
+import 'chat_session_model.dart';
 
 /// AI Service Type Enum
 enum AIServiceType {
@@ -92,6 +93,12 @@ class ChatMessageModel {
   /// For encrypted storage
   bool isEncrypted = false;
 
+  /// Whether the user marked this message as helpful
+  bool wasHelpful = false;
+
+  /// The session this message belongs to
+  final ToOne<ChatSession> session = ToOne<ChatSession>();
+
   ChatMessageModel({
     this.id = 0,
     String? uid,
@@ -99,9 +106,16 @@ class ChatMessageModel {
     required this.isUserMessage,
     String? role,
     DateTime? timestamp,
+    bool? wasHelpful,
+    ChatSession? session,
   })  : uid = uid ?? const Uuid().v4(),
         role = role ?? (isUserMessage ? 'user' : 'assistant'),
-        timestamp = timestamp ?? DateTime.now();
+        timestamp = timestamp ?? DateTime.now(),
+        wasHelpful = wasHelpful ?? false {
+    if (session != null) {
+      this.session.target = session;
+    }
+  }
 
   /// Create a copy with updated values
   ChatMessageModel copyWith({
@@ -112,15 +126,21 @@ class ChatMessageModel {
     String? role,
     DateTime? timestamp,
     bool? isEncrypted,
+    bool? wasHelpful,
+    ChatSession? session,
   }) {
-    return ChatMessageModel(
+    final copy = ChatMessageModel(
       id: id ?? this.id,
       uid: uid ?? this.uid,
       content: content ?? this.content,
       isUserMessage: isUserMessage ?? this.isUserMessage,
       role: role ?? this.role,
       timestamp: timestamp ?? this.timestamp,
-    )..isEncrypted = isEncrypted ?? this.isEncrypted;
+      wasHelpful: wasHelpful ?? this.wasHelpful,
+      session: session ?? this.session.target,
+    );
+    copy.isEncrypted = isEncrypted ?? this.isEncrypted;
+    return copy;
   }
 }
 
@@ -219,7 +239,7 @@ class AIServiceConfig {
     this.preferredModel,
     this.allowDataTraining = false,
     this.temperature = 0.7,
-    this.maxTokens = 500,
+    this.maxTokens = 8096,
   }) : uid = uid ?? const Uuid().v4() {
     _serviceType = serviceType;
   }

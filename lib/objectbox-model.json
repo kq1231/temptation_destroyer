@@ -197,7 +197,7 @@
     },
     {
       "id": "8:4131266175279097061",
-      "lastPropertyId": "7:3666469237871487651",
+      "lastPropertyId": "9:7516328470501572854",
       "name": "ChatMessageModel",
       "properties": [
         {
@@ -237,6 +237,19 @@
           "id": "7:3666469237871487651",
           "name": "role",
           "type": 9
+        },
+        {
+          "id": "8:5340697945452502162",
+          "name": "wasHelpful",
+          "type": 1
+        },
+        {
+          "id": "9:7516328470501572854",
+          "name": "sessionId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "11:1698625639249539995",
+          "relationTarget": "ChatSession"
         }
       ],
       "relations": []
@@ -946,7 +959,7 @@
     }
   ],
   "lastEntityId": "19:7809979764960026324",
-  "lastIndexId": "10:2311241240915069713",
+  "lastIndexId": "11:1698625639249539995",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

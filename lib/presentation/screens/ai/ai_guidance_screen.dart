@@ -50,7 +50,8 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels <= 200) {
+    if (_scrollController.position.atEdge) {
+      print('Loading more messages');
       ref.read(chatProvider.notifier).loadMoreMessages();
     }
   }
@@ -151,16 +152,22 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
                   return _buildWelcomeScreen();
                 }
 
+                List<ChatMessageModel> messages =
+                    state.messages.reversed.toList();
+
                 return RefreshIndicator(
                   onRefresh: () async {
                     await ref.read(chatProvider.notifier).initialize();
+                    _scrollController.jumpTo(0);
                   },
                   child: ListView.builder(
+                    reverse: true,
+                    shrinkWrap: true,
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
-                    itemCount: state.messages.length + (state.hasMore ? 1 : 0),
+                    itemCount: messages.length + (state.hasMore ? 1 : 0),
                     itemBuilder: (context, index) {
-                      if (index == state.messages.length) {
+                      if (index == messages.length) {
                         return const Center(
                           child: Padding(
                             padding: EdgeInsets.all(8.0),
@@ -168,7 +175,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
                           ),
                         );
                       }
-                      return _buildChatMessage(state.messages[index]);
+                      return _buildChatMessage(messages[index]);
                     },
                   ),
                 );
