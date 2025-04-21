@@ -30,6 +30,9 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   final ContextManager _contextManager = ContextManager();
   late ChatSession? _session;
 
+  // Add a state to toggle streaming mode
+  bool _streamingMode = true;
+
   @override
   void initState() {
     super.initState();
@@ -287,10 +290,34 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   }
 
   Widget _buildChatMessage(ChatMessageModel message) {
+    // Find if this is the latest AI message and we're still streaming
+    final chatState = ref.watch(chatProvider);
+
+    // Find the latest AI message
+    ChatMessageModel? latestAiMessage;
+    if (chatState.value != null && chatState.value!.messages.isNotEmpty) {
+      for (final msg in chatState.value!.messages) {
+        if (!msg.isUserMessage) {
+          latestAiMessage = msg;
+          break;
+        }
+      }
+    }
+
+    final isLatestAiMessage =
+        latestAiMessage != null && message.uid == latestAiMessage.uid;
+    final isTyping =
+        chatState.isLoading && isLatestAiMessage && message.content.isEmpty;
+    final isCurrentlyStreaming =
+        _streamingMode && isLatestAiMessage && !isTyping && chatState.isLoading;
+
     return ChatMessageBubble(
       message: message.content,
       isUserMessage: message.isUserMessage,
       wasHelpful: message.wasHelpful,
+      isError: message.isError,
+      isStreaming: isCurrentlyStreaming,
+      isTyping: isTyping,
       onRateResponse: (bool helpful) {
         ref.read(chatProvider.notifier).rateResponse(
               message.uid,
@@ -319,65 +346,96 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          // Voice input button (disabled for now)
-          const IconButton(
-            icon: Icon(Icons.mic),
-            onPressed: null, // TODO: Implement voice input
-            color: Colors.grey,
+          // Streaming toggle
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                "Streaming mode",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              Switch(
+                value: _streamingMode,
+                activeColor: Theme.of(context).primaryColor,
+                onChanged: isLoading
+                    ? null
+                    : (value) {
+                        setState(() {
+                          _streamingMode = value;
+                        });
+                      },
+              ),
+            ],
           ),
 
-          // Text input field
-          Expanded(
-            child: RawKeyboardListener(
-              focusNode: _messageFocusNode,
-              onKey: (event) {
-                if (isLoading) return;
-                // Only handle key down events
-                if (event.isKeyPressed(LogicalKeyboardKey.enter) &&
-                    event.runtimeType.toString() == 'RawKeyDownEvent') {
-                  // If Shift is NOT pressed, send message
-                  if (!(event.isShiftPressed)) {
-                    // Prevent the default behavior (new line)
-                    // Send the message
-                    _sendMessage();
-                  }
-                  // If Shift is pressed, allow new line (do nothing)
-                }
-              },
-              child: TextField(
-                controller: _messageController,
-                decoration: InputDecoration(
-                  hintText: 'Type your message...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+          // Input row
+          Row(
+            children: [
+              // Voice input button (disabled for now)
+              const IconButton(
+                icon: Icon(Icons.mic),
+                onPressed: null, // TODO: Implement voice input
+                color: Colors.grey,
+              ),
+
+              // Text input field
+              Expanded(
+                child: RawKeyboardListener(
+                  focusNode: _messageFocusNode,
+                  onKey: (event) {
+                    if (isLoading) return;
+                    // Only handle key down events
+                    if (event.isKeyPressed(LogicalKeyboardKey.enter) &&
+                        event.runtimeType.toString() == 'RawKeyDownEvent') {
+                      // If Shift is NOT pressed, send message
+                      if (!(event.isShiftPressed)) {
+                        // Prevent the default behavior (new line)
+                        // Send the message
+                        _sendMessage();
+                      }
+                      // If Shift is pressed, allow new line (do nothing)
+                    }
+                  },
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      hintText: 'Type your message...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                    ),
+                    minLines: 1,
+                    maxLines: 5,
+                    textCapitalization: TextCapitalization.sentences,
+                    textInputAction: TextInputAction.newline,
+                    enabled: !isLoading,
                   ),
                 ),
-                minLines: 1,
-                maxLines: 5,
-                textCapitalization: TextCapitalization.sentences,
-                // Remove onSubmitted and onEditingComplete to avoid double send
-                // onSubmitted: isLoading ? null : (_) => _sendMessage(),
-                // onEditingComplete: isLoading ? null : _sendMessage,
-                textInputAction: TextInputAction.newline,
-                enabled: !isLoading,
               ),
-            ),
-          ),
 
-          // Send button
-          IconButton(
-            icon: Icon(isLoading ? Icons.hourglass_top : Icons.send),
-            onPressed: isLoading ? null : _sendMessage,
-            color: Theme.of(context).primaryColor,
+              // Send button
+              IconButton(
+                icon: Icon(isLoading
+                    ? Icons.hourglass_top
+                    : _streamingMode
+                        ? Icons.stream
+                        : Icons.send),
+                onPressed: isLoading ? null : _sendMessage,
+                color: Theme.of(context).primaryColor,
+              ),
+            ],
           ),
         ],
       ),
@@ -396,7 +454,13 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
         });
       }
 
-      ref.read(chatProvider.notifier).sendMessage(message);
+      // Use streaming or regular mode based on toggle
+      if (_streamingMode) {
+        ref.read(chatProvider.notifier).sendStreamingMessage(message);
+      } else {
+        ref.read(chatProvider.notifier).sendMessage(message);
+      }
+
       _messageController.clear();
       // Refocus the text field after sending
       FocusScope.of(context).requestFocus(_messageFocusNode);

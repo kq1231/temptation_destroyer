@@ -95,7 +95,7 @@
     },
     {
       "id": "8:4131266175279097061",
-      "lastPropertyId": "9:7516328470501572854",
+      "lastPropertyId": "11:1290622394365178957",
       "name": "ChatMessageModel",
       "properties": [
         {
@@ -148,6 +148,11 @@
           "flags": 520,
           "indexId": "11:1698625639249539995",
           "relationTarget": "ChatSession"
+        },
+        {
+          "id": "11:1290622394365178957",
+          "name": "isError",
+          "type": 1
         }
       ],
       "relations": []
@@ -766,7 +771,7 @@
     },
     {
       "id": "19:7809979764960026324",
-      "lastPropertyId": "20:3728390860473653931",
+      "lastPropertyId": "22:825586208970566093",
       "name": "ChatSession",
       "properties": [
         {
@@ -861,6 +866,16 @@
           "id": "20:3728390860473653931",
           "name": "maxTokens",
           "type": 6
+        },
+        {
+          "id": "21:6452981298426996080",
+          "name": "isEncrypted",
+          "type": 1
+        },
+        {
+          "id": "22:825586208970566093",
+          "name": "encryptionKey",
+          "type": 9
         }
       ],
       "relations": []
@@ -984,7 +999,8 @@
     6408614864208921134,
     735994827260583777,
     6777513656975215707,
-    241618885501133761
+    241618885501133761,
+    5237340241862937642
   ],
   "retiredRelationUids": [],
   "version": 1

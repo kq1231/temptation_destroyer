@@ -182,6 +182,7 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
         isUserMessage: false,
         session: currentState.currentSession,
         wasHelpful: null,
+        isError: true,
       );
 
       // Store the error message
@@ -258,6 +259,7 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
         isUserMessage: false,
         session: currentState.currentSession,
         wasHelpful: null,
+        isError: true,
       );
 
       // Store the error message
@@ -348,5 +350,175 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
     state = AsyncValue.data(currentState.copyWith(
       errorMessage: null,
     ));
+  }
+
+  /// Send a message with streaming response
+  Future<void> sendStreamingMessage(String content) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    // Get the current config from the service provider
+    final config = ref.read(aiServiceProvider).config;
+
+    // Play message sent sound
+    _soundService.playSound(SoundEffect.messageSent);
+
+    // Check if this is an emergency message
+    final isEmergency = _contextManager.isEmergencyContext(content);
+
+    final newMessage = ChatMessageModel(
+      content: content,
+      isUserMessage: true,
+      session: currentState.currentSession,
+    );
+
+    // Create a typing indicator message for the AI response
+    final typingMessage = ChatMessageModel(
+      content: '',
+      isUserMessage: false,
+      session: currentState.currentSession,
+    );
+
+    // Create a new list with the user's message and typing indicator
+    final updatedMessages = [
+      ...currentState.messages,
+      newMessage,
+      typingMessage
+    ];
+
+    // Update state with user's message and typing indicator
+    state = AsyncValue.data(currentState.copyWith(
+      messages: updatedMessages,
+    ));
+
+    try {
+      // Store the user message (encryption handled in storeMessageAsync)
+      await _repository.storeMessageAsync(newMessage);
+
+      // If this is an emergency, use special handling
+      if (isEmergency) {
+        await _handleEmergencyMessage(content);
+        return;
+      }
+
+      // Get AI response with context management
+      final availableTokens = _contextManager.getAvailableContextSize(
+        config.serviceType,
+        config.preferredModel,
+        500, // System prompt length
+      );
+
+      final context = _contextManager.selectContext(
+        updatedMessages,
+        availableTokens,
+        currentQuery: content,
+      );
+
+      // Generate streaming AI response
+      String fullResponse = '';
+      final streamingMessage = ChatMessageModel(
+        content: '',
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: null,
+      );
+
+      // Update state to show a streaming message
+      final messagesWithoutTyping = currentState.messages
+          .where((m) => !m.isUserMessage || m.content.isNotEmpty)
+          .toList();
+
+      state = AsyncValue.data(currentState.copyWith(
+        messages: [...messagesWithoutTyping, newMessage, streamingMessage],
+      ));
+
+      // Listen to the stream of response chunks
+      await for (final chunk in _repository.generateStreamingResponse(
+        userInput: content,
+        context: context,
+        config: config,
+      )) {
+        // Append the new chunk to the full response
+        fullResponse += chunk;
+
+        // Update the streaming message with the accumulated text
+        final updatedStreamingMessage = streamingMessage.copyWith(
+          content: fullResponse,
+        );
+
+        // Get current state again in case it changed
+        final latestState = state.value;
+        if (latestState == null) continue;
+
+        // Find the index of the streaming message
+        final msgIndex = latestState.messages
+            .indexWhere((m) => m.uid == streamingMessage.uid);
+
+        if (msgIndex != -1) {
+          // Create a new list with the updated streaming message
+          final updatedMessages = [...latestState.messages];
+          updatedMessages[msgIndex] = updatedStreamingMessage;
+
+          // Update state with the new content
+          state = AsyncValue.data(latestState.copyWith(
+            messages: updatedMessages,
+          ));
+        }
+      }
+
+      // Stream completed, create final AI message
+      final finalAiMessage = streamingMessage.copyWith(
+        content: fullResponse,
+      );
+
+      // Store AI message (encryption handled in storeMessageAsync)
+      await _repository.storeMessageAsync(finalAiMessage);
+
+      // Play message received sound
+      _soundService.playSound(SoundEffect.messageReceived);
+
+      // Update state with the final message
+      final latestState = state.value;
+      if (latestState != null) {
+        final msgIndex = latestState.messages
+            .indexWhere((m) => m.uid == streamingMessage.uid);
+
+        if (msgIndex != -1) {
+          // Create a new list with the final message
+          final finalMessages = [...latestState.messages];
+          finalMessages[msgIndex] = finalAiMessage;
+
+          // Update state with the final message
+          state = AsyncValue.data(latestState.copyWith(
+            messages: finalMessages,
+          ));
+        }
+      }
+    } catch (error) {
+      // Play error sound
+      _soundService.playSound(SoundEffect.error);
+
+      // Create an error message from the AI
+      final errorMessage = ChatMessageModel(
+        content: "Error: ${error.toString()}",
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: null,
+        isError: true,
+      );
+
+      // Store the error message
+      await _repository.storeMessageAsync(errorMessage);
+
+      // On error, keep the user's message and add the error message
+      final messagesWithoutTyping = currentState.messages
+          .where((m) => !m.isUserMessage || m.content.isNotEmpty)
+          .toList();
+
+      state = AsyncValue.data(currentState.copyWith(
+        messages: [...messagesWithoutTyping, newMessage, errorMessage],
+        errorMessage: error.toString(),
+      ));
+    }
   }
 }

@@ -88,6 +88,8 @@ class _ChatSessionsScreenState extends ConsumerState<ChatSessionsScreen> {
               return _buildEmptyState();
             }
 
+            print(sessions.map((e) => e.title));
+
             // Filter sessions based on archived status
             final filteredSessions = _showArchived
                 ? sessions

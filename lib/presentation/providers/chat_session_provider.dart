@@ -17,7 +17,7 @@ class ChatSessionNotifier extends AutoDisposeAsyncNotifier<List<ChatSession>> {
 
   Future<List<ChatSession>> _loadSessions() async {
     try {
-      final sessions = await _repository.getChatSessions();
+      final sessions = await _repository.getChatSessions(includeArchived: true);
       return sessions;
     } catch (e) {
       return [];

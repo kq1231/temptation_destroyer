@@ -484,8 +484,8 @@ class AISettingsScreen extends ConsumerWidget {
                     return Slider(
                       value: state.config.temperature,
                       min: 0.0,
-                      max: 1.0,
-                      divisions: 10,
+                      max: 2.0,
+                      divisions: 20,
                       label: state.config.temperature.toStringAsFixed(1),
                       onChanged: (value) {
                         // Update local state immediately for visual feedback
@@ -497,7 +497,7 @@ class AISettingsScreen extends ConsumerWidget {
                     );
                   }),
                 ),
-                const Text('1.0', style: TextStyle(fontSize: 12)),
+                const Text('2.0', style: TextStyle(fontSize: 12)),
               ],
             ),
 
@@ -705,7 +705,7 @@ class AISettingsScreen extends ConsumerWidget {
     {'id': 'meta/llama3-70b-instruct', 'name': 'Meta Llama 3 70B'},
     {'id': 'anthropic/claude-3-opus', 'name': 'Claude 3 Opus'},
     {'id': 'anthropic/claude-3-sonnet', 'name': 'Claude 3 Sonnet'},
-    {'id': 'anthropic/claude-3-haiku', 'name': 'Claude 3 Haiku'},
+    {'id': 'anthropic/claude-3.5-haiku', 'name': 'Claude 3 Haiku'},
     {'id': 'mistralai/mistral-7b-instruct', 'name': 'Mistral 7B'},
     {'id': 'google/gemma-7b-it', 'name': 'Google Gemma 7B'},
     {'id': 'openai/gpt-4', 'name': 'GPT-4'},

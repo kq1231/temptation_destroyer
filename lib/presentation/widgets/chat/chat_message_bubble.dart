@@ -8,6 +8,9 @@ class ChatMessageBubble extends StatelessWidget {
   final bool isUserMessage;
   final bool? wasHelpful;
   final Function(bool)? onRateResponse;
+  final bool isError;
+  final bool isStreaming;
+  final bool isTyping;
 
   const ChatMessageBubble({
     Key? key,
@@ -15,9 +18,13 @@ class ChatMessageBubble extends StatelessWidget {
     required this.isUserMessage,
     this.wasHelpful,
     this.onRateResponse,
+    this.isError = false,
+    this.isStreaming = false,
+    this.isTyping = false,
   }) : super(key: key);
 
-  bool get _isLoading => !isUserMessage && message.isEmpty;
+  bool get _isLoading => !isUserMessage && message.isEmpty && !isTyping;
+  bool get _showTypingIndicator => isTyping && !isUserMessage;
 
   void _copyToClipboard(BuildContext context) {
     Clipboard.setData(ClipboardData(text: message));
@@ -44,9 +51,7 @@ class ChatMessageBubble extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isUserMessage
-                ? Theme.of(context).primaryColor
-                : Theme.of(context).colorScheme.surface,
+            color: _getBubbleColor(context),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(isUserMessage ? 16 : 4),
               topRight: Radius.circular(isUserMessage ? 4 : 16),
@@ -71,12 +76,95 @@ class ChatMessageBubble extends StatelessWidget {
                       : Theme.of(context).primaryColor,
                   size: 30,
                 )
+              else if (_showTypingIndicator)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LoadingAnimationWidget.waveDots(
+                      color: Theme.of(context).primaryColor,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Typing...",
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    )
+                  ],
+                )
+              else if (isError)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'API Error',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    EnhancedMarkdown(
+                      data: message,
+                      isUserMessage:
+                          true, // Use light text color for error messages
+                    ),
+                  ],
+                )
               else
-                EnhancedMarkdown(
-                  data: message,
-                  isUserMessage: isUserMessage,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isStreaming && !isUserMessage)
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.stream,
+                              color: Theme.of(context).primaryColor,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "Live Response",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    EnhancedMarkdown(
+                      data: message,
+                      isUserMessage: isUserMessage,
+                    ),
+                  ],
                 ),
-              if (!isUserMessage && !_isLoading && onRateResponse != null)
+              if (!isUserMessage &&
+                  !_isLoading &&
+                  onRateResponse != null &&
+                  !isError &&
+                  !isStreaming &&
+                  !isTyping)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Row(
@@ -105,6 +193,32 @@ class ChatMessageBubble extends StatelessWidget {
                     ],
                   ),
                 ),
+              if (isError)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildRatingButton(
+                        icon: Icons.copy_outlined,
+                        isSelected: false,
+                        onPressed: () => _copyToClipboard(context),
+                        context: context,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 16),
+                      _buildRatingButton(
+                        icon: Icons.settings,
+                        isSelected: false,
+                        onPressed: () {
+                          Navigator.of(context).pushNamed('/ai-settings');
+                        },
+                        context: context,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
             ],
           ),
         ),
@@ -112,11 +226,24 @@ class ChatMessageBubble extends StatelessWidget {
     );
   }
 
+  Color _getBubbleColor(BuildContext context) {
+    if (isUserMessage) {
+      return Theme.of(context).primaryColor;
+    }
+
+    if (isError) {
+      return Colors.red.shade700;
+    }
+
+    return Theme.of(context).colorScheme.surface;
+  }
+
   Widget _buildRatingButton({
     required IconData icon,
     required bool isSelected,
     required VoidCallback onPressed,
     required BuildContext context,
+    Color? color,
   }) {
     return InkWell(
       onTap: onPressed,
@@ -132,9 +259,13 @@ class ChatMessageBubble extends StatelessWidget {
         child: Icon(
           icon,
           size: 16,
-          color: isSelected
-              ? Theme.of(context).primaryColor
-              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          color: color ??
+              (isSelected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.5)),
         ),
       ),
     );

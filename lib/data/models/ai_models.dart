@@ -39,6 +39,9 @@ class ChatMessageModel {
   /// Whether the user marked this message as helpful
   bool? wasHelpful;
 
+  /// Whether this message is an error message
+  bool isError;
+
   /// The session this message belongs to
   final ToOne<ChatSession> session = ToOne<ChatSession>();
 
@@ -50,6 +53,7 @@ class ChatMessageModel {
     String? role,
     DateTime? timestamp,
     this.wasHelpful,
+    this.isError = false,
     ChatSession? session,
   })  : uid = uid ?? const Uuid().v4(),
         role = role ?? (isUserMessage ? 'user' : 'assistant'),
@@ -69,6 +73,7 @@ class ChatMessageModel {
     DateTime? timestamp,
     bool? isEncrypted,
     bool? wasHelpful,
+    bool? isError,
     ChatSession? session,
   }) {
     final copy = ChatMessageModel(
@@ -79,6 +84,7 @@ class ChatMessageModel {
       role: role ?? this.role,
       timestamp: timestamp ?? this.timestamp,
       wasHelpful: wasHelpful ?? this.wasHelpful,
+      isError: isError ?? this.isError,
       session: session ?? this.session.target,
     );
     copy.isEncrypted = isEncrypted ?? this.isEncrypted;

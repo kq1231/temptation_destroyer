@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'dart:math';
+import 'dart:convert';
 
 import '../../core/utils/object_box_manager.dart';
 import '../../core/security/secure_storage_service.dart';
@@ -138,21 +139,27 @@ class AIRepository {
       // Get API key from secure storage
       final apiKey = await _getSecureApiKey(serviceConfig.serviceType);
       if (apiKey == null || apiKey.isEmpty) {
-        print('No API key found, falling back to offline mode');
-        return await _getFallbackResponse(userInput, context, session);
+        print('No API key found, returning error message');
+        return await _getFallbackResponse(userInput, context, session,
+            errorMessage:
+                "No API key found for ${serviceConfig.serviceType}. Please add your API key in the settings.");
       }
 
       // Validate API key
       final isValid = await _validateApiKey(serviceConfig.serviceType, apiKey);
       if (!isValid) {
-        print('Invalid API key, falling back to offline mode');
-        return await _getFallbackResponse(userInput, context, session);
+        print('Invalid API key, returning error message');
+        return await _getFallbackResponse(userInput, context, session,
+            errorMessage:
+                "Invalid API key format for ${serviceConfig.serviceType}. Please check your API key in the settings.");
       }
 
       // Check rate limiting
       if (!_canMakeRequest(serviceConfig.serviceType)) {
         print('Rate limit exceeded');
-        throw Exception('Rate limit exceeded for ${serviceConfig.serviceType}');
+        return await _getFallbackResponse(userInput, context, session,
+            errorMessage:
+                "Rate limit exceeded for ${serviceConfig.serviceType}. Please try again in a minute.");
       }
 
       // Create a config copy with the secure API key
@@ -183,8 +190,9 @@ class AIRepository {
       return chatMessage;
     } catch (e) {
       print('Error generating AI response: $e');
-      // Return a fallback response on error
-      return await _getFallbackResponse(userInput, context, session);
+      // Return an error message instead of a fallback response
+      return await _getFallbackResponse(userInput, context, session,
+          errorMessage: e.toString());
     }
   }
 
@@ -222,25 +230,99 @@ class AIRepository {
             break;
           case AIServiceType.offline:
             print('Using offline mode');
-            return "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.";
+            throw AIServiceException(
+                "Currently in offline mode. Please select an online AI service in settings.");
         }
         print('Request successful!');
         return response;
+      } on DioException catch (e) {
+        retryCount++;
+        print('Request failed (attempt $retryCount/$maxRetries): $e');
+
+        // Parse the error response to get a more specific error message
+        String errorMessage = "Network error occurred";
+
+        if (e.response != null && e.response?.data != null) {
+          try {
+            final responseData = e.response?.data;
+            if (responseData is Map<String, dynamic>) {
+              if (responseData.containsKey('error')) {
+                final error = responseData['error'];
+                if (error is Map<String, dynamic> &&
+                    error.containsKey('message')) {
+                  errorMessage = error['message'];
+                } else if (error is String) {
+                  errorMessage = error;
+                }
+              } else if (responseData.containsKey('message')) {
+                errorMessage = responseData['message'];
+              }
+            } else if (responseData is String) {
+              errorMessage = responseData;
+            }
+          } catch (_) {
+            // If we can't parse the error, use a default message with the status code
+            errorMessage = "Error ${e.response?.statusCode}: ${e.message}";
+          }
+        }
+
+        // Specific error handling based on status code
+        if (e.response?.statusCode == 401) {
+          throw AIServiceException(
+              "Authentication failed: Invalid API key or unauthorized access.");
+        } else if (e.response?.statusCode == 403) {
+          throw AIServiceException(
+              "Access forbidden: Your API key may not have permission to use this model.");
+        } else if (e.response?.statusCode == 429) {
+          if (retryCount == maxRetries) {
+            throw AIServiceException(
+                "Rate limit exceeded: The service is currently overloaded. Please try again later.");
+          }
+          // We'll retry for 429 errors
+        } else if (e.response?.statusCode == 500 ||
+            e.response?.statusCode == 502 ||
+            e.response?.statusCode == 503) {
+          if (retryCount == maxRetries) {
+            throw AIServiceException(
+                "Server error (${e.response?.statusCode}): The AI service is currently experiencing issues. Please try again later.");
+          }
+          // We'll retry for server errors
+        } else {
+          // For other errors, provide the specific error message
+          throw AIServiceException("API error: $errorMessage");
+        }
+
+        // Wait before retrying, with exponential backoff
+        if (retryCount < maxRetries) {
+          print('Retrying in ${retryDelay.inSeconds} seconds...');
+          await Future.delayed(retryDelay);
+          retryDelay *= 2;
+        }
       } catch (e) {
         retryCount++;
         print('Request failed (attempt $retryCount/$maxRetries): $e');
-        if (retryCount == maxRetries) {
-          // If this was the last retry, rethrow the error
-          rethrow;
+
+        // If it's already an AIServiceException, just rethrow it
+        if (e is AIServiceException) {
+          if (retryCount == maxRetries) rethrow;
+        } else {
+          // For other exceptions, create a more specific error
+          if (retryCount == maxRetries) {
+            throw AIServiceException(
+                "Error connecting to AI service: ${e.toString()}");
+          }
         }
+
         // Wait before retrying, with exponential backoff
-        print('Retrying in ${retryDelay.inSeconds} seconds...');
-        await Future.delayed(retryDelay);
-        retryDelay *= 2;
+        if (retryCount < maxRetries) {
+          print('Retrying in ${retryDelay.inSeconds} seconds...');
+          await Future.delayed(retryDelay);
+          retryDelay *= 2;
+        }
       }
     }
 
-    throw Exception('Failed after $maxRetries retries');
+    throw AIServiceException('Failed after $maxRetries retries');
   }
 
   /// Send a request to OpenAI
@@ -565,9 +647,62 @@ class AIRepository {
     }
   }
 
-  /// Get a fallback response when AI services are unavailable
-  Future<ChatMessageModel> _getFallbackResponse(String userInput,
-      List<ChatMessageModel> context, ChatSession? session) async {
+  /// Get a fallback response when AI services are unavailable or there's an error
+  Future<ChatMessageModel> _getFallbackResponse(
+      String userInput, List<ChatMessageModel> context, ChatSession? session,
+      {String? errorMessage}) async {
+    // If we have a specific error message, use it
+    if (errorMessage != null) {
+      // Format the error message for better readability
+      String formattedError = "⚠️ Error: ";
+
+      // Remove "Exception:" prefix if it exists
+      if (errorMessage.startsWith("Exception:")) {
+        errorMessage = errorMessage.substring(10).trim();
+      }
+
+      // Clean up common error messages
+      if (errorMessage.contains("AIServiceException")) {
+        errorMessage = errorMessage.replaceAll("AIServiceException: ", "");
+      }
+
+      // Format the error message
+      formattedError += errorMessage;
+
+      // Add helpful advice based on error type
+      if (errorMessage.contains("API key")) {
+        formattedError += "\n\nPlease go to Settings and check your API key.";
+      } else if (errorMessage.contains("rate limit") ||
+          errorMessage.contains("429")) {
+        formattedError +=
+            "\n\nThe AI service is currently overloaded. Please try again in a few minutes.";
+      } else if (errorMessage.contains("timeout") ||
+          errorMessage.contains("network")) {
+        formattedError +=
+            "\n\nPlease check your internet connection and try again.";
+      } else if (errorMessage.toLowerCase().contains("insufficient credit") ||
+          errorMessage.toLowerCase().contains("quota") ||
+          errorMessage.toLowerCase().contains("credits")) {
+        formattedError +=
+            "\n\nYou have insufficient credits on your account. Please check your API service dashboard.";
+      }
+
+      final message = ChatMessageModel(
+        content: formattedError,
+        isUserMessage: false,
+        role: 'assistant',
+        wasHelpful: null,
+        session: session,
+        isError: true,
+      );
+
+      // Ensure error messages are also encrypted
+      await storeMessageAsync(message);
+
+      return message;
+    }
+
+    // Default fallback responses if no specific error
     final responses = [
       'I apologize, but I am currently in offline mode. Please try again later when online services are available.',
       'I am currently operating in offline mode. Please check your internet connection and API settings.',
@@ -696,17 +831,6 @@ class AIRepository {
   /// Get chat history settings
   config.ChatHistorySettings getChatHistorySettings() {
     final allSettings = _settingsBox.getAll();
-
-    if (allSettings.isEmpty) {
-      // Create default settings if none exist
-      final defaultSettings = ChatHistorySettingsModel();
-      _settingsBox.put(defaultSettings);
-      return config.ChatHistorySettings(
-        storeChatHistory: defaultSettings.storeChatHistory,
-        autoDeleteAfterDays: defaultSettings.autoDeleteAfterDays,
-        lastCleared: defaultSettings.lastCleared,
-      );
-    }
 
     final dbSettings = allSettings.first;
     return config.ChatHistorySettings(
@@ -888,9 +1012,8 @@ class AIRepository {
     _chatBox.removeAll();
 
     // Update lastCleared in settings
-    var dbSettings =
-        _settingsBox.getAll().firstOrNull ?? ChatHistorySettingsModel();
-    dbSettings = dbSettings.copyWith(lastCleared: DateTime.now());
+    var dbSettings = _settingsBox.getAll().firstOrNull;
+    dbSettings = dbSettings!.copyWith(lastCleared: DateTime.now());
     _settingsBox.put(dbSettings);
 
     // Update config settings to match
@@ -1113,6 +1236,380 @@ class AIRepository {
     } catch (e) {
       debugPrint('Error updating message rating: $e');
       rethrow;
+    }
+  }
+
+  /// Generate a streaming response from the AI
+  Stream<String> generateStreamingResponse({
+    required String userInput,
+    required List<ChatMessageModel> context,
+    config.AIServiceConfig? config,
+    ChatSession? session,
+  }) async* {
+    print('\n=== AI Repository: Generating Streaming Response ===');
+    print('User input length: ${userInput.length}');
+    print('Context length: ${context.length}');
+
+    // Get the current AI service config if not provided
+    final serviceConfig = config ?? getServiceConfig();
+    print('Service type: ${serviceConfig.serviceType}');
+    print('Model: ${serviceConfig.preferredModel ?? "default"}');
+
+    // Don't check for API key if we're in offline mode
+    if (serviceConfig.serviceType == AIServiceType.offline) {
+      print('Using offline mode');
+      yield 'I am currently in offline mode. Please switch to an online AI service for more personalized guidance.';
+      return;
+    }
+
+    try {
+      // Get API key from secure storage
+      final apiKey = await _getSecureApiKey(serviceConfig.serviceType);
+      if (apiKey == null || apiKey.isEmpty) {
+        print('No API key found, returning error message');
+        yield "⚠️ Error: No API key found for ${serviceConfig.serviceType}. Please add your API key in the settings.";
+        return;
+      }
+
+      // Validate API key
+      final isValid = await _validateApiKey(serviceConfig.serviceType, apiKey);
+      if (!isValid) {
+        print('Invalid API key, returning error message');
+        yield "⚠️ Error: Invalid API key format for ${serviceConfig.serviceType}. Please check your API key in the settings.";
+        return;
+      }
+
+      // Check rate limiting
+      if (!_canMakeRequest(serviceConfig.serviceType)) {
+        print('Rate limit exceeded');
+        yield "⚠️ Error: Rate limit exceeded for ${serviceConfig.serviceType}. Please try again in a minute.";
+        return;
+      }
+
+      // Create a config copy with the secure API key
+      final secureConfig = serviceConfig.copyWith(apiKey: apiKey);
+
+      print('\nSending streaming request to AI service...');
+      // Send the streaming request to the appropriate AI service
+      try {
+        await for (final chunk in _sendStreamingRequestToAIService(
+          userInput: userInput,
+          context: context,
+          config: secureConfig,
+        )) {
+          yield chunk;
+        }
+      } catch (e) {
+        // If there's an error during streaming, yield an error message
+        yield "⚠️ Error: ${e.toString()}";
+      }
+    } catch (e) {
+      print('Error generating AI response: $e');
+      yield "⚠️ Error: ${e.toString()}";
+    }
+  }
+
+  /// Send a streaming request to the selected AI service
+  Stream<String> _sendStreamingRequestToAIService({
+    required String userInput,
+    required List<ChatMessageModel> context,
+    required config.AIServiceConfig config,
+  }) async* {
+    print('\n=== Sending Streaming Request to AI Service ===');
+    print('Service type: ${config.serviceType}');
+    print('Model: ${config.preferredModel ?? "default"}');
+
+    try {
+      switch (config.serviceType) {
+        case AIServiceType.openAI:
+          print('Sending streaming request to OpenAI...');
+          await for (final chunk
+              in _sendOpenAIStreamingRequest(userInput, context, config)) {
+            yield chunk;
+          }
+          break;
+        case AIServiceType.anthropic:
+          print('Sending streaming request to Anthropic...');
+          await for (final chunk
+              in _sendAnthropicStreamingRequest(userInput, context, config)) {
+            yield chunk;
+          }
+          break;
+        case AIServiceType.openRouter:
+          print('Sending streaming request to OpenRouter...');
+          await for (final chunk
+              in _sendOpenRouterStreamingRequest(userInput, context, config)) {
+            yield chunk;
+          }
+          break;
+        case AIServiceType.offline:
+          print('Using offline mode');
+          yield "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.";
+          break;
+      }
+    } catch (e) {
+      print('Error in streaming request: $e');
+      if (e is AIServiceException) {
+        yield "⚠️ Error: ${e.message}";
+      } else {
+        yield "⚠️ Error: ${e.toString()}";
+      }
+    }
+  }
+
+  /// Send a streaming request to OpenAI
+  Stream<String> _sendOpenAIStreamingRequest(String userInput,
+      List<ChatMessageModel> context, config.AIServiceConfig config) async* {
+    try {
+      final apiKey = await _getSecureApiKey(AIServiceType.openAI);
+      if (apiKey == null) {
+        throw AIServiceException('OpenAI API key not found');
+      }
+
+      // Add logging for OpenAI request parameters
+      print('OpenAI Streaming Request Parameters:');
+      print('Model: ${config.preferredModel}');
+      print('Temperature: ${config.temperature}');
+      print('Max Tokens: ${config.maxTokens}');
+
+      // Send the streaming request using Dio SSE
+      final response = await _dio.post(
+        'https://api.openai.com/v1/chat/completions',
+        data: {
+          'model': config.preferredModel,
+          'messages': [
+            {
+              'role': 'system',
+              'content':
+                  'You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment.'
+            },
+            ...buildContextMessages(context),
+            {'role': 'user', 'content': userInput}
+          ],
+          'temperature': config.temperature,
+          'max_tokens': config.maxTokens,
+          'stream': true, // Enable streaming
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream',
+          },
+          responseType: ResponseType.stream,
+        ),
+      );
+
+      // Process the stream
+      final stream = response.data.stream;
+      await for (List<int> chunk in stream) {
+        final String decodedChunk = String.fromCharCodes(chunk);
+
+        // Split by newline and process each SSE
+        for (String line in decodedChunk.split('\n')) {
+          if (line.startsWith('data: ') && line != 'data: [DONE]') {
+            // Extract the JSON data
+            String jsonData = line.substring(6);
+            try {
+              Map<String, dynamic> data = jsonDecode(jsonData);
+              if (data['choices'] != null &&
+                  data['choices'][0]['delta'] != null &&
+                  data['choices'][0]['delta']['content'] != null) {
+                yield data['choices'][0]['delta']['content'] as String;
+              }
+            } catch (e) {
+              print('Error parsing SSE chunk: $e');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 429) {
+          throw AIServiceException('Rate limit exceeded for OpenAI');
+        } else if (e.response?.statusCode == 401) {
+          throw AIServiceException('Invalid API key for OpenAI');
+        } else {
+          throw AIServiceException('OpenAI error: ${e.message}');
+        }
+      }
+      throw AIServiceException('OpenAI streaming error: ${e.toString()}');
+    }
+  }
+
+  /// Send a streaming request to Anthropic
+  Stream<String> _sendAnthropicStreamingRequest(String userInput,
+      List<ChatMessageModel> context, config.AIServiceConfig config) async* {
+    try {
+      final apiKey = await _getSecureApiKey(AIServiceType.anthropic);
+      if (apiKey == null) {
+        throw AIServiceException('Anthropic API key not found');
+      }
+
+      final selectedModel =
+          await _selectOptimalModel(userInput, context, config);
+
+      // Add logging for Anthropic request parameters
+      print('Anthropic Streaming Request Parameters:');
+      print('Model: $selectedModel');
+      print('Temperature: ${config.temperature}');
+      print('Max Tokens: ${config.maxTokens}');
+
+      // Send the streaming request using Dio SSE
+      final response = await _dio.post(
+        'https://api.anthropic.com/v1/messages',
+        data: {
+          'model': selectedModel,
+          'messages': [
+            {'role': 'user', 'content': '$context\n\n$userInput'}
+          ],
+          'max_tokens': config.maxTokens,
+          'temperature': config.temperature,
+          'stream': true, // Enable streaming
+        },
+        options: Options(
+          headers: {
+            'x-api-key': apiKey,
+            'anthropic-version': '2024-01-01',
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream',
+          },
+          responseType: ResponseType.stream,
+        ),
+      );
+
+      // Process the stream
+      final stream = response.data.stream;
+      await for (List<int> chunk in stream) {
+        final String decodedChunk = String.fromCharCodes(chunk);
+
+        // Split by newline and process each SSE
+        for (String line in decodedChunk.split('\n')) {
+          if (line.startsWith('data: ') && !line.contains('event_type')) {
+            // Extract the JSON data
+            String jsonData = line.substring(6);
+            try {
+              Map<String, dynamic> data = jsonDecode(jsonData);
+              if (data['type'] == 'content_block_delta' &&
+                  data['delta'] != null &&
+                  data['delta']['text'] != null) {
+                yield data['delta']['text'] as String;
+              }
+            } catch (e) {
+              print('Error parsing Anthropic SSE chunk: $e');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 429) {
+          throw AIServiceException('Rate limit exceeded for Anthropic');
+        } else if (e.response?.statusCode == 401) {
+          throw AIServiceException('Invalid API key for Anthropic');
+        } else {
+          throw AIServiceException('Anthropic error: ${e.message}');
+        }
+      }
+      throw AIServiceException('Anthropic streaming error: ${e.toString()}');
+    }
+  }
+
+  /// Send a streaming request to OpenRouter
+  Stream<String> _sendOpenRouterStreamingRequest(String userInput,
+      List<ChatMessageModel> context, config.AIServiceConfig config) async* {
+    try {
+      final apiKey = await _getSecureApiKey(AIServiceType.openRouter);
+      if (apiKey == null) {
+        throw AIServiceException('OpenRouter API key not found');
+      }
+
+      final selectedModel =
+          await _selectOptimalModel(userInput, context, config);
+
+      // Adjust parameters based on the model
+      int maxTokens = config.maxTokens;
+      double temperature = config.temperature;
+
+      // Model-specific adjustments
+      if (selectedModel.contains('claude-3')) {
+        maxTokens = 1000; // Claude models can handle longer responses
+      } else if (selectedModel.contains('gpt-4')) {
+        maxTokens = 800; // GPT-4 models get slightly more tokens
+      } else if (selectedModel.contains('llama3-70b')) {
+        maxTokens = 600; // Llama models get moderate tokens
+      }
+
+      // Add logging for OpenRouter request parameters
+      print('OpenRouter Streaming Request Parameters:');
+      print('Model: $selectedModel');
+      print('Temperature: $temperature');
+      print('Max Tokens: $maxTokens');
+
+      // Send the streaming request using Dio SSE
+      final response = await _dio.post(
+        'https://openrouter.ai/api/v1/chat/completions',
+        data: {
+          'model': selectedModel,
+          'messages': [
+            {
+              'role': 'system',
+              'content':
+                  'You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment. Keep responses concise but helpful.'
+            },
+            {'role': 'user', 'content': 'Context about my situation: $context'},
+            {'role': 'user', 'content': userInput}
+          ],
+          'temperature': temperature,
+          'max_tokens': maxTokens,
+          'stream': true, // Enable streaming
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $apiKey',
+            'HTTP-Referer': 'https://temptation-destroyer.app',
+            'X-Title': 'Temptation Destroyer',
+            'Content-Type': 'application/json',
+            'Accept': 'text/event-stream',
+          },
+          responseType: ResponseType.stream,
+        ),
+      );
+
+      // Process the stream
+      final stream = response.data.stream;
+      await for (List<int> chunk in stream) {
+        final String decodedChunk = String.fromCharCodes(chunk);
+
+        // Split by newline and process each SSE
+        for (String line in decodedChunk.split('\n')) {
+          if (line.startsWith('data: ') && line != 'data: [DONE]') {
+            // Extract the JSON data
+            String jsonData = line.substring(6);
+            try {
+              Map<String, dynamic> data = jsonDecode(jsonData);
+              if (data['choices'] != null &&
+                  data['choices'][0]['delta'] != null &&
+                  data['choices'][0]['delta']['content'] != null) {
+                yield data['choices'][0]['delta']['content'] as String;
+              }
+            } catch (e) {
+              print('Error parsing OpenRouter SSE chunk: $e');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 429) {
+          throw AIServiceException('Rate limit exceeded for OpenRouter');
+        } else if (e.response?.statusCode == 401) {
+          throw AIServiceException('Invalid API key for OpenRouter');
+        } else {
+          throw AIServiceException('OpenRouter error: ${e.message}');
+        }
+      }
+      throw AIServiceException('OpenRouter streaming error: ${e.toString()}');
     }
   }
 }

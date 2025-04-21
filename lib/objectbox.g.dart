@@ -124,7 +124,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(8, 4131266175279097061),
       name: 'ChatMessageModel',
-      lastPropertyId: const obx_int.IdUid(9, 7516328470501572854),
+      lastPropertyId: const obx_int.IdUid(11, 1290622394365178957),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -174,7 +174,12 @@ final _entities = <obx_int.ModelEntity>[
             type: 11,
             flags: 520,
             indexId: const obx_int.IdUid(11, 1698625639249539995),
-            relationTarget: 'ChatSession')
+            relationTarget: 'ChatSession'),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(11, 1290622394365178957),
+            name: 'isError',
+            type: 1,
+            flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
       backlinks: <obx_int.ModelBacklink>[]),
@@ -790,7 +795,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(19, 7809979764960026324),
       name: 'ChatSession',
-      lastPropertyId: const obx_int.IdUid(20, 3728390860473653931),
+      lastPropertyId: const obx_int.IdUid(22, 825586208970566093),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -883,6 +888,16 @@ final _entities = <obx_int.ModelEntity>[
             id: const obx_int.IdUid(20, 3728390860473653931),
             name: 'maxTokens',
             type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(21, 6452981298426996080),
+            name: 'isEncrypted',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(22, 825586208970566093),
+            name: 'encryptionKey',
+            type: 9,
             flags: 0)
       ],
       relations: <obx_int.ModelRelation>[],
@@ -1040,7 +1055,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         6408614864208921134,
         735994827260583777,
         6777513656975215707,
-        241618885501133761
+        241618885501133761,
+        5237340241862937642
       ],
       retiredRelationUids: const [],
       modelVersion: 5,
@@ -1164,7 +1180,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final uidOffset = fbb.writeString(object.uid);
           final contentOffset = fbb.writeString(object.content);
           final roleOffset = fbb.writeString(object.role);
-          fbb.startTable(10);
+          fbb.startTable(12);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, uidOffset);
           fbb.addOffset(2, contentOffset);
@@ -1174,6 +1190,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addOffset(6, roleOffset);
           fbb.addBool(7, object.wasHelpful);
           fbb.addInt64(8, object.session.targetId);
+          fbb.addBool(10, object.isError);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -1194,6 +1211,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
           final wasHelpfulParam =
               const fb.BoolReader().vTableGetNullable(buffer, rootOffset, 18);
+          final isErrorParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 24, false);
           final object = ChatMessageModel(
               id: idParam,
               uid: uidParam,
@@ -1201,7 +1220,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               isUserMessage: isUserMessageParam,
               role: roleParam,
               timestamp: timestampParam,
-              wasHelpful: wasHelpfulParam)
+              wasHelpful: wasHelpfulParam,
+              isError: isErrorParam)
             ..isEncrypted =
                 const fb.BoolReader().vTableGet(buffer, rootOffset, 14, false);
           object.session.targetId =
@@ -1961,7 +1981,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final preferredModelOffset = object.preferredModel == null
               ? null
               : fbb.writeString(object.preferredModel!);
-          fbb.startTable(21);
+          final encryptionKeyOffset = object.encryptionKey == null
+              ? null
+              : fbb.writeString(object.encryptionKey!);
+          fbb.startTable(23);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, uidOffset);
           fbb.addOffset(2, titleOffset);
@@ -1980,6 +2003,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addBool(17, object.allowDataTraining);
           fbb.addFloat64(18, object.temperature);
           fbb.addInt64(19, object.maxTokens);
+          fbb.addBool(20, object.isEncrypted);
+          fbb.addOffset(21, encryptionKeyOffset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -2000,6 +2025,11 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .vTableGetNullable(buffer, rootOffset, 14);
           final messageCountParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
+          final isEncryptedParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 44, false);
+          final encryptionKeyParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 46);
           final tagsParam = const fb.ListReader<String>(
                   fb.StringReader(asciiOptimization: true),
                   lazy: false)
@@ -2030,6 +2060,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
               lastModified: lastModifiedParam,
               topic: topicParam,
               messageCount: messageCountParam,
+              isEncrypted: isEncryptedParam,
+              encryptionKey: encryptionKeyParam,
               tags: tagsParam,
               selectedModel: selectedModelParam,
               isArchived: isArchivedParam,
@@ -2187,6 +2219,10 @@ class ChatMessageModel_ {
   /// see [ChatMessageModel.session]
   static final session = obx.QueryRelationToOne<ChatMessageModel, ChatSession>(
       _entities[2].properties[8]);
+
+  /// see [ChatMessageModel.isError]
+  static final isError =
+      obx.QueryBooleanProperty<ChatMessageModel>(_entities[2].properties[9]);
 }
 
 /// [EmergencySession] entity fields to define ObjectBox queries.
@@ -2708,6 +2744,14 @@ class ChatSession_ {
   /// see [ChatSession.maxTokens]
   static final maxTokens =
       obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[17]);
+
+  /// see [ChatSession.isEncrypted]
+  static final isEncrypted =
+      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[18]);
+
+  /// see [ChatSession.encryptionKey]
+  static final encryptionKey =
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[19]);
 }
 
 /// [ChatHistorySettingsModel] entity fields to define ObjectBox queries.
