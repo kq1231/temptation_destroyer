@@ -14,7 +14,7 @@
   - Update documentation and comments
 
 ## Chat Session Management
-- [ ] **3. Implement Chat Sessions**
+- [ ] **3. Implement Chat Sessions** DONE
   - Create Chat Session Model with:
     - session_id (UUID)
     - title (generated from first message)
@@ -51,7 +51,7 @@
   - Add validation helpers for string values
 
 ## UI/UX Improvements ✨
-- [ ] **7. Implement GPT Markdown Package**
+- [ ] **7. Implement GPT Markdown Package** DONE
   - Add `gpt_markdown` dependency
   - Replace current Markdown renderer in ChatMessageBubble
   - Add custom CSS styling for:
@@ -93,3 +93,4 @@
 
 - Work on EmergencyChat widget, Inshaa Allah
 
+- Integrate VAPI into the app!

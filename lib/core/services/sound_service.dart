@@ -11,22 +11,14 @@ class SoundService {
   SoundService._internal();
 
   final AudioPlayer _player = AudioPlayer();
-  bool _soundEnabled = true;
-
-  /// Whether sound effects are enabled
-  bool get soundEnabled => _soundEnabled;
-
-  /// Set whether sound effects are enabled
-  set soundEnabled(bool value) {
-    _soundEnabled = value;
-  }
+  bool soundEnabled = true;
 
   /// Initialize the sound service
   Future<void> initialize() async {
     try {
       // Set global settings
       await _player.setReleaseMode(ReleaseMode.release);
-      await _player.setSourceAsset('assets/sounds/message_sent.mp3');
+      await _player.setSourceAsset('sounds/message_sent.mp3');
     } catch (e) {
       debugPrint('Error initializing sound service: $e');
     }
@@ -34,26 +26,26 @@ class SoundService {
 
   /// Play a sound effect
   Future<void> playSound(SoundEffect effect) async {
-    if (!_soundEnabled) return;
+    if (!soundEnabled) return;
 
     try {
       String assetPath;
 
       switch (effect) {
         case SoundEffect.messageSent:
-          assetPath = 'assets/sounds/message_sent.mp3';
+          assetPath = 'sounds/message_sent.mp3';
           break;
         case SoundEffect.messageReceived:
-          assetPath = 'assets/sounds/message_received.mp3';
+          assetPath = 'sounds/message_received.mp3';
           break;
         case SoundEffect.notification:
-          assetPath = 'assets/sounds/notification.mp3';
+          assetPath = 'sounds/notification.mp3';
           break;
         case SoundEffect.success:
-          assetPath = 'assets/sounds/success.mp3';
+          assetPath = 'sounds/success.mp3';
           break;
         case SoundEffect.error:
-          assetPath = 'assets/sounds/error.mp3';
+          assetPath = 'sounds/error.mp3';
           break;
       }
 

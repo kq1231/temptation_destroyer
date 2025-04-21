@@ -142,7 +142,7 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen> {
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error toggling mute: \${e.toString()}')),
+        const SnackBar(content: Text('Error toggling mute: \${e.toString()}')),
       );
     }
   }

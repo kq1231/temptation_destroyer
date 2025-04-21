@@ -790,7 +790,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
       id: const obx_int.IdUid(19, 7809979764960026324),
       name: 'ChatSession',
-      lastPropertyId: const obx_int.IdUid(16, 1704094128167665651),
+      lastPropertyId: const obx_int.IdUid(20, 3728390860473653931),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
@@ -830,16 +830,6 @@ final _entities = <obx_int.ModelEntity>[
             type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 6777513656975215707),
-            name: 'isEncrypted',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(9, 241618885501133761),
-            name: 'encryptionKey',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
             id: const obx_int.IdUid(10, 8279218058055743343),
             name: 'tags',
             type: 30,
@@ -872,6 +862,26 @@ final _entities = <obx_int.ModelEntity>[
         obx_int.ModelProperty(
             id: const obx_int.IdUid(16, 1704094128167665651),
             name: 'dbServiceType',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(17, 5607894414324050060),
+            name: 'preferredModel',
+            type: 9,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(18, 5749071218933266812),
+            name: 'allowDataTraining',
+            type: 1,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(19, 8306940704976111897),
+            name: 'temperature',
+            type: 8,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(20, 3728390860473653931),
+            name: 'maxTokens',
             type: 6,
             flags: 0)
       ],
@@ -1028,7 +1038,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
         2219895886433063406,
         8067232528677260136,
         6408614864208921134,
-        735994827260583777
+        735994827260583777,
+        6777513656975215707,
+        241618885501133761
       ],
       retiredRelationUids: const [],
       modelVersion: 5,
@@ -1938,9 +1950,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final titleOffset = fbb.writeString(object.title);
           final topicOffset =
               object.topic == null ? null : fbb.writeString(object.topic!);
-          final encryptionKeyOffset = object.encryptionKey == null
-              ? null
-              : fbb.writeString(object.encryptionKey!);
           final tagsOffset = fbb.writeList(
               object.tags.map(fbb.writeString).toList(growable: false));
           final selectedModelOffset = object.selectedModel == null
@@ -1949,7 +1958,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           final metadataOffset = object.metadata == null
               ? null
               : fbb.writeString(object.metadata!);
-          fbb.startTable(17);
+          final preferredModelOffset = object.preferredModel == null
+              ? null
+              : fbb.writeString(object.preferredModel!);
+          fbb.startTable(21);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, uidOffset);
           fbb.addOffset(2, titleOffset);
@@ -1957,8 +1969,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(4, object.lastModified.millisecondsSinceEpoch);
           fbb.addOffset(5, topicOffset);
           fbb.addInt64(6, object.messageCount);
-          fbb.addBool(7, object.isEncrypted);
-          fbb.addOffset(8, encryptionKeyOffset);
           fbb.addOffset(9, tagsOffset);
           fbb.addOffset(10, selectedModelOffset);
           fbb.addBool(11, object.isArchived);
@@ -1966,6 +1976,10 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addOffset(13, metadataOffset);
           fbb.addInt64(14, object.dbSessionType);
           fbb.addInt64(15, object.dbServiceType);
+          fbb.addOffset(16, preferredModelOffset);
+          fbb.addBool(17, object.allowDataTraining);
+          fbb.addFloat64(18, object.temperature);
+          fbb.addInt64(19, object.maxTokens);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -1986,11 +2000,6 @@ obx_int.ModelDefinition getObjectBoxModel() {
               .vTableGetNullable(buffer, rootOffset, 14);
           final messageCountParam =
               const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
-          final isEncryptedParam =
-              const fb.BoolReader().vTableGet(buffer, rootOffset, 18, false);
-          final encryptionKeyParam =
-              const fb.StringReader(asciiOptimization: true)
-                  .vTableGetNullable(buffer, rootOffset, 20);
           final tagsParam = const fb.ListReader<String>(
                   fb.StringReader(asciiOptimization: true),
                   lazy: false)
@@ -2004,6 +2013,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
               const fb.BoolReader().vTableGet(buffer, rootOffset, 28, false);
           final metadataParam = const fb.StringReader(asciiOptimization: true)
               .vTableGetNullable(buffer, rootOffset, 30);
+          final preferredModelParam =
+              const fb.StringReader(asciiOptimization: true)
+                  .vTableGetNullable(buffer, rootOffset, 36);
+          final allowDataTrainingParam =
+              const fb.BoolReader().vTableGet(buffer, rootOffset, 38, false);
+          final temperatureParam =
+              const fb.Float64Reader().vTableGet(buffer, rootOffset, 40, 0);
+          final maxTokensParam =
+              const fb.Int64Reader().vTableGet(buffer, rootOffset, 42, 0);
           final object = ChatSession(
               id: idParam,
               uid: uidParam,
@@ -2012,13 +2030,15 @@ obx_int.ModelDefinition getObjectBoxModel() {
               lastModified: lastModifiedParam,
               topic: topicParam,
               messageCount: messageCountParam,
-              isEncrypted: isEncryptedParam,
-              encryptionKey: encryptionKeyParam,
               tags: tagsParam,
               selectedModel: selectedModelParam,
               isArchived: isArchivedParam,
               isFavorite: isFavoriteParam,
-              metadata: metadataParam)
+              metadata: metadataParam,
+              preferredModel: preferredModelParam,
+              allowDataTraining: allowDataTrainingParam,
+              temperature: temperatureParam,
+              maxTokens: maxTokensParam)
             ..dbSessionType =
                 const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 32)
             ..dbServiceType = const fb.Int64Reader()
@@ -2645,41 +2665,49 @@ class ChatSession_ {
   static final messageCount =
       obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[6]);
 
-  /// see [ChatSession.isEncrypted]
-  static final isEncrypted =
-      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[7]);
-
-  /// see [ChatSession.encryptionKey]
-  static final encryptionKey =
-      obx.QueryStringProperty<ChatSession>(_entities[12].properties[8]);
-
   /// see [ChatSession.tags]
   static final tags =
-      obx.QueryStringVectorProperty<ChatSession>(_entities[12].properties[9]);
+      obx.QueryStringVectorProperty<ChatSession>(_entities[12].properties[7]);
 
   /// see [ChatSession.selectedModel]
   static final selectedModel =
-      obx.QueryStringProperty<ChatSession>(_entities[12].properties[10]);
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[8]);
 
   /// see [ChatSession.isArchived]
   static final isArchived =
-      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[11]);
+      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[9]);
 
   /// see [ChatSession.isFavorite]
   static final isFavorite =
-      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[12]);
+      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[10]);
 
   /// see [ChatSession.metadata]
   static final metadata =
-      obx.QueryStringProperty<ChatSession>(_entities[12].properties[13]);
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[11]);
 
   /// see [ChatSession.dbSessionType]
   static final dbSessionType =
-      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[14]);
+      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[12]);
 
   /// see [ChatSession.dbServiceType]
   static final dbServiceType =
-      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[15]);
+      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[13]);
+
+  /// see [ChatSession.preferredModel]
+  static final preferredModel =
+      obx.QueryStringProperty<ChatSession>(_entities[12].properties[14]);
+
+  /// see [ChatSession.allowDataTraining]
+  static final allowDataTraining =
+      obx.QueryBooleanProperty<ChatSession>(_entities[12].properties[15]);
+
+  /// see [ChatSession.temperature]
+  static final temperature =
+      obx.QueryDoubleProperty<ChatSession>(_entities[12].properties[16]);
+
+  /// see [ChatSession.maxTokens]
+  static final maxTokens =
+      obx.QueryIntegerProperty<ChatSession>(_entities[12].properties[17]);
 }
 
 /// [ChatHistorySettingsModel] entity fields to define ObjectBox queries.

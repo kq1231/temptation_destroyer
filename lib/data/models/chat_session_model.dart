@@ -103,6 +103,18 @@ class ChatSession {
   /// Custom metadata as JSON string
   String? metadata;
 
+  /// Preferred AI model for this session
+  String? preferredModel;
+
+  /// Whether data training is allowed for this session
+  bool allowDataTraining;
+
+  /// Temperature setting for the AI (controls randomness)
+  double temperature;
+
+  /// Maximum tokens for AI response
+  int maxTokens;
+
   ChatSession({
     this.id = 0,
     String? uid,
@@ -120,6 +132,10 @@ class ChatSession {
     this.isArchived = false,
     this.isFavorite = false,
     this.metadata,
+    this.preferredModel,
+    this.allowDataTraining = false,
+    this.temperature = 0.7,
+    this.maxTokens = 1000,
   })  : uid = uid ?? const Uuid().v4(),
         createdAt = createdAt ?? DateTime.now(),
         lastModified = lastModified ?? DateTime.now(),
@@ -164,6 +180,10 @@ class ChatSession {
     bool? isArchived,
     bool? isFavorite,
     String? metadata,
+    String? preferredModel,
+    bool? allowDataTraining,
+    double? temperature,
+    int? maxTokens,
   }) {
     return ChatSession(
       id: id ?? this.id,
@@ -182,6 +202,10 @@ class ChatSession {
       isArchived: isArchived ?? this.isArchived,
       isFavorite: isFavorite ?? this.isFavorite,
       metadata: metadata ?? this.metadata,
+      preferredModel: preferredModel ?? this.preferredModel,
+      allowDataTraining: allowDataTraining ?? this.allowDataTraining,
+      temperature: temperature ?? this.temperature,
+      maxTokens: maxTokens ?? this.maxTokens,
     );
   }
 

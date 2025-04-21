@@ -149,7 +149,7 @@ class _EmergencyResolutionFormState
                   const Text('10'),
                 ],
               ),
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
@@ -173,7 +173,7 @@ class _EmergencyResolutionFormState
               // Notes field
               TextField(
                 controller: _notesController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: AppStrings.sessionNotesHint,
                   border: OutlineInputBorder(),
                 ),
@@ -184,7 +184,7 @@ class _EmergencyResolutionFormState
               // Helpful strategies field
               TextField(
                 controller: _strategiesController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: AppStrings.sessionHelpfulStrategiesHint,
                   border: OutlineInputBorder(),
                 ),

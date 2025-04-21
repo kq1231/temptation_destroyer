@@ -1141,7 +1141,7 @@ class _EmergencyChatWidgetState extends ConsumerState<EmergencyChatWidget> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: message.isUserMessage
-              ? Theme.of(context).primaryColor.withOpacity(0.8)
+              ? Theme.of(context).primaryColor.withValues(alpha: 0.8)
               : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(16),
         ),

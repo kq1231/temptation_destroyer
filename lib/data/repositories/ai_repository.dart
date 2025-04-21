@@ -10,7 +10,7 @@ import '../models/chat_session_model.dart';
 import '../models/chat_history_settings_model.dart';
 import '../../objectbox.g.dart';
 import '../../core/config/ai_service_config.dart' as config;
-import '../../presentation/providers/ai_service_settings_provider.dart';
+import '../../presentation/providers/ai_service_provider.dart';
 
 /// Repository for handling AI-related operations
 class AIRepository {
@@ -269,10 +269,10 @@ class AIRepository {
 
       // Add logging for OpenAI request parameters
       print('OpenAI Request Parameters:');
-      print('Model: ' + selectedModel);
-      print('Messages: ' + buildContextMessages(context).toString());
-      print('Temperature: ' + config.temperature.toString());
-      print('Max Tokens: ' + config.maxTokens.toString());
+      print('Model: $selectedModel');
+      print('Messages: ${buildContextMessages(context)}');
+      print('Temperature: ${config.temperature}');
+      print('Max Tokens: ${config.maxTokens}');
 
       while (retryCount <= maxRetries) {
         try {
@@ -427,11 +427,11 @@ class AIRepository {
 
       // Add logging for Anthropic request parameters
       print('Anthropic Request Parameters:');
-      print('Model: ' + selectedModel);
-      print('Messages: ' +
+      print('Model: $selectedModel');
+      print('Messages: '
           '[{"role": "user", "content": "$context\n\n$userInput"}]');
-      print('Temperature: ' + config.temperature.toString());
-      print('Max Tokens: ' + config.maxTokens.toString());
+      print('Temperature: ${config.temperature}');
+      print('Max Tokens: ${config.maxTokens}');
 
       while (retryCount <= maxRetries) {
         try {
@@ -512,11 +512,11 @@ class AIRepository {
 
       // Add logging for OpenRouter request parameters
       print('OpenRouter Request Parameters:');
-      print('Model: ' + selectedModel);
-      print('Messages: ' +
+      print('Model: $selectedModel');
+      print('Messages: '
           '[{"role": "system", "content": "You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment. Keep responses concise but helpful."}, {"role": "user", "content": "Context about my situation: $context"}, {"role": "user", "content": "$userInput"}]');
-      print('Temperature: ' + temperature.toString());
-      print('Max Tokens: ' + maxTokens.toString());
+      print('Temperature: $temperature');
+      print('Max Tokens: $maxTokens');
 
       while (retryCount <= maxRetries) {
         try {
@@ -786,7 +786,7 @@ class AIRepository {
   }
 
   /// Clear chat history and update last cleared timestamp
-  void clearChatHistory() {
+  Future<void> clearChatHistory() async {
     // Get existing settings or create new
     var dbSettings =
         _settingsBox.getAll().firstOrNull ?? ChatHistorySettingsModel();
@@ -798,7 +798,7 @@ class AIRepository {
     _settingsBox.put(dbSettings);
 
     // Clear messages
-    _chatBox.removeAll();
+    await _chatBox.removeAllAsync();
 
     // Also update the current config with new settings
     saveServiceConfig(getServiceConfig().copyWith(
@@ -811,31 +811,73 @@ class AIRepository {
   }
 
   /// Get the AI service configuration
-  config.AIServiceConfig getServiceConfig() =>
-      _ref.read(aiServiceSettingsProvider);
+  config.AIServiceConfig getServiceConfig() {
+    // First check for active session configuration
+    final aiServiceState = _ref.read(aiServiceProvider);
+    if (aiServiceState.activeSession != null) {
+      // If we have an active session, use its configuration
+      return config.AIServiceConfig.fromChatSession(
+          aiServiceState.activeSession!);
+    }
+
+    // Otherwise use the global configuration
+    return _ref.read(aiServiceProvider).config;
+  }
 
   /// Save the AI service configuration
-  void saveServiceConfig(config.AIServiceConfig config) {
-    _ref
-        .read(aiServiceSettingsProvider.notifier)
-        .setServiceType(config.serviceType);
-    if (config.apiKey != null) {
-      _ref.read(aiServiceSettingsProvider.notifier).setApiKey(config.apiKey!);
+  void saveServiceConfig(config.AIServiceConfig newConfig) {
+    final aiServiceNotifier = _ref.read(aiServiceProvider.notifier);
+
+    // Update service type if different
+    if (newConfig.serviceType !=
+        _ref.read(aiServiceProvider).config.serviceType) {
+      aiServiceNotifier.setServiceType(newConfig.serviceType);
     }
-    if (config.preferredModel != null) {
-      _ref
-          .read(aiServiceSettingsProvider.notifier)
-          .setPreferredModel(config.preferredModel);
+
+    // Update API key if provided
+    if (newConfig.apiKey != null && newConfig.apiKey!.isNotEmpty) {
+      aiServiceNotifier.setApiKey(newConfig.apiKey!);
     }
-    _ref
-        .read(aiServiceSettingsProvider.notifier)
-        .setAllowDataTraining(config.allowDataTraining);
-    _ref
-        .read(aiServiceSettingsProvider.notifier)
-        .setTemperature(config.temperature);
-    _ref
-        .read(aiServiceSettingsProvider.notifier)
-        .setMaxTokens(config.maxTokens);
+
+    // Update preferred model if provided
+    if (newConfig.preferredModel != null) {
+      aiServiceNotifier.setPreferredModel(newConfig.preferredModel);
+    }
+
+    // Update other settings
+    if (newConfig.allowDataTraining !=
+        _ref.read(aiServiceProvider).config.allowDataTraining) {
+      aiServiceNotifier.toggleDataTraining();
+    }
+
+    // Update temperature
+    if (newConfig.temperature !=
+        _ref.read(aiServiceProvider).config.temperature) {
+      aiServiceNotifier.setTemperature(newConfig.temperature);
+    }
+
+    // Update max tokens
+    if (newConfig.maxTokens != _ref.read(aiServiceProvider).config.maxTokens) {
+      aiServiceNotifier.setMaxTokens(newConfig.maxTokens);
+    }
+
+    // Update chat history settings
+    if (newConfig.settings.storeChatHistory !=
+        _ref.read(aiServiceProvider).config.settings.storeChatHistory) {
+      aiServiceNotifier
+          .updateStoreChatHistory(newConfig.settings.storeChatHistory);
+    }
+
+    if (newConfig.settings.autoDeleteAfterDays !=
+        _ref.read(aiServiceProvider).config.settings.autoDeleteAfterDays) {
+      aiServiceNotifier
+          .updateAutoDeleteDays(newConfig.settings.autoDeleteAfterDays);
+    }
+
+    // If we have a last cleared timestamp in the config, update it
+    if (newConfig.settings.lastCleared != null) {
+      aiServiceNotifier.clearChatHistory();
+    }
   }
 
   /// Get available models for the selected service with pricing info

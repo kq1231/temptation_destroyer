@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/ai_models.dart' as models;
+import '../../data/models/chat_session_model.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../core/config/ai_service_config.dart';
 import '../../core/security/secure_storage_service.dart';
@@ -12,11 +13,13 @@ class AIServiceState {
   final AIServiceConfig config;
   final bool isLoading;
   final String? errorMessage;
+  final ChatSession? activeSession;
 
   AIServiceState({
     required this.config,
     this.isLoading = false,
     this.errorMessage,
+    this.activeSession,
   });
 
   /// Create a copy with updated values
@@ -24,11 +27,13 @@ class AIServiceState {
     AIServiceConfig? config,
     bool? isLoading,
     String? errorMessage,
+    ChatSession? activeSession,
   }) {
     return AIServiceState(
       config: config ?? this.config,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: errorMessage,
+      activeSession: activeSession ?? this.activeSession,
     );
   }
 }
@@ -53,17 +58,13 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   Future<void> _initialize() async {
     state = state.copyWith(isLoading: true);
     try {
-      final config = AIServiceConfig(
+      // Default config if no session is provided
+      AIServiceConfig config = AIServiceConfig(
         serviceType: models.AIServiceType.openAI,
-        apiKey: await _secureStorage.getKey(
-          models.AIServiceType.openAI.toString(),
-        ),
       );
 
-      // Get API key from secure storage
+      // Get API key from secure storage for the default service type
       final apiKey = await _secureStorage.getKey(config.serviceType.toString());
-
-      print('API Key: $apiKey');
 
       // Update config with API key
       final updatedConfig = config.copyWith(apiKey: apiKey);
@@ -80,8 +81,54 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
     }
   }
 
+  /// Set the active chat session and load its configuration
+  Future<void> setActiveSession(ChatSession? session) async {
+    if (session == null) {
+      // If no session is provided, use the global configuration
+      state = state.copyWith(activeSession: null);
+      return;
+    }
+
+    try {
+      // Create a config from the session
+      final sessionConfig = AIServiceConfig.fromChatSession(session);
+
+      // Get the API key for the session's service type
+      final apiKey =
+          await _secureStorage.getKey(session.serviceType.toString());
+
+      // Update the config with the appropriate API key
+      final updatedConfig = sessionConfig.copyWith(apiKey: apiKey);
+
+      // Update the state with the session and its config
+      state = state.copyWith(
+        activeSession: session,
+        config: updatedConfig,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to load session settings: $e',
+      );
+    }
+  }
+
+  /// Save the current configuration to the active session
+  Future<void> saveConfigToActiveSession() async {
+    final session = state.activeSession;
+    if (session == null) return;
+
+    // Apply the current config to the session
+    final updatedSession = state.config.applyToSession(session);
+
+    // Save the updated session
+    await _repository.updateChatSession(updatedSession);
+
+    // Update the state with the updated session
+    state = state.copyWith(activeSession: updatedSession);
+  }
+
   /// Set the service type
-  void setServiceType(models.AIServiceType type) {
+  Future<void> setServiceType(models.AIServiceType type) async {
     try {
       // Create new config with updated service type
       final newConfig = state.config.copyWith(
@@ -94,6 +141,11 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
 
       // Update state
       state = state.copyWith(config: newConfig);
+
+      // If there's an active session, apply the changes to it
+      if (state.activeSession != null) {
+        await saveConfigToActiveSession();
+      }
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to save service type: $e',
@@ -129,7 +181,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   }
 
   /// Set the preferred model
-  void setPreferredModel(String? model) {
+  Future<void> setPreferredModel(String? model) async {
     try {
       // Create new config with updated model
       final newConfig = state.config.copyWith(preferredModel: model);
@@ -139,6 +191,11 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
 
       // Update state
       state = state.copyWith(config: newConfig);
+
+      // If there's an active session, apply the changes to it
+      if (state.activeSession != null) {
+        await saveConfigToActiveSession();
+      }
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to save preferred model: $e',
@@ -147,7 +204,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   }
 
   /// Toggle data training permission
-  void toggleDataTraining() {
+  Future<void> toggleDataTraining() async {
     try {
       final newAllowDataTraining = !state.config.allowDataTraining;
 
@@ -163,6 +220,11 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       state = state.copyWith(
         config: newConfig,
       );
+
+      // If there's an active session, apply the changes to it
+      if (state.activeSession != null) {
+        await saveConfigToActiveSession();
+      }
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to update data training setting: $e',
@@ -171,7 +233,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   }
 
   /// Update chat history storage setting
-  void updateStoreChatHistory(bool store) {
+  Future<void> updateStoreChatHistory(bool store) async {
     try {
       final newSettings = state.config.settings.copyWith(
         storeChatHistory: store,
@@ -197,7 +259,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   }
 
   /// Update auto-delete days
-  void updateAutoDeleteDays(int days) {
+  Future<void> updateAutoDeleteDays(int days) async {
     try {
       final newSettings = state.config.settings.copyWith(
         autoDeleteAfterDays: days,
@@ -223,7 +285,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   }
 
   /// Clear chat history
-  void clearChatHistory() {
+  Future<void> clearChatHistory() async {
     try {
       final newSettings = state.config.settings.copyWith(
         lastCleared: DateTime.now(),
@@ -244,6 +306,52 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to update last cleared timestamp: $e',
+      );
+    }
+  }
+
+  /// Update temperature setting
+  Future<void> setTemperature(double temperature) async {
+    try {
+      // Create new config with updated temperature
+      final newConfig = state.config.copyWith(temperature: temperature);
+
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(config: newConfig);
+
+      // If there's an active session, apply the changes to it
+      if (state.activeSession != null) {
+        await saveConfigToActiveSession();
+      }
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to update temperature: $e',
+      );
+    }
+  }
+
+  /// Update max tokens setting
+  Future<void> setMaxTokens(int maxTokens) async {
+    try {
+      // Create new config with updated max tokens
+      final newConfig = state.config.copyWith(maxTokens: maxTokens);
+
+      // Save to repository
+      _repository.saveServiceConfig(newConfig);
+
+      // Update state
+      state = state.copyWith(config: newConfig);
+
+      // If there's an active session, apply the changes to it
+      if (state.activeSession != null) {
+        await saveConfigToActiveSession();
+      }
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to update max tokens: $e',
       );
     }
   }

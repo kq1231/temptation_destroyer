@@ -256,10 +256,10 @@ extension ColorExtension on Color {
     int? alpha,
   }) {
     return Color.fromARGB(
-      alpha ?? this.alpha,
-      red ?? this.red,
-      green ?? this.green,
-      blue ?? this.blue,
+      alpha ?? a.toInt(),
+      red ?? b.toInt(),
+      green ?? g.toInt(),
+      blue ?? b.toInt(),
     );
   }
 }

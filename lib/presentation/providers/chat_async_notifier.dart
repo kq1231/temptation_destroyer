@@ -7,10 +7,7 @@ import '../../core/services/sound_service.dart';
 import '../../data/repositories/ai_repository.dart';
 import 'chat_state.dart';
 
-final chatProvider =
-    AsyncNotifierProvider<ChatAsyncNotifier, ChatState>(ChatAsyncNotifier.new);
-
-class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
+class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
   final ContextManager _contextManager = ContextManager();
   final SoundService _soundService = SoundService();
   late final AIRepository _repository;
@@ -248,8 +245,8 @@ class ChatAsyncNotifier extends AsyncNotifier<ChatState> {
   Future<void> clearChatHistory() async {
     state = const AsyncValue.loading();
     try {
-      _repository.clearChatHistory();
-      state = const AsyncValue.data(ChatState());
+      await _repository.clearChatHistory();
+      await initialize();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }

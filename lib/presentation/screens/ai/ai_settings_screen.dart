@@ -12,10 +12,12 @@ class AISettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final aiServiceState = ref.watch(aiServiceProvider);
+    final isSessionSpecific = aiServiceState.activeSession != null;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Service Settings'),
+        title: Text(
+            isSessionSpecific ? 'Session AI Settings' : 'AI Service Settings'),
       ),
       body: aiServiceState.isLoading
           ? const Center(child: LoadingIndicator())
@@ -24,11 +26,15 @@ class AISettingsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (isSessionSpecific)
+                    _buildSessionInfoBanner(context, aiServiceState),
                   _buildServiceTypeSelector(context, ref),
                   const SizedBox(height: 24),
                   _buildApiKeySection(context, ref, aiServiceState),
                   const SizedBox(height: 24),
                   _buildSettingsSection(context, ref, aiServiceState),
+                  const SizedBox(height: 24),
+                  _buildAdvancedSettingsSection(context, ref, aiServiceState),
                   const SizedBox(height: 24),
                   _buildHistorySection(context, ref, aiServiceState),
                   const SizedBox(height: 24),
@@ -40,20 +46,77 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildSessionInfoBanner(BuildContext context, AIServiceState state) {
+    final session = state.activeSession!;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.info_outline, color: Colors.blue),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Editing settings for session: ${session.title}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Changes will only apply to this chat session. To adjust global settings, go back and open AI Settings from the main menu.',
+            style: TextStyle(fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildServiceTypeSelector(BuildContext context, WidgetRef ref) {
     final currentType = ref.watch(
       aiServiceProvider.select((state) => state.config.serviceType),
     );
 
+    final isSessionSpecific = ref.watch(
+      aiServiceProvider.select((state) => state.activeSession != null),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Select AI Service',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          children: [
+            const Text(
+              'Select AI Service',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (isSessionSpecific) ...[
+              const SizedBox(width: 8),
+              const Chip(
+                label: Text('Session Setting'),
+                backgroundColor: Colors.blue,
+                labelStyle: TextStyle(color: Colors.white, fontSize: 10),
+                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 16),
         _buildServiceOption(
@@ -101,8 +164,8 @@ class AISettingsScreen extends ConsumerWidget {
     bool isSelected,
   ) {
     return InkWell(
-      onTap: () {
-        ref.read(aiServiceProvider.notifier).setServiceType(type);
+      onTap: () async {
+        await ref.read(aiServiceProvider.notifier).setServiceType(type);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -329,6 +392,8 @@ class AISettingsScreen extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final isSessionSpecific = state.activeSession != null;
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -336,12 +401,25 @@ class AISettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Model Settings',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                const Text(
+                  'Model Settings',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (isSessionSpecific) ...[
+                  const SizedBox(width: 8),
+                  const Chip(
+                    label: Text('Session Setting'),
+                    backgroundColor: Colors.blue,
+                    labelStyle: TextStyle(color: Colors.white, fontSize: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                  ),
+                ],
+              ],
             ),
             const SizedBox(height: 16),
             SwitchListTile(
@@ -351,8 +429,8 @@ class AISettingsScreen extends ConsumerWidget {
                 softWrap: true,
               ),
               value: state.config.allowDataTraining,
-              onChanged: (value) {
-                ref.read(aiServiceProvider.notifier).toggleDataTraining();
+              onChanged: (value) async {
+                await ref.read(aiServiceProvider.notifier).toggleDataTraining();
               },
             ),
             const SizedBox(height: 8),
@@ -362,7 +440,8 @@ class AISettingsScreen extends ConsumerWidget {
               const Text('Preferred Model:'),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                value: _getValidModelValue(state.config.preferredModel),
+                value: _getValidModelValue(
+                    state.config.preferredModel, state.config.serviceType),
                 isExpanded: true,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
@@ -378,15 +457,124 @@ class AISettingsScreen extends ConsumerWidget {
                           ),
                         ))
                     .toList(),
-                onChanged: (value) {
+                onChanged: (value) async {
                   if (value != null) {
-                    ref
+                    await ref
                         .read(aiServiceProvider.notifier)
                         .setPreferredModel(value);
                   }
                 },
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdvancedSettingsSection(
+    BuildContext context,
+    WidgetRef ref,
+    AIServiceState state,
+  ) {
+    if (state.config.serviceType == models.AIServiceType.offline) {
+      return const SizedBox.shrink();
+    }
+
+    final isSessionSpecific = state.activeSession != null;
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text(
+                  'Advanced Settings',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (isSessionSpecific) ...[
+                  const SizedBox(width: 8),
+                  const Chip(
+                    label: Text('Session Setting'),
+                    backgroundColor: Colors.blue,
+                    labelStyle: TextStyle(color: Colors.white, fontSize: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Temperature slider
+            const Text(
+              'Temperature:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              'Controls randomness in responses. Lower values are more focused, higher values more creative.',
+              style: TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Text('0.0', style: TextStyle(fontSize: 12)),
+                Expanded(
+                  child: Slider(
+                    value: state.config.temperature,
+                    min: 0.0,
+                    max: 1.0,
+                    divisions: 10,
+                    label: state.config.temperature.toStringAsFixed(1),
+                    onChanged: (value) async {
+                      await ref
+                          .read(aiServiceProvider.notifier)
+                          .setTemperature(value);
+                    },
+                  ),
+                ),
+                const Text('1.0', style: TextStyle(fontSize: 12)),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Max tokens slider
+            const Text(
+              'Maximum Response Length:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              'Limits the length of AI responses. Higher values allow longer answers.',
+              style: TextStyle(fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Text('512', style: TextStyle(fontSize: 12)),
+                Expanded(
+                  child: Slider(
+                    value: state.config.maxTokens.toDouble(),
+                    min: 512,
+                    max: 4096,
+                    divisions: 14,
+                    label: state.config.maxTokens.toString(),
+                    onChanged: (value) async {
+                      await ref
+                          .read(aiServiceProvider.notifier)
+                          .setMaxTokens(value.toInt());
+                    },
+                  ),
+                ),
+                const Text('4096', style: TextStyle(fontSize: 12)),
+              ],
+            ),
           ],
         ),
       ),
@@ -434,6 +622,13 @@ class AISettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     AIServiceState state,
   ) {
+    final isSessionSpecific = state.activeSession != null;
+
+    // If we're editing session-specific settings, don't show the global history options
+    if (isSessionSpecific) {
+      return const SizedBox.shrink();
+    }
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -456,8 +651,8 @@ class AISettingsScreen extends ConsumerWidget {
                 softWrap: true,
               ),
               value: state.config.settings.storeChatHistory,
-              onChanged: (value) {
-                ref
+              onChanged: (value) async {
+                await ref
                     .read(aiServiceProvider.notifier)
                     .updateStoreChatHistory(value);
               },
@@ -474,16 +669,16 @@ class AISettingsScreen extends ConsumerWidget {
                   contentPadding:
                       EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
-                items: [
+                items: const [
                   DropdownMenuItem(value: 7, child: Text('7 days')),
                   DropdownMenuItem(value: 30, child: Text('30 days')),
                   DropdownMenuItem(value: 90, child: Text('90 days')),
                   DropdownMenuItem(value: 365, child: Text('1 year')),
                   DropdownMenuItem(value: -1, child: Text('Never')),
                 ],
-                onChanged: (value) {
+                onChanged: (value) async {
                   if (value != null) {
-                    ref
+                    await ref
                         .read(aiServiceProvider.notifier)
                         .updateAutoDeleteDays(value);
                   }
@@ -492,8 +687,8 @@ class AISettingsScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Center(
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    _showClearHistoryConfirmation(context, ref);
+                  onPressed: () async {
+                    await _showClearHistoryConfirmation(context, ref);
                   },
                   icon: const Icon(Icons.delete_forever),
                   label: const Text('Clear All Chat History'),
@@ -510,7 +705,8 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showClearHistoryConfirmation(BuildContext context, WidgetRef ref) {
+  Future<void> _showClearHistoryConfirmation(
+      BuildContext context, WidgetRef ref) async {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -524,8 +720,8 @@ class AISettingsScreen extends ConsumerWidget {
             child: const Text('CANCEL'),
           ),
           TextButton(
-            onPressed: () {
-              ref.read(aiServiceProvider.notifier).clearChatHistory();
+            onPressed: () async {
+              await ref.read(aiServiceProvider.notifier).clearChatHistory();
               Navigator.of(ctx).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -601,9 +797,11 @@ class AISettingsScreen extends ConsumerWidget {
               ),
             );
           }).toList(),
-          onChanged: (value) {
+          onChanged: (value) async {
             if (value != null) {
-              ref.read(aiServiceProvider.notifier).setPreferredModel(value);
+              await ref
+                  .read(aiServiceProvider.notifier)
+                  .setPreferredModel(value);
             }
           },
         ),
@@ -857,8 +1055,9 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _getValidModelValue(String? currentValue) {
-    final modelOptions = _getModelOptions(models.AIServiceType.openAI);
+  String _getValidModelValue(
+      String? currentValue, models.AIServiceType serviceType) {
+    final modelOptions = _getModelOptions(serviceType);
     final validValues = modelOptions.map((option) => option.value).toList();
     return validValues.contains(currentValue) ? currentValue! : 'default';
   }

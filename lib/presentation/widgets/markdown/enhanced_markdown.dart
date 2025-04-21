@@ -111,13 +111,16 @@ class EnhancedMarkdown extends StatelessWidget {
           left: BorderSide(
             color: isUserMessage
                 ? Colors.white70
-                : Theme.of(context).primaryColor.withOpacity(0.7),
+                : Theme.of(context).primaryColor.withValues(alpha: 0.7),
             width: 4,
           ),
         ),
         color: isUserMessage
-            ? Colors.white.withOpacity(0.1)
-            : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            ? Colors.white.withValues(alpha: 0.1)
+            : Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withValues(alpha: 0.3),
       ),
       blockquotePadding:
           const EdgeInsets.only(left: 16, top: 8, bottom: 8, right: 8),
@@ -132,7 +135,7 @@ class EnhancedMarkdown extends StatelessWidget {
       tableBorder: TableBorder.all(
         color: isUserMessage
             ? Colors.white30
-            : Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            : Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
         width: 1,
       ),
       tableCellsPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -141,14 +144,14 @@ class EnhancedMarkdown extends StatelessWidget {
       code: baseStyle.copyWith(
         fontFamily: 'monospace',
         backgroundColor: isUserMessage
-            ? Colors.white.withOpacity(0.1)
-            : Theme.of(context).primaryColor.withOpacity(0.1),
+            ? Colors.white.withValues(alpha: 0.1)
+            : Theme.of(context).primaryColor.withValues(alpha: 0.1),
         color: isUserMessage ? Colors.white : Theme.of(context).primaryColor,
       ),
       codeblockDecoration: BoxDecoration(
         color: isUserMessage
             ? Colors.white10
-            : Theme.of(context).colorScheme.surfaceVariant,
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(4),
       ),
       codeblockPadding: const EdgeInsets.all(8),
@@ -282,8 +285,8 @@ class EnhancedMarkdown extends StatelessWidget {
       code: baseStyle.copyWith(
         fontFamily: 'monospace',
         backgroundColor: isUserMessage
-            ? Colors.white.withOpacity(0.1)
-            : Theme.of(context).primaryColor.withOpacity(0.1),
+            ? Colors.white.withValues(alpha: 0.1)
+            : Theme.of(context).primaryColor.withValues(alpha: 0.1),
       ),
     );
 

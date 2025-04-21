@@ -108,7 +108,7 @@ class HomeScreen extends ConsumerWidget {
               title: const Text('AI Guidance'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.of(context).pushNamed('/ai-guidance');
+                Navigator.of(context).pushNamed('/chat-sessions');
               },
             ),
             ListTile(
@@ -234,7 +234,7 @@ class HomeScreen extends ConsumerWidget {
                         context,
                         Icons.chat_bubble_outline,
                         'AI Help',
-                        () => Navigator.of(context).pushNamed('/ai-guidance'),
+                        () => Navigator.of(context).pushNamed('/chat-sessions'),
                       ),
                       _buildFeatureButton(
                         context,

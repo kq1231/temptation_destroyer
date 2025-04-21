@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../presentation/providers/ai_service_provider.dart';
 import '../../../presentation/providers/chat_provider.dart';
 import '../../../data/models/ai_models.dart';
+import '../../../data/models/chat_session_model.dart';
 import '../../widgets/app_loading_indicator.dart';
 import '../../widgets/emergency_chat_widget.dart';
 import '../../widgets/chat/chat_message_bubble.dart';
@@ -10,8 +11,9 @@ import '../../../core/context/context_manager.dart';
 
 class AIGuidanceScreen extends ConsumerStatefulWidget {
   static const routeName = '/ai-guidance';
+  final ChatSession? session;
 
-  const AIGuidanceScreen({super.key});
+  const AIGuidanceScreen({super.key, this.session});
 
   @override
   ConsumerState<AIGuidanceScreen> createState() => _AIGuidanceScreenState();
@@ -24,19 +26,30 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   bool _isEmergencyMode = false;
   String _emergencyTriggerMessage = '';
   final ContextManager _contextManager = ContextManager();
+  late ChatSession? _session;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _session = widget.session;
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      // Initialize the chat state when the screen first loads
-      Future.microtask(() => ref.read(chatProvider.notifier).initialize());
+      // Get session from route arguments if not passed directly
+      if (_session == null) {
+        final args = ModalRoute.of(context)?.settings.arguments;
+        if (args is ChatSession) {
+          _session = args;
+        }
+      }
+
+      // Initialize chat with the session
+      Future.microtask(
+          () => ref.read(chatProvider.notifier).initialize(session: _session));
       _isInitialized = true;
     }
   }
@@ -52,22 +65,9 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
-      print('Loading more messages');
       ref.read(chatProvider.notifier).loadMoreMessages();
     }
   }
-
-  // void _scrollToBottom() {
-  //   if (_scrollController.hasClients) {
-  //     Future.delayed(const Duration(milliseconds: 100), () {
-  //       _scrollController.animateTo(
-  //         _scrollController.position.maxScrollExtent,
-  //         duration: const Duration(milliseconds: 200),
-  //         curve: Curves.easeOut,
-  //       );
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +101,9 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
     // Standard chat UI
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Guidance'),
+        title: chatState.value?.currentSession == null
+            ? const Text('AI Guidance')
+            : Text(chatState.value?.currentSession?.title ?? 'AI Guidance'),
         actions: [
           // Settings button
           IconButton(
@@ -158,7 +160,9 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
 
                 return RefreshIndicator(
                   onRefresh: () async {
-                    await ref.read(chatProvider.notifier).initialize();
+                    await ref.read(chatProvider.notifier).initialize(
+                          session: state.currentSession,
+                        );
                     _scrollController.jumpTo(0);
                   },
                   child: ListView.builder(
@@ -196,7 +200,9 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
                     ),
                     TextButton(
                       onPressed: () {
-                        ref.read(chatProvider.notifier).initialize();
+                        ref.read(chatProvider.notifier).initialize(
+                              session: _session,
+                            );
                       },
                       child: const Text('Retry'),
                     ),
@@ -300,7 +306,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, -1),
           ),

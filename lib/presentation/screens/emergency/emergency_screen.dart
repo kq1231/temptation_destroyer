@@ -164,12 +164,12 @@ class EmergencyScreen extends ConsumerWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+      child: const Padding(
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
                 Icon(Icons.tips_and_updates, color: AppColors.info),
                 SizedBox(width: 8),
@@ -182,29 +182,29 @@ class EmergencyScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            const _EmergencyTip(
+            SizedBox(height: 16),
+            _EmergencyTip(
               title: 'Step away',
               description:
                   'Change your environment immediately. Walk outside, go to a different room, or just stand up.',
               icon: Icons.directions_walk,
             ),
-            const SizedBox(height: 12),
-            const _EmergencyTip(
+            SizedBox(height: 12),
+            _EmergencyTip(
               title: 'Deep breathing',
               description:
                   'Take 5 deep breaths, inhaling for 4 seconds and exhaling for 6 seconds.',
               icon: Icons.air,
             ),
-            const SizedBox(height: 12),
-            const _EmergencyTip(
+            SizedBox(height: 12),
+            _EmergencyTip(
               title: 'Call someone',
               description:
                   'Reach out to a trusted friend or family member who knows about your struggle.',
               icon: Icons.phone,
             ),
-            const SizedBox(height: 12),
-            const _EmergencyTip(
+            SizedBox(height: 12),
+            _EmergencyTip(
               title: 'Remember your "why"',
               description:
                   'Think about why you started this journey and the person you want to become.',

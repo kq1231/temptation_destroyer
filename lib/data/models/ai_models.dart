@@ -49,12 +49,11 @@ class ChatMessageModel {
     required this.isUserMessage,
     String? role,
     DateTime? timestamp,
-    bool? wasHelpful,
+    this.wasHelpful,
     ChatSession? session,
   })  : uid = uid ?? const Uuid().v4(),
         role = role ?? (isUserMessage ? 'user' : 'assistant'),
-        timestamp = timestamp ?? DateTime.now(),
-        wasHelpful = wasHelpful {
+        timestamp = timestamp ?? DateTime.now() {
     if (session != null) {
       this.session.target = session;
     }
@@ -122,40 +121,6 @@ class ChatHistorySettings {
       storeChatHistory: storeChatHistory ?? this.storeChatHistory,
       autoDeleteAfterDays: autoDeleteAfterDays ?? this.autoDeleteAfterDays,
       lastCleared: lastCleared ?? this.lastCleared,
-    );
-  }
-}
-
-/// Simple runtime configuration for AI services (not persisted)
-class AIServiceSettings {
-  final AIServiceType serviceType;
-  final String? preferredModel;
-  final bool allowDataTraining;
-  final double temperature;
-  final int maxTokens;
-
-  const AIServiceSettings({
-    this.serviceType = AIServiceType.offline,
-    this.preferredModel,
-    this.allowDataTraining = false,
-    this.temperature = 1.0,
-    this.maxTokens = 8096,
-  });
-
-  /// Create a copy with updated values
-  AIServiceSettings copyWith({
-    AIServiceType? serviceType,
-    String? preferredModel,
-    bool? allowDataTraining,
-    double? temperature,
-    int? maxTokens,
-  }) {
-    return AIServiceSettings(
-      serviceType: serviceType ?? this.serviceType,
-      preferredModel: preferredModel ?? this.preferredModel,
-      allowDataTraining: allowDataTraining ?? this.allowDataTraining,
-      temperature: temperature ?? this.temperature,
-      maxTokens: maxTokens ?? this.maxTokens,
     );
   }
 }

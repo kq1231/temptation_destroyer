@@ -12,7 +12,6 @@ void main() {
       expect(session.title, equals('Test Session'));
       expect(session.sessionType, equals(ChatSessionType.normal));
       expect(session.messageCount, equals(0));
-      expect(session.isEncrypted, isFalse);
       expect(session.tags, isEmpty);
       expect(session.serviceType, equals(AIServiceType.offline));
       expect(session.isArchived, isFalse);
@@ -29,8 +28,6 @@ void main() {
         sessionType: ChatSessionType.emergency,
         topic: 'Emergency Support',
         messageCount: 5,
-        isEncrypted: true,
-        encryptionKey: 'test-key',
         tags: ['urgent', 'support'],
         serviceType: AIServiceType.openAI,
         selectedModel: 'gpt-4',
@@ -46,8 +43,6 @@ void main() {
       expect(session.sessionType, equals(ChatSessionType.emergency));
       expect(session.topic, equals('Emergency Support'));
       expect(session.messageCount, equals(5));
-      expect(session.isEncrypted, isTrue);
-      expect(session.encryptionKey, equals('test-key'));
       expect(session.tags, containsAll(['urgent', 'support']));
       expect(session.serviceType, equals(AIServiceType.openAI));
       expect(session.selectedModel, equals('gpt-4'));
@@ -73,7 +68,6 @@ void main() {
       expect(copied.title, equals('Updated'));
       expect(copied.sessionType, equals(ChatSessionType.guided));
       expect(copied.serviceType, equals(AIServiceType.anthropic));
-      expect(copied.isEncrypted, isTrue);
       expect(copied.uid, equals(original.uid));
     });
 

@@ -120,9 +120,9 @@ class _PasswordSetupScreenState extends ConsumerState<PasswordSetupScreen> {
             // Type to confirm field
             TextField(
               controller: _typeToConfirmController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: AppStrings.typeToConfirm,
-                border: const OutlineInputBorder(),
+                border: OutlineInputBorder(),
               ),
               onChanged: (value) {
                 setState(() {

@@ -169,14 +169,14 @@ class HobbyDetailsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Card(
+            const Card(
               elevation: 2,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Coming soon! In future updates, you\'ll be able to track your engagement with this hobby over time.',
                       style: TextStyle(
                         fontStyle: FontStyle.italic,

@@ -1,4 +1,5 @@
 import '../../data/models/ai_models.dart';
+import '../../data/models/chat_session_model.dart';
 
 /// Chat history settings
 class ChatHistorySettings {
@@ -84,6 +85,33 @@ class AIServiceConfig {
       temperature: temperature ?? this.temperature,
       maxTokens: maxTokens ?? this.maxTokens,
       settings: settings ?? this.settings,
+    );
+  }
+
+  /// Create a config from a chat session
+  factory AIServiceConfig.fromChatSession(ChatSession session) {
+    return AIServiceConfig(
+      serviceType: session.serviceType,
+      preferredModel: session.preferredModel,
+      allowDataTraining: session.allowDataTraining,
+      temperature: session.temperature,
+      maxTokens: session.maxTokens,
+      settings: const ChatHistorySettings(
+        storeChatHistory: true, // Always store history for an existing session
+        autoDeleteAfterDays:
+            30, // Default value, can be overridden by global settings
+      ),
+    );
+  }
+
+  /// Apply this config to a chat session
+  ChatSession applyToSession(ChatSession session) {
+    return session.copyWith(
+      serviceType: serviceType,
+      preferredModel: preferredModel,
+      allowDataTraining: allowDataTraining,
+      temperature: temperature,
+      maxTokens: maxTokens,
     );
   }
 }

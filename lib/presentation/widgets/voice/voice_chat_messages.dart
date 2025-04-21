@@ -75,7 +75,7 @@ class VoiceChatMessages extends ConsumerWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               padding: const EdgeInsets.all(8),
-              color: Colors.green.withOpacity(0.1),
+              color: Colors.green.withValues(alpha: 0.1),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -128,7 +128,7 @@ class VoiceChatMessages extends ConsumerWidget {
           width: 12,
           height: 12,
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(value),
+            color: Colors.green.withValues(alpha: value),
             shape: BoxShape.circle,
           ),
         );
@@ -156,7 +156,7 @@ class VoiceChatMessages extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 5,
                     offset: const Offset(0, 2),
                   ),

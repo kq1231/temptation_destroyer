@@ -295,7 +295,7 @@ class ChallengeRepository {
 
   // Get a random category
   ChallengeCategory _getRandomCategory() {
-    final categories = ChallengeCategory.values;
+    const categories = ChallengeCategory.values;
     return categories[
         _random.nextInt(categories.length - 1)]; // Exclude 'custom'
   }

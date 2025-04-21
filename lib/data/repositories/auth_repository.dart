@@ -387,15 +387,15 @@ class AuthRepository {
       final user = users.first;
 
       // Check for rate limiting
-      final cooldownMinutes =
+      const cooldownMinutes =
           30; // 30 minute cooldown after too many failed attempts
-      final maxAttempts = 5; // Maximum of 5 attempts before cooldown
+      const maxAttempts = 5; // Maximum of 5 attempts before cooldown
 
       // If user has exceeded max attempts and is within cooldown period
       if (user.failedRecoveryAttempts >= maxAttempts &&
           user.lastFailedRecoveryAttempt != null) {
         final cooldownEnd = user.lastFailedRecoveryAttempt!
-            .add(Duration(minutes: cooldownMinutes));
+            .add(const Duration(minutes: cooldownMinutes));
         final now = DateTime.now();
 
         if (now.isBefore(cooldownEnd)) {

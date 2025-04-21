@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:temptation_destroyer/data/models/hobby_model.dart';
+import 'package:temptation_destroyer/data/models/chat_session_model.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/password_setup_screen.dart';
 import 'screens/auth/recovery_codes_screen.dart';
@@ -13,6 +14,7 @@ import 'screens/hobbies/hobby_form_screen.dart';
 import 'screens/hobbies/hobby_details_screen.dart';
 import 'screens/aspirations/aspirations_management_screen.dart';
 import 'screens/ai/ai_guidance_screen.dart';
+import 'screens/ai/chat_sessions_screen.dart';
 import 'screens/ai/ai_settings_screen.dart';
 import 'screens/statistics/statistics_dashboard_screen.dart';
 import 'providers/auth_provider.dart';
@@ -44,7 +46,7 @@ class TemptationDestroyerApp extends ConsumerWidget {
         '/hobbies': (context) => const HobbyManagementScreen(),
         '/hobbies/add': (context) => const HobbyFormScreen(),
         '/aspirations': (context) => const AspirationsManagementScreen(),
-        '/ai-guidance': (context) => const AIGuidanceScreen(),
+        '/chat-sessions': (context) => const ChatSessionsScreen(),
         '/statistics': (context) => const StatisticsDashboardScreen(),
         '/ai-settings': (context) => const AISettingsScreen(),
       },
@@ -61,6 +63,12 @@ class TemptationDestroyerApp extends ConsumerWidget {
           final hobby = settings.arguments as HobbyModel;
           return MaterialPageRoute(
             builder: (context) => HobbyDetailsScreen(hobby: hobby),
+          );
+        } else if (settings.name == '/ai-guidance') {
+          // Extract the session from arguments
+          final session = settings.arguments as ChatSession?;
+          return MaterialPageRoute(
+            builder: (context) => AIGuidanceScreen(session: session),
           );
         }
         return null;

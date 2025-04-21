@@ -58,9 +58,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // App logo or icon
-            Center(
+            const Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 32),
+                padding: EdgeInsets.symmetric(vertical: 32),
                 child: Icon(
                   Icons.shield,
                   size: 80,
@@ -70,22 +70,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
 
             // App title and welcome message
-            Center(
+            const Center(
               child: Column(
                 children: [
                   Text(
                     AppStrings.appName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: AppColors.text,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     AppStrings.appSlogan,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       color: AppColors.textSecondary,
                       fontStyle: FontStyle.italic,
