@@ -8,7 +8,6 @@ import '../../core/security/secure_storage_service.dart';
 import '../../core/utils/encryption_service.dart';
 import '../models/ai_models.dart';
 import '../models/chat_session_model.dart';
-import '../models/chat_history_settings_model.dart';
 import '../../objectbox.g.dart';
 import '../../core/config/ai_service_config.dart' as config;
 import '../../presentation/providers/ai_service_provider.dart';
@@ -17,7 +16,6 @@ import '../../presentation/providers/ai_service_provider.dart';
 class AIRepository {
   final SecureStorageService _secureStorage;
   final Box<ChatMessageModel> _chatBox;
-  final Box<ChatHistorySettingsModel> _settingsBox;
   final Dio _dio;
   final EncryptionService _encryptionService = EncryptionService.instance;
   final dynamic _ref;
@@ -30,8 +28,6 @@ class AIRepository {
   AIRepository(dynamic ref)
       : _secureStorage = SecureStorageService.instance,
         _chatBox = ObjectBoxManager.instance.box<ChatMessageModel>(),
-        _settingsBox =
-            ObjectBoxManager.instance.box<ChatHistorySettingsModel>(),
         _dio = Dio(),
         _ref = ref {
     _initializeRequestTracking();
@@ -828,58 +824,6 @@ class AIRepository {
     return count;
   }
 
-  /// Get chat history settings
-  config.ChatHistorySettings getChatHistorySettings() {
-    final allSettings = _settingsBox.getAll();
-
-    final dbSettings = allSettings.first;
-    return config.ChatHistorySettings(
-      storeChatHistory: dbSettings.storeChatHistory,
-      autoDeleteAfterDays: dbSettings.autoDeleteAfterDays,
-      lastCleared: dbSettings.lastCleared,
-    );
-  }
-
-  /// Update chat history settings
-  void updateChatHistorySettings(config.ChatHistorySettings settings) {
-    // Get existing settings or create new
-    var existingSettings =
-        _settingsBox.getAll().firstOrNull ?? ChatHistorySettingsModel();
-
-    // Update settings using copyWith
-    existingSettings = existingSettings.copyWith(
-      storeChatHistory: settings.storeChatHistory,
-      autoDeleteAfterDays: settings.autoDeleteAfterDays,
-      lastCleared: settings.lastCleared,
-    );
-    _settingsBox.put(existingSettings);
-  }
-
-  /// Clear chat history and update last cleared timestamp
-  Future<void> clearChatHistory() async {
-    // Get existing settings or create new
-    var dbSettings =
-        _settingsBox.getAll().firstOrNull ?? ChatHistorySettingsModel();
-
-    // Update last cleared timestamp
-    dbSettings = dbSettings.copyWith(
-      lastCleared: DateTime.now(),
-    );
-    _settingsBox.put(dbSettings);
-
-    // Clear messages
-    await _chatBox.removeAllAsync();
-
-    // Also update the current config with new settings
-    saveServiceConfig(getServiceConfig().copyWith(
-      settings: config.ChatHistorySettings(
-        storeChatHistory: dbSettings.storeChatHistory,
-        autoDeleteAfterDays: dbSettings.autoDeleteAfterDays,
-        lastCleared: dbSettings.lastCleared,
-      ),
-    ));
-  }
-
   /// Get the AI service configuration
   config.AIServiceConfig getServiceConfig() {
     // First check for active session configuration
@@ -1010,20 +954,6 @@ class AIRepository {
   /// Delete all AI data (responses and chat history)
   void deleteAllAIData() {
     _chatBox.removeAll();
-
-    // Update lastCleared in settings
-    var dbSettings = _settingsBox.getAll().firstOrNull;
-    dbSettings = dbSettings!.copyWith(lastCleared: DateTime.now());
-    _settingsBox.put(dbSettings);
-
-    // Update config settings to match
-    saveServiceConfig(getServiceConfig().copyWith(
-      settings: config.ChatHistorySettings(
-        storeChatHistory: dbSettings.storeChatHistory,
-        autoDeleteAfterDays: dbSettings.autoDeleteAfterDays,
-        lastCleared: dbSettings.lastCleared,
-      ),
-    ));
   }
 
   /// Get chat messages with pagination
@@ -1611,5 +1541,11 @@ class AIRepository {
       }
       throw AIServiceException('OpenRouter streaming error: ${e.toString()}');
     }
+  }
+
+  /// Clear chat history
+  Future<void> clearChatHistory() async {
+    // Clear messages
+    await _chatBox.removeAllAsync();
   }
 }

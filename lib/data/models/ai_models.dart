@@ -92,45 +92,6 @@ class ChatMessageModel {
   }
 }
 
-/// Settings for Chat History
-@Entity()
-class ChatHistorySettings {
-  @Id()
-  int id = 0;
-
-  /// Whether to store chat history
-  bool storeChatHistory;
-
-  /// Number of days after which to auto-delete chat history
-  int autoDeleteAfterDays;
-
-  /// When the chat history was last cleared
-  @Property(type: PropertyType.date)
-  DateTime lastCleared;
-
-  ChatHistorySettings({
-    this.id = 0,
-    this.storeChatHistory = false,
-    this.autoDeleteAfterDays = 30,
-    DateTime? lastCleared,
-  }) : lastCleared = lastCleared ?? DateTime.now();
-
-  /// Create a copy with updated values
-  ChatHistorySettings copyWith({
-    int? id,
-    bool? storeChatHistory,
-    int? autoDeleteAfterDays,
-    DateTime? lastCleared,
-  }) {
-    return ChatHistorySettings(
-      id: id ?? this.id,
-      storeChatHistory: storeChatHistory ?? this.storeChatHistory,
-      autoDeleteAfterDays: autoDeleteAfterDays ?? this.autoDeleteAfterDays,
-      lastCleared: lastCleared ?? this.lastCleared,
-    );
-  }
-}
-
 class AIServiceException implements Exception {
   final String message;
 

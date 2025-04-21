@@ -1,32 +1,6 @@
 import '../../data/models/ai_models.dart';
 import '../../data/models/chat_session_model.dart';
 
-/// Chat history settings
-class ChatHistorySettings {
-  final bool storeChatHistory;
-  final int autoDeleteAfterDays;
-  final DateTime? lastCleared;
-
-  const ChatHistorySettings({
-    this.storeChatHistory = false,
-    this.autoDeleteAfterDays = 30,
-    this.lastCleared,
-  });
-
-  /// Create a copy with updated values
-  ChatHistorySettings copyWith({
-    bool? storeChatHistory,
-    int? autoDeleteAfterDays,
-    DateTime? lastCleared,
-  }) {
-    return ChatHistorySettings(
-      storeChatHistory: storeChatHistory ?? this.storeChatHistory,
-      autoDeleteAfterDays: autoDeleteAfterDays ?? this.autoDeleteAfterDays,
-      lastCleared: lastCleared ?? this.lastCleared,
-    );
-  }
-}
-
 /// Configuration class for AI services
 class AIServiceConfig {
   /// The type of AI service to use
@@ -47,9 +21,6 @@ class AIServiceConfig {
   /// Maximum tokens for response generation
   final int maxTokens;
 
-  /// Chat history settings
-  final ChatHistorySettings settings;
-
   /// Constructor
   const AIServiceConfig({
     this.serviceType = AIServiceType.offline,
@@ -58,7 +29,6 @@ class AIServiceConfig {
     this.allowDataTraining = false,
     this.temperature = 1.0,
     this.maxTokens = 2048,
-    this.settings = const ChatHistorySettings(),
   });
 
   /// Create a copy with updated values
@@ -70,7 +40,6 @@ class AIServiceConfig {
     bool? allowDataTraining,
     double? temperature,
     int? maxTokens,
-    ChatHistorySettings? settings,
   }) {
     return AIServiceConfig(
       serviceType: serviceType ?? this.serviceType,
@@ -79,7 +48,6 @@ class AIServiceConfig {
       allowDataTraining: allowDataTraining ?? this.allowDataTraining,
       temperature: temperature ?? this.temperature,
       maxTokens: maxTokens ?? this.maxTokens,
-      settings: settings ?? this.settings,
     );
   }
 
@@ -91,11 +59,6 @@ class AIServiceConfig {
       allowDataTraining: session.allowDataTraining,
       temperature: session.temperature,
       maxTokens: session.maxTokens,
-      settings: const ChatHistorySettings(
-        storeChatHistory: true, // Always store history for an existing session
-        autoDeleteAfterDays:
-            30, // Default value, can be overridden by global settings
-      ),
     );
   }
 

@@ -181,25 +181,19 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   }
 
   /// Set the service type
-  Future<void> setServiceType(models.AIServiceType type) async {
+  Future<void> setServiceType(models.AIServiceType type,
+      {String? apiKey}) async {
+    if (state.isLoading) return;
+
     try {
-      // Show loading state
       state = state.copyWith(isLoading: true);
 
-      print(
-          "SERVICE TYPE FROM THE setServiceType METHOD INSIDE THE ai_service_provider.dart: $type");
-
-      // Get the appropriate API key for this service
-      final apiKey = await _secureStorage.getKey(type.toString());
-      print(
-          "API KEY FROM THE setServiceType METHOD INSIDE THE ai_service_provider.dart: $apiKey");
-      // Create new config with updated service type and API key
+      // Create new config with updated service type
       final newConfig = AIServiceConfig(
-        maxTokens: state.config.maxTokens,
         temperature: state.config.temperature,
+        maxTokens: state.config.maxTokens,
         preferredModel: state.config.preferredModel,
         allowDataTraining: state.config.allowDataTraining,
-        settings: state.config.settings,
         serviceType: type,
         apiKey: apiKey,
       );
@@ -221,6 +215,74 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Failed to save service type: $e',
+      );
+    }
+  }
+
+  /// Update API Key for the current service
+  Future<void> updateApiKey(String apiKey) async {
+    if (state.isLoading) return;
+
+    try {
+      state = state.copyWith(isLoading: true);
+
+      // Store the API key securely
+      final secureStorage = SecureStorageService.instance;
+      await secureStorage.storeKey(
+        state.config.serviceType.toString(),
+        apiKey,
+      );
+
+      // Create an updated config with the API key
+      final updatedConfig = state.config.copyWith(
+        apiKey: apiKey,
+      );
+
+      state = state.copyWith(
+        config: updatedConfig,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to update API key: $e',
+        isLoading: false,
+      );
+    }
+  }
+
+  /// Clear chat history
+  Future<void> clearChatHistory() async {
+    try {
+      // Clear chat history in repository
+      await _repository.clearChatHistory();
+
+      print('Chat history cleared');
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to clear chat history: $e',
+      );
+    }
+  }
+
+  /// Update temperature setting
+  Future<void> setTemperature(double temperature) async {
+    try {
+      // Create new config with updated temperature
+      final newConfig = state.config.copyWith(temperature: temperature);
+
+      // Update state immediately
+      state = state.copyWith(config: newConfig);
+
+      // If there's an active session, apply the changes to it
+      if (state.activeSession != null) {
+        await saveConfigToActiveSession();
+      } else {
+        // Otherwise save it directly
+        await _directSaveConfig(newConfig);
+      }
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to update temperature: $e',
       );
     }
   }
@@ -298,101 +360,6 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to update data training setting: $e',
-      );
-    }
-  }
-
-  /// Update chat history storage setting
-  Future<void> updateStoreChatHistory(bool store) async {
-    try {
-      final newSettings = state.config.settings.copyWith(
-        storeChatHistory: store,
-      );
-
-      // Create new config with updated settings
-      final newConfig = state.config.copyWith(
-        settings: newSettings,
-      );
-
-      // Update state immediately
-      state = state.copyWith(config: newConfig);
-
-      // Save the config
-      await _directSaveConfig(newConfig);
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Failed to update chat history setting: $e',
-      );
-    }
-  }
-
-  /// Update auto-delete days
-  Future<void> updateAutoDeleteDays(int days) async {
-    try {
-      final newSettings = state.config.settings.copyWith(
-        autoDeleteAfterDays: days,
-      );
-
-      // Create new config with updated settings
-      final newConfig = state.config.copyWith(
-        settings: newSettings,
-      );
-
-      // Update state immediately
-      state = state.copyWith(config: newConfig);
-
-      // Save the config
-      await _directSaveConfig(newConfig);
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Failed to update auto-delete days: $e',
-      );
-    }
-  }
-
-  /// Clear chat history
-  Future<void> clearChatHistory() async {
-    try {
-      final newSettings = state.config.settings.copyWith(
-        lastCleared: DateTime.now(),
-      );
-
-      // Create new config with updated settings
-      final newConfig = state.config.copyWith(
-        settings: newSettings,
-      );
-
-      // Update state immediately
-      state = state.copyWith(config: newConfig);
-
-      // Save the config
-      await _directSaveConfig(newConfig);
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Failed to update last cleared timestamp: $e',
-      );
-    }
-  }
-
-  /// Update temperature setting
-  Future<void> setTemperature(double temperature) async {
-    try {
-      // Create new config with updated temperature
-      final newConfig = state.config.copyWith(temperature: temperature);
-
-      // Update state immediately
-      state = state.copyWith(config: newConfig);
-
-      // If there's an active session, apply the changes to it
-      if (state.activeSession != null) {
-        await saveConfigToActiveSession();
-      } else {
-        // Otherwise save it directly
-        await _directSaveConfig(newConfig);
-      }
-    } catch (e) {
-      state = state.copyWith(
-        errorMessage: 'Failed to update temperature: $e',
       );
     }
   }

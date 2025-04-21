@@ -32,8 +32,6 @@ class AISettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 24),
                   _buildAdvancedSettingsSection(context, ref, aiServiceState),
                   const SizedBox(height: 24),
-                  _buildHistorySection(context, ref, aiServiceState),
-                  const SizedBox(height: 24),
                   _buildSoundSettingsSection(context, ref),
                   const SizedBox(height: 40),
                 ],
@@ -579,142 +577,6 @@ class AISettingsScreen extends ConsumerWidget {
     }
   }
 
-  Widget _buildHistorySection(
-    BuildContext context,
-    WidgetRef ref,
-    AIServiceState state,
-  ) {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Chat History',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            StatefulBuilder(builder: (context, setState) {
-              return SwitchListTile(
-                title: const Text('Store chat history'),
-                subtitle: const Text(
-                  'If enabled, your chat history will be stored on your device only',
-                  softWrap: true,
-                ),
-                value: state.config.settings.storeChatHistory,
-                onChanged: (value) {
-                  // Update local state immediately for visual feedback
-                  setState(() {});
-                  ref
-                      .read(aiServiceProvider.notifier)
-                      .updateStoreChatHistory(value);
-                },
-              );
-            }),
-            if (state.config.settings.storeChatHistory) ...[
-              const SizedBox(height: 8),
-              const Text('Auto-delete after:'),
-              const SizedBox(height: 8),
-              StatefulBuilder(builder: (context, setState) {
-                return DropdownButtonFormField<int>(
-                  value: state.config.settings.autoDeleteAfterDays,
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 7, child: Text('7 days')),
-                    DropdownMenuItem(value: 30, child: Text('30 days')),
-                    DropdownMenuItem(value: 90, child: Text('90 days')),
-                    DropdownMenuItem(value: 365, child: Text('1 year')),
-                    DropdownMenuItem(value: -1, child: Text('Never')),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      // Update local state immediately
-                      setState(() {});
-                      ref
-                          .read(aiServiceProvider.notifier)
-                          .updateAutoDeleteDays(value);
-                    }
-                  },
-                );
-              }),
-              const SizedBox(height: 16),
-              Center(
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    await _showClearHistoryConfirmation(context, ref);
-                  },
-                  icon: const Icon(Icons.delete_forever),
-                  label: const Text('Clear All Chat History'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.red,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showClearHistoryConfirmation(
-      BuildContext context, WidgetRef ref) async {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Clear All Chat History'),
-        content: const Text(
-          'Are you sure you want to delete all of your chat history? This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('CANCEL'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await ref.read(aiServiceProvider.notifier).clearChatHistory();
-              Navigator.of(ctx).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Chat history cleared'),
-                ),
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('CLEAR'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Expanded list of popular models for OpenRouter
-  static const List<Map<String, String>> openRouterModels = [
-    {'id': 'meta/llama3-70b-instruct', 'name': 'Meta Llama 3 70B'},
-    {'id': 'anthropic/claude-3-opus', 'name': 'Claude 3 Opus'},
-    {'id': 'anthropic/claude-3-sonnet', 'name': 'Claude 3 Sonnet'},
-    {'id': 'anthropic/claude-3.5-haiku', 'name': 'Claude 3 Haiku'},
-    {'id': 'mistralai/mistral-7b-instruct', 'name': 'Mistral 7B'},
-    {'id': 'google/gemma-7b-it', 'name': 'Google Gemma 7B'},
-    {'id': 'openai/gpt-4', 'name': 'GPT-4'},
-    {'id': 'openai/gpt-4-turbo', 'name': 'GPT-4 Turbo'},
-    {'id': 'openai/gpt-3.5-turbo', 'name': 'GPT-3.5 Turbo'},
-    {'id': 'cohere/command-r', 'name': 'Cohere Command-R'},
-    {'id': 'meta/llama3-8b-instruct', 'name': 'Meta Llama 3 8B'},
-  ];
-
   Widget _buildModelSelectionArea(WidgetRef ref, AIServiceState state) {
     // Only show for OpenRouter
     if (state.config.serviceType != models.AIServiceType.openRouter) {
@@ -1068,6 +930,21 @@ class AISettingsScreen extends ConsumerWidget {
       ),
     );
   }
+
+  // Expanded list of popular models for OpenRouter
+  static const List<Map<String, String>> openRouterModels = [
+    {'id': 'meta/llama3-70b-instruct', 'name': 'Meta Llama 3 70B'},
+    {'id': 'anthropic/claude-3-opus', 'name': 'Claude 3 Opus'},
+    {'id': 'anthropic/claude-3-sonnet', 'name': 'Claude 3 Sonnet'},
+    {'id': 'anthropic/claude-3.5-haiku', 'name': 'Claude 3 Haiku'},
+    {'id': 'mistralai/mistral-7b-instruct', 'name': 'Mistral 7B'},
+    {'id': 'google/gemma-7b-it', 'name': 'Google Gemma 7B'},
+    {'id': 'openai/gpt-4', 'name': 'GPT-4'},
+    {'id': 'openai/gpt-4-turbo', 'name': 'GPT-4 Turbo'},
+    {'id': 'openai/gpt-3.5-turbo', 'name': 'GPT-3.5 Turbo'},
+    {'id': 'cohere/command-r', 'name': 'Cohere Command-R'},
+    {'id': 'meta/llama3-8b-instruct', 'name': 'Meta Llama 3 8B'},
+  ];
 }
 
 class ModelOption {
