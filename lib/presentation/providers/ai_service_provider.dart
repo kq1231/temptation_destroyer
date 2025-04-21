@@ -7,7 +7,7 @@ import '../../core/security/secure_storage_service.dart';
 import 'chat_session_provider.dart';
 
 /// Provider for the AI repository
-final aiRepositoryProvider = Provider((ref) => AIRepository(ref));
+final aiRepositoryProvider = Provider.autoDispose((ref) => AIRepository(ref));
 
 /// AI Service state
 class AIServiceState {
@@ -183,17 +183,32 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   /// Set the service type
   Future<void> setServiceType(models.AIServiceType type) async {
     try {
+      // Show loading state
+      state = state.copyWith(isLoading: true);
+
+      print(
+          "SERVICE TYPE FROM THE setServiceType METHOD INSIDE THE ai_service_provider.dart: $type");
+
       // Get the appropriate API key for this service
       final apiKey = await _secureStorage.getKey(type.toString());
-
+      print(
+          "API KEY FROM THE setServiceType METHOD INSIDE THE ai_service_provider.dart: $apiKey");
       // Create new config with updated service type and API key
-      final newConfig = state.config.copyWith(
+      final newConfig = AIServiceConfig(
+        maxTokens: state.config.maxTokens,
+        temperature: state.config.temperature,
+        preferredModel: state.config.preferredModel,
+        allowDataTraining: state.config.allowDataTraining,
+        settings: state.config.settings,
         serviceType: type,
         apiKey: apiKey,
       );
 
-      // Update state immediately
-      state = state.copyWith(config: newConfig);
+      // Update state immediately to reflect the new service type
+      state = state.copyWith(
+        config: newConfig,
+        isLoading: false,
+      );
 
       // If there's an active session, apply the changes to it
       if (state.activeSession != null) {
@@ -204,6 +219,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       }
     } catch (e) {
       state = state.copyWith(
+        isLoading: false,
         errorMessage: 'Failed to save service type: $e',
       );
     }

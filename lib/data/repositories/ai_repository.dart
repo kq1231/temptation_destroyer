@@ -69,10 +69,6 @@ class AIRepository {
       if (config.serviceType == type &&
           config.apiKey != null &&
           config.apiKey!.isNotEmpty) {
-        // If the key is encrypted, decrypt it
-        if (config.isEncrypted) {
-          return ObjectBoxManager.decryptString(config.apiKey!);
-        }
         return config.apiKey;
       }
 

@@ -35,9 +35,6 @@ class AIServiceConfig {
   /// The API key for the service (optional)
   final String? apiKey;
 
-  /// Whether the API key is encrypted
-  final bool isEncrypted;
-
   /// Preferred model for the service (optional)
   final String? preferredModel;
 
@@ -57,7 +54,6 @@ class AIServiceConfig {
   const AIServiceConfig({
     this.serviceType = AIServiceType.offline,
     this.apiKey,
-    this.isEncrypted = false,
     this.preferredModel,
     this.allowDataTraining = false,
     this.temperature = 1.0,
@@ -79,7 +75,6 @@ class AIServiceConfig {
     return AIServiceConfig(
       serviceType: serviceType ?? this.serviceType,
       apiKey: apiKey ?? this.apiKey,
-      isEncrypted: isEncrypted ?? this.isEncrypted,
       preferredModel: preferredModel ?? this.preferredModel,
       allowDataTraining: allowDataTraining ?? this.allowDataTraining,
       temperature: temperature ?? this.temperature,

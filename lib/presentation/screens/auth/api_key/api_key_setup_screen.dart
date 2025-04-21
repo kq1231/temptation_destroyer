@@ -49,32 +49,33 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
     try {
       final secureStorage = SecureStorageService.instance;
 
-      // Get current service config
-      final config = _repository.getServiceConfig();
-
-      // Set the initial provider selection based on the current config
-      if (config.serviceType != AIServiceType.offline) {
-        for (final entry in _serviceTypeMap.entries) {
-          if (entry.value == config.serviceType) {
-            setState(() => _selectedProvider = entry.key);
-            break;
-          }
-        }
-      }
-
       // Check if there's a key for the selected provider
-      final apiKey = await secureStorage.getKey(_selectedProvider);
+      final apiKey = await secureStorage
+          .getKey(_serviceTypeMap[_selectedProvider]!.toString());
+
+      print(
+          "SERVICE TYPE FROM THE _checkForExistingKeys METHOD INSIDE THE api_key_setup_screen.dart: ${_serviceTypeMap[_selectedProvider]}");
+      print(
+          "API KEY FROM THE _checkForExistingKeys METHOD INSIDE THE api_key_setup_screen.dart: $apiKey");
 
       setState(() {
         _hasStoredKey = apiKey != null && apiKey.isNotEmpty;
-        if (_hasStoredKey) {
+
+        if (_hasStoredKey && apiKey != null) {
           // Display a masked version of the API key
-          _apiKeyController.text = apiKey!
-              .replaceRange(4, apiKey.length - 4, '•' * (apiKey.length - 8));
+          _apiKeyController.text = apiKey.replaceRange(
+              4, apiKey.length - 4, '•' * (apiKey.length - 8));
+        } else {
+          _hasStoredKey = false;
+          _apiKeyController.clear();
         }
       });
     } catch (e) {
       print('Error checking for existing keys: $e');
+      setState(() {
+        _hasStoredKey = false;
+        _apiKeyController.clear();
+      });
     } finally {
       setState(() => _isLoading = false);
     }
@@ -103,8 +104,8 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
       final serviceType = _serviceTypeMap[_selectedProvider]!;
       final secureStorage = SecureStorageService.instance;
 
-      // Store the API key securely
-      await secureStorage.storeKey(_selectedProvider, apiKey);
+      // Store the API key securely using the service type as the key
+      await secureStorage.storeKey(serviceType.toString(), apiKey);
 
       // Get current config and update it
       final config = _repository.getServiceConfig();
@@ -154,18 +155,20 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
 
     try {
       final secureStorage = SecureStorageService.instance;
+      final serviceType = _serviceTypeMap[_selectedProvider]!;
 
-      // Delete the API key from secure storage
-      await secureStorage.deleteKey(_selectedProvider);
+      // Delete the API key from secure storage using the service type
+      await secureStorage.deleteKey(serviceType.toString());
 
-      // Get current config and clear the API key
+      // Get current config and clear the API key if it's the current service
       final config = _repository.getServiceConfig();
-      final updatedConfig = config.copyWith(
-        apiKey: null,
-      );
-
-      // Save to repository
-      _repository.saveServiceConfig(updatedConfig);
+      if (config.serviceType == serviceType) {
+        final updatedConfig = config.copyWith(
+          apiKey: null,
+        );
+        // Save to repository
+        _repository.saveServiceConfig(updatedConfig);
+      }
 
       if (!mounted) return;
 
@@ -254,12 +257,24 @@ class _ApiKeySetupScreenState extends ConsumerState<ApiKeySetupScreen> {
                       );
                     }).toList(),
                     onChanged: (value) {
-                      if (value != null) {
+                      print(
+                          "VALUE FROM THE onChanged METHOD INSIDE THE api_key_setup_screen.dart: $value");
+                      if (value != null && value != _selectedProvider) {
                         setState(() {
                           _selectedProvider = value;
+                          print(
+                              "SET STATE FROM THE onChanged METHOD INSIDE THE api_key_setup_screen.dart: $_selectedProvider");
+                          _isLoading = true; // Show loading indicator
                         });
+
                         // When changing provider, check if we have a key for it
-                        _checkForExistingKeys();
+                        _checkForExistingKeys().then((_) {
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        });
                       }
                     },
                   ),

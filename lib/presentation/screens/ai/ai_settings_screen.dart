@@ -67,7 +67,7 @@ class AISettingsScreen extends ConsumerWidget {
           ref,
           models.AIServiceType.openAI,
           'OpenAI',
-          'Access GPT-3.5 and GPT-4',
+          'Access GPT-3.5, GPT-4, and more...',
           currentType == models.AIServiceType.openAI,
         ),
         _buildServiceOption(
@@ -108,6 +108,7 @@ class AISettingsScreen extends ConsumerWidget {
   ) {
     return InkWell(
       onTap: () async {
+        if (isSelected) return; // Don't refresh if already selected
         await ref.read(aiServiceProvider.notifier).setServiceType(type);
       },
       child: Padding(
@@ -176,9 +177,6 @@ class AISettingsScreen extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    final hasApiKey =
-        state.config.apiKey != null && state.config.apiKey!.isNotEmpty;
-
     return Card(
       elevation: 2,
       child: Padding(
@@ -200,7 +198,7 @@ class AISettingsScreen extends ConsumerWidget {
               softWrap: true,
             ),
             const SizedBox(height: 16),
-            if (hasApiKey)
+            if (state.config.apiKey != null && state.config.apiKey!.isNotEmpty)
               ListTile(
                 leading: const Icon(Icons.check_circle, color: Colors.green),
                 title: const Text('API Key is set'),
@@ -246,70 +244,95 @@ class AISettingsScreen extends ConsumerWidget {
     WidgetRef ref,
     AIServiceState state,
   ) {
-    final apiKeyController = TextEditingController(text: state.config.apiKey);
     final secureStorage = SecureStorageService.instance;
 
+    // We'll use FutureBuilder to first retrieve the current API key
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title:
-            Text('Enter ${_getServiceName(state.config.serviceType)} API Key'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: apiKeyController,
-              decoration: const InputDecoration(
-                labelText: 'API Key',
-                hintText: 'Enter your API key',
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _getApiKeyInstructions(state.config.serviceType),
-              style: const TextStyle(fontSize: 12),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final apiKey = apiKeyController.text.trim();
-              if (apiKey.isNotEmpty) {
-                // Store the API key securely with the service type as identifier
-                // Not awaiting this to avoid blocking the UI
-                // Very important for smooth user experience
-                secureStorage.storeKey(
-                  state.config.serviceType.toString(),
-                  apiKey,
-                );
+      builder: (context) => FutureBuilder<String?>(
+          future: secureStorage.getKey(state.config.serviceType.toString()),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const AlertDialog(
+                title: Text('Loading API Key'),
+                content: Center(
+                  heightFactor: 2,
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
 
-                // Update the provider state
-                ref.read(aiServiceProvider.notifier).setApiKey(apiKey);
+            final apiKeyController = TextEditingController(text: snapshot.data);
 
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        '${_getServiceName(state.config.serviceType)} API key saved successfully',
-                      ),
-                      backgroundColor: Colors.green,
+            return AlertDialog(
+              title: Text(
+                  'Enter ${_getServiceName(state.config.serviceType)} API Key'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: apiKeyController,
+                    decoration: const InputDecoration(
+                      labelText: 'API Key',
+                      hintText: 'Enter your API key',
                     ),
-                  );
-                }
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+                    obscureText: true,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    _getApiKeyInstructions(state.config.serviceType),
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final apiKey = apiKeyController.text.trim();
+                    if (apiKey.isNotEmpty) {
+                      // First close the dialog to avoid UI blocking
+                      Navigator.of(context).pop();
+
+                      // Show a loading indicator
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Saving API key...'),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      }
+
+                      // Store the API key securely with the service type as identifier
+                      await secureStorage.storeKey(
+                        state.config.serviceType.toString(),
+                        apiKey,
+                      );
+
+                      // Update the provider state
+                      ref.read(aiServiceProvider.notifier).setApiKey(apiKey);
+
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${_getServiceName(state.config.serviceType)} API key saved successfully',
+                            ),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          }),
     );
   }
 
