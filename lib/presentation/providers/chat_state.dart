@@ -42,7 +42,7 @@ class ChatState {
     );
   }
 
-  static const int messagesPerPage = 20;
+  static const int messagesPerPage = 100;
 
   @override
   bool operator ==(Object other) =>

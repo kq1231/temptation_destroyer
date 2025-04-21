@@ -1,3 +1,5 @@
+import 'package:temptation_destroyer/data/models/ai_models.dart';
+
 import '../../../data/repositories/ai_repository.dart';
 
 /// Use case for generating AI guidance responses
@@ -15,7 +17,9 @@ class GenerateAIGuidanceUseCase {
       // Call the repository to generate the response
       final aiResponse = await _aiRepository.generateResponse(
         userInput: userInput,
-        context: context ?? 'General guidance request',
+        context: context != null
+            ? [ChatMessageModel(content: context, isUserMessage: false)]
+            : [],
       );
 
       return aiResponse.content;

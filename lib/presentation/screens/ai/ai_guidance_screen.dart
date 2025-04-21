@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../presentation/providers/ai_service_provider.dart';
 import '../../../presentation/providers/chat_provider.dart';
@@ -22,6 +23,7 @@ class AIGuidanceScreen extends ConsumerStatefulWidget {
 class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
   final _messageController = TextEditingController();
   final _scrollController = ScrollController();
+  final FocusNode _messageFocusNode = FocusNode();
   bool _isInitialized = false;
   bool _isEmergencyMode = false;
   String _emergencyTriggerMessage = '';
@@ -59,6 +61,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
     _messageController.dispose();
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
+    _messageFocusNode.dispose();
     super.dispose();
   }
 
@@ -163,11 +166,15 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
                     await ref.read(chatProvider.notifier).initialize(
                           session: state.currentSession,
                         );
-                    _scrollController.jumpTo(0);
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (_scrollController.hasClients) {
+                        _scrollController
+                            .jumpTo(_scrollController.position.minScrollExtent);
+                      }
+                    });
                   },
                   child: ListView.builder(
                     reverse: true,
-                    shrinkWrap: true,
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
                     itemCount: messages.length + (state.hasMore ? 1 : 0),
@@ -306,7 +313,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, -1),
           ),
@@ -323,28 +330,46 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
 
           // Text input field
           Expanded(
-            child: TextField(
-              controller: _messageController,
-              decoration: InputDecoration(
-                hintText: 'Type your message...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
+            child: RawKeyboardListener(
+              focusNode: _messageFocusNode,
+              onKey: (event) {
+                if (isLoading) return;
+                // Only handle key down events
+                if (event.isKeyPressed(LogicalKeyboardKey.enter) &&
+                    event.runtimeType.toString() == 'RawKeyDownEvent') {
+                  // If Shift is NOT pressed, send message
+                  if (!(event.isShiftPressed)) {
+                    // Prevent the default behavior (new line)
+                    // Send the message
+                    _sendMessage();
+                  }
+                  // If Shift is pressed, allow new line (do nothing)
+                }
+              },
+              child: TextField(
+                controller: _messageController,
+                decoration: InputDecoration(
+                  hintText: 'Type your message...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                 ),
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                minLines: 1,
+                maxLines: 5,
+                textCapitalization: TextCapitalization.sentences,
+                // Remove onSubmitted and onEditingComplete to avoid double send
+                // onSubmitted: isLoading ? null : (_) => _sendMessage(),
+                // onEditingComplete: isLoading ? null : _sendMessage,
+                textInputAction: TextInputAction.newline,
+                enabled: !isLoading,
               ),
-              minLines: 1,
-              maxLines: 5,
-              textCapitalization: TextCapitalization.sentences,
-              onSubmitted: isLoading ? null : (_) => _sendMessage(),
-              // Add key event handling
-              onEditingComplete: isLoading ? null : _sendMessage,
-              textInputAction: TextInputAction.send,
             ),
           ),
 
@@ -373,6 +398,18 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
 
       ref.read(chatProvider.notifier).sendMessage(message);
       _messageController.clear();
+      // Refocus the text field after sending
+      FocusScope.of(context).requestFocus(_messageFocusNode);
+      // Scroll to latest message after sending
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.minScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
     }
   }
 

@@ -149,7 +149,7 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
       // Generate AI response
       final aiResponse = await _repository.generateResponse(
         userInput: content,
-        context: context.join('\n'),
+        context: context,
         config: config,
       );
 
@@ -176,10 +176,25 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
       // Play error sound
       _soundService.playSound(SoundEffect.error);
 
-      // On error, keep the user's message but remove loading state
-      final messagesWithoutLoading = [...currentState.messages, newMessage];
+      // Create an error message from the AI
+      final errorMessage = ChatMessageModel(
+        content: "Error: ${error.toString()}",
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: null,
+      );
+
+      // Store the error message
+      await _repository.storeMessageAsync(errorMessage);
+
+      // On error, keep the user's message and add the error message
+      final messagesWithError = [
+        ...currentState.messages,
+        newMessage,
+        errorMessage
+      ];
       state = AsyncValue.data(currentState.copyWith(
-        messages: messagesWithoutLoading,
+        messages: messagesWithError,
         errorMessage: error.toString(),
       ));
     }
@@ -199,7 +214,13 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
       // Generate emergency response
       final aiResponse = await _repository.generateResponse(
         userInput: content,
-        context: emergencyPrompt,
+        context: [
+          ChatMessageModel(
+            content: emergencyPrompt,
+            isUserMessage: false,
+            session: currentState.currentSession,
+          ),
+        ],
         config: config.copyWith(
           temperature: 0.3, // Lower temperature for more focused response
           maxTokens: 300, // Shorter response for immediate help
@@ -231,12 +252,23 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
       // Play error sound
       _soundService.playSound(SoundEffect.error);
 
-      // On error, remove loading state
+      // Create an error message from the AI
+      final errorMessage = ChatMessageModel(
+        content: "Emergency Response Error: ${error.toString()}",
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: null,
+      );
+
+      // Store the error message
+      await _repository.storeMessageAsync(errorMessage);
+
+      // On error, remove loading state and add error message
       final messagesWithoutLoading = currentState.messages
           .where((m) => !m.isUserMessage || m.content.isNotEmpty)
           .toList();
       state = AsyncValue.data(currentState.copyWith(
-        messages: messagesWithoutLoading,
+        messages: [...messagesWithoutLoading, errorMessage],
         errorMessage: error.toString(),
       ));
     }

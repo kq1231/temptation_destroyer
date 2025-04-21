@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/context/context_manager.dart';
 import '../../data/models/ai_models.dart';
 import '../../presentation/providers/chat_provider.dart';
+import '../widgets/chat/chat_message_bubble.dart';
 
 /// Widget for emergency response UI
 /// Provides immediate help resources and quick response options
@@ -34,18 +35,37 @@ class _EmergencyChatWidgetState extends ConsumerState<EmergencyChatWidget> {
   final _scrollController = ScrollController();
   bool _showResources = true;
   final ContextManager _contextManager = ContextManager();
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _sendEmergencyMessage();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      // Initialize and send the emergency message
+      Future.microtask(() => _sendEmergencyMessage());
+      _isInitialized = true;
+    }
   }
 
   @override
   void dispose() {
     _messageController.dispose();
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      ref.read(chatProvider.notifier).loadMoreMessages();
+    }
   }
 
   /// Sends the initial emergency notification to the AI
@@ -214,122 +234,98 @@ class _EmergencyChatWidgetState extends ConsumerState<EmergencyChatWidget> {
   }
 
   Widget _buildChatArea() {
-    return Consumer(
-      builder: (context, ref, child) {
-        final chatState = ref.watch(chatProvider);
-        return chatState.when(
-          data: (state) {
-            if (state.messages.isEmpty) {
-              return const Center(
-                child: Text('Loading emergency response...'),
-              );
-            }
+    final chatState = ref.watch(chatProvider);
 
-            return ListView.builder(
-              controller: _scrollController,
-              reverse: true,
-              itemCount: state.messages.length,
-              itemBuilder: (context, index) {
-                final message = state.messages[index];
-                return _buildMessageBubble(message);
-              },
-            );
+    return chatState.when(
+      data: (state) {
+        if (!state.isInitialized) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state.messages.isEmpty) {
+          return const Center(
+            child: Text('Loading emergency response...'),
+          );
+        }
+
+        List<ChatMessageModel> messages = state.messages.reversed.toList();
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            await ref.read(chatProvider.notifier).initialize(
+                  session: state.currentSession,
+                );
+            _scrollController.jumpTo(0);
           },
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
+          child: ListView.builder(
+            reverse: true,
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16),
+            itemCount: messages.length + (state.hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == messages.length) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              return _buildChatMessage(messages[index]);
+            },
           ),
-          error: (error, stackTrace) => Center(
-            child: Text('Error: $error'),
+        );
+      },
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
+      ),
+      error: (error, stackTrace) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            Text(
+              'Error: $error',
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+            TextButton(
+              onPressed: () {
+                ref.read(chatProvider.notifier).initialize();
+              },
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatMessage(ChatMessageModel message) {
+    return ChatMessageBubble(
+      message: message.content,
+      isUserMessage: message.isUserMessage,
+      wasHelpful: message.wasHelpful,
+      onRateResponse: (bool helpful) {
+        ref.read(chatProvider.notifier).rateResponse(
+              message.uid,
+              helpful,
+            );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Thank you for your feedback!'),
+            duration: Duration(seconds: 2),
           ),
         );
       },
     );
   }
 
-  Widget _buildMessageBubble(ChatMessageModel message) {
-    final isUser = message.isUserMessage;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        children: [
-          if (!isUser) _buildAvatarIcon(),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isUser ? Colors.red.shade200 : Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.content,
-                    style: TextStyle(
-                      color: isUser ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  if (!isUser) _buildEmergencyActions(),
-                ],
-              ),
-            ),
-          ),
-          if (isUser) _buildAvatarIcon(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvatarIcon() {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: Colors.red.shade100,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        Icons.support_agent,
-        color: Colors.red.shade700,
-        size: 20,
-      ),
-    );
-  }
-
-  Widget _buildEmergencyActions() {
-    return Wrap(
-      spacing: 8,
-      children: [
-        ActionChip(
-          label: const Text('Get Professional Help'),
-          onPressed: widget.onRequestProfessionalHelp,
-          backgroundColor: Colors.red.shade100,
-        ),
-        ActionChip(
-          label: const Text('Call Helpline'),
-          onPressed: () => _launchUrl('tel:18002738255'),
-          backgroundColor: Colors.red.shade100,
-        ),
-        ActionChip(
-          label: const Text('Islamic Resources'),
-          onPressed: _navigateToIslamicResources,
-          backgroundColor: Colors.red.shade100,
-        ),
-      ],
-    );
-  }
-
   Widget _buildEmergencyInput() {
+    final chatState = ref.watch(chatProvider);
+    final isLoading = chatState.isLoading;
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
@@ -362,13 +358,16 @@ class _EmergencyChatWidgetState extends ConsumerState<EmergencyChatWidget> {
               ),
               maxLines: null,
               textCapitalization: TextCapitalization.sentences,
+              onSubmitted: isLoading ? null : (_) => _sendMessage(),
+              onEditingComplete: isLoading ? null : _sendMessage,
+              textInputAction: TextInputAction.send,
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.send),
+            icon: Icon(isLoading ? Icons.hourglass_top : Icons.send),
             color: Colors.red,
-            onPressed: _sendMessage,
+            onPressed: isLoading ? null : _sendMessage,
           ),
         ],
       ),

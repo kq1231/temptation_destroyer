@@ -111,13 +111,15 @@ class AIRepository {
   /// Generate a response from the AI
   Future<ChatMessageModel> generateResponse({
     required String userInput,
-    required String context,
+    required List<ChatMessageModel> context,
     config.AIServiceConfig? config,
     ChatSession? session,
   }) async {
     print('\n=== AI Repository: Generating Response ===');
     print('User input length: ${userInput.length}');
     print('Context length: ${context.length}');
+    print('User input: $userInput');
+    print('Context: $context');
 
     // Get the current AI service config if not provided
     final serviceConfig = config ?? getServiceConfig();
@@ -189,12 +191,13 @@ class AIRepository {
   /// Send a request to the selected AI service with retry logic
   Future<String> _sendRequestToAIService({
     required String userInput,
-    required String context,
+    required List<ChatMessageModel> context,
     required config.AIServiceConfig config,
   }) async {
     print('\n=== Sending Request to AI Service ===');
     print('Service type: ${config.serviceType}');
     print('Model: ${config.preferredModel ?? "default"}');
+    print('Context: $context');
 
     int retryCount = 0;
     const maxRetries = 3;
@@ -241,8 +244,8 @@ class AIRepository {
   }
 
   /// Send a request to OpenAI
-  Future<String> _sendOpenAIRequest(
-      String userInput, String context, config.AIServiceConfig config) async {
+  Future<String> _sendOpenAIRequest(String userInput,
+      List<ChatMessageModel> context, config.AIServiceConfig config) async {
     try {
       final apiKey = await _getSecureApiKey(AIServiceType.openAI);
       if (apiKey == null) {
@@ -253,8 +256,6 @@ class AIRepository {
         throw AIServiceException('Rate limit exceeded for OpenAI');
       }
 
-      final selectedModel =
-          await _selectOptimalModel(userInput, context, config);
       const maxRetries = 3;
       var retryCount = 0;
       var backoffDelay = const Duration(seconds: 1);
@@ -265,7 +266,7 @@ class AIRepository {
 
       // Add logging for OpenAI request parameters
       print('OpenAI Request Parameters:');
-      print('Model: $selectedModel');
+      print('Model: ${config.preferredModel}');
       print('Messages: ${buildContextMessages(context)}');
       print('Temperature: ${config.temperature}');
       print('Max Tokens: ${config.maxTokens}');
@@ -275,16 +276,14 @@ class AIRepository {
           final response = await _dio.post(
             'https://api.openai.com/v1/chat/completions',
             data: {
-              'model': selectedModel,
+              'model': config.preferredModel,
               'messages': [
                 {
                   'role': 'system',
                   'content':
                       'You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment.'
                 },
-                // Parse the context into previous messages
                 ...buildContextMessages(context),
-                // Add the current user message
                 {'role': 'user', 'content': userInput}
               ],
               'temperature': config.temperature,
@@ -322,89 +321,40 @@ class AIRepository {
     }
   }
 
-  /// Build context messages from a string representation of previous messages
-  List<Map<String, String>> buildContextMessages(String context) {
+  /// Build context messages from a list of ChatMessageModel
+  List<Map<String, String>> buildContextMessages(
+      List<ChatMessageModel> context) {
     if (context.isEmpty) {
       return [];
     }
-
     try {
-      // Try to split the context into separate messages based on typical patterns
       final messageList = <Map<String, String>>[];
-      final lines = context.split('\n');
-      String currentMessage = '';
-      String currentRole = 'system';
-
-      for (var line in lines) {
-        // Skip empty lines
-        if (line.trim().isEmpty) {
-          continue;
+      for (final message in context) {
+        String role = 'user';
+        if (message.isUserMessage == false) {
+          role = 'assistant';
         }
-
-        // Check for role markers
-        if (line.startsWith('User:') || line.contains('User said:')) {
-          // If we have a current message, add it before starting a new one
-          if (currentMessage.isNotEmpty) {
-            messageList
-                .add({'role': currentRole, 'content': currentMessage.trim()});
-            currentMessage = '';
-          }
-          currentRole = 'user';
-          // Remove the prefix to get just the message content
-          currentMessage =
-              line.replaceAll(RegExp(r'User:?|User said:?'), '').trim();
-        } else if (line.startsWith('Assistant:') ||
-            line.contains('Assistant said:')) {
-          // If we have a current message, add it before starting a new one
-          if (currentMessage.isNotEmpty) {
-            messageList
-                .add({'role': currentRole, 'content': currentMessage.trim()});
-            currentMessage = '';
-          }
-          currentRole = 'assistant';
-          // Remove the prefix to get just the message content
-          currentMessage = line
-              .replaceAll(RegExp(r'Assistant:?|Assistant said:?'), '')
-              .trim();
-        } else {
-          // Continue the current message
-          currentMessage += (currentMessage.isEmpty ? '' : '\n') + line;
-        }
+        messageList.add({
+          'role': role,
+          'content': message.content.trim(),
+        });
       }
-
-      // Add the last message if there is one
-      if (currentMessage.isNotEmpty) {
-        messageList
-            .add({'role': currentRole, 'content': currentMessage.trim()});
-      }
-
-      // If we couldn't parse any messages, treat the whole context as a system message
-      if (messageList.isEmpty) {
-        return [
-          {'role': 'system', 'content': context}
-        ];
-      }
-
       // Debug print the parsed messages
       print('Parsed ${messageList.length} context messages:');
       for (var msg in messageList) {
         print(
             '${msg['role']}: ${msg['content']?.substring(0, min(30, msg['content']!.length))}...');
       }
-
       return messageList;
     } catch (e) {
       print('Error parsing context into messages: $e');
-      // If there's an error in parsing, treat the whole context as a system message
-      return [
-        {'role': 'system', 'content': context}
-      ];
+      return [];
     }
   }
 
   /// Send a request to Anthropic
-  Future<String> _sendAnthropicRequest(
-      String userInput, String context, config.AIServiceConfig config) async {
+  Future<String> _sendAnthropicRequest(String userInput,
+      List<ChatMessageModel> context, config.AIServiceConfig config) async {
     try {
       final apiKey = await _getSecureApiKey(AIServiceType.anthropic);
       if (apiKey == null) {
@@ -475,8 +425,8 @@ class AIRepository {
   }
 
   /// Send a request to OpenRouter with enhanced error handling and model selection
-  Future<String> _sendOpenRouterRequest(
-      String userInput, String context, config.AIServiceConfig config) async {
+  Future<String> _sendOpenRouterRequest(String userInput,
+      List<ChatMessageModel> context, config.AIServiceConfig config) async {
     try {
       final apiKey = await _getSecureApiKey(AIServiceType.openRouter);
       if (apiKey == null) {
@@ -571,8 +521,8 @@ class AIRepository {
   }
 
   /// Select the optimal model based on input complexity and availability
-  Future<String> _selectOptimalModel(
-      String userInput, String context, config.AIServiceConfig config) async {
+  Future<String> _selectOptimalModel(String userInput,
+      List<ChatMessageModel> context, config.AIServiceConfig config) async {
     // If user has specified a model, use it
     if (config.preferredModel != null &&
         getAvailableModels(config.serviceType)
@@ -616,8 +566,8 @@ class AIRepository {
   }
 
   /// Get a fallback response when AI services are unavailable
-  Future<ChatMessageModel> _getFallbackResponse(
-      String userInput, String context, ChatSession? session) async {
+  Future<ChatMessageModel> _getFallbackResponse(String userInput,
+      List<ChatMessageModel> context, ChatSession? session) async {
     final responses = [
       'I apologize, but I am currently in offline mode. Please try again later when online services are available.',
       'I am currently operating in offline mode. Please check your internet connection and API settings.',
