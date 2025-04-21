@@ -94,3 +94,5 @@
 - Work on EmergencyChat widget, Inshaa Allah
 
 - Integrate VAPI into the app!
+
+- API Error messages in the chats
