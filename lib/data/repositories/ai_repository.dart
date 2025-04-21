@@ -826,57 +826,24 @@ class AIRepository {
 
   /// Save the AI service configuration
   void saveServiceConfig(config.AIServiceConfig newConfig) {
-    final aiServiceNotifier = _ref.read(aiServiceProvider.notifier);
-
-    // Update service type if different
-    if (newConfig.serviceType !=
-        _ref.read(aiServiceProvider).config.serviceType) {
-      aiServiceNotifier.setServiceType(newConfig.serviceType);
-    }
-
-    // Update API key if provided
-    if (newConfig.apiKey != null && newConfig.apiKey!.isNotEmpty) {
-      aiServiceNotifier.setApiKey(newConfig.apiKey!);
-    }
-
-    // Update preferred model if provided
-    if (newConfig.preferredModel != null) {
-      aiServiceNotifier.setPreferredModel(newConfig.preferredModel);
-    }
-
-    // Update other settings
-    if (newConfig.allowDataTraining !=
-        _ref.read(aiServiceProvider).config.allowDataTraining) {
-      aiServiceNotifier.toggleDataTraining();
-    }
-
-    // Update temperature
-    if (newConfig.temperature !=
-        _ref.read(aiServiceProvider).config.temperature) {
-      aiServiceNotifier.setTemperature(newConfig.temperature);
-    }
-
-    // Update max tokens
-    if (newConfig.maxTokens != _ref.read(aiServiceProvider).config.maxTokens) {
-      aiServiceNotifier.setMaxTokens(newConfig.maxTokens);
-    }
-
-    // Update chat history settings
-    if (newConfig.settings.storeChatHistory !=
-        _ref.read(aiServiceProvider).config.settings.storeChatHistory) {
-      aiServiceNotifier
-          .updateStoreChatHistory(newConfig.settings.storeChatHistory);
-    }
-
-    if (newConfig.settings.autoDeleteAfterDays !=
-        _ref.read(aiServiceProvider).config.settings.autoDeleteAfterDays) {
-      aiServiceNotifier
-          .updateAutoDeleteDays(newConfig.settings.autoDeleteAfterDays);
-    }
-
-    // If we have a last cleared timestamp in the config, update it
-    if (newConfig.settings.lastCleared != null) {
-      aiServiceNotifier.clearChatHistory();
+    // We don't need to update the provider state here anymore
+    // This was causing a circular dependency
+    // Just update the session if we have an active one
+    try {
+      final aiServiceState = _ref.read(aiServiceProvider);
+      if (aiServiceState.activeSession != null) {
+        final session = aiServiceState.activeSession!;
+        final updatedSession = session.copyWith(
+          serviceType: newConfig.serviceType,
+          preferredModel: newConfig.preferredModel,
+          allowDataTraining: newConfig.allowDataTraining,
+          temperature: newConfig.temperature,
+          maxTokens: newConfig.maxTokens,
+        );
+        updateChatSession(updatedSession);
+      }
+    } catch (e) {
+      debugPrint('Error in saveServiceConfig: $e');
     }
   }
 

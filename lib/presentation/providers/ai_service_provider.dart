@@ -4,6 +4,7 @@ import '../../data/models/chat_session_model.dart';
 import '../../data/repositories/ai_repository.dart';
 import '../../core/config/ai_service_config.dart';
 import '../../core/security/secure_storage_service.dart';
+import 'chat_session_provider.dart';
 
 /// Provider for the AI repository
 final aiRepositoryProvider = Provider((ref) => AIRepository(ref));
@@ -42,8 +43,9 @@ class AIServiceState {
 class AIServiceNotifier extends StateNotifier<AIServiceState> {
   final AIRepository _repository;
   final SecureStorageService _secureStorage = SecureStorageService.instance;
+  final dynamic _ref;
 
-  AIServiceNotifier(this._repository)
+  AIServiceNotifier(this._repository, this._ref)
       : super(
           AIServiceState(
             config: const AIServiceConfig(
@@ -58,26 +60,69 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   Future<void> _initialize() async {
     state = state.copyWith(isLoading: true);
     try {
-      // Default config if no session is provided
-      AIServiceConfig config = AIServiceConfig(
-        serviceType: models.AIServiceType.openAI,
-      );
+      // Try to get the current chat session
+      final chatSessions = await _ref.read(chatSessionsProvider.future);
+      final currentSession =
+          chatSessions.isNotEmpty ? chatSessions.first : null;
 
-      // Get API key from secure storage for the default service type
-      final apiKey = await _secureStorage.getKey(config.serviceType.toString());
+      // Initialize config based on session or defaults
+      AIServiceConfig config;
 
-      // Update config with API key
-      final updatedConfig = config.copyWith(apiKey: apiKey);
+      if (currentSession != null) {
+        // Create config from session
+        config = AIServiceConfig.fromChatSession(currentSession);
 
-      state = state.copyWith(
-        isLoading: false,
-        config: updatedConfig,
-      );
+        // Get API key for the session's service type
+        final apiKey =
+            await _secureStorage.getKey(currentSession.serviceType.toString());
+        config = config.copyWith(apiKey: apiKey);
+
+        // Set the active session
+        state = state.copyWith(
+          isLoading: false,
+          config: config,
+          activeSession: currentSession,
+        );
+      } else {
+        // Use default config
+        config = const AIServiceConfig(
+          serviceType: models.AIServiceType.offline,
+          maxTokens: 512,
+        );
+
+        // Get API key for default service
+        final apiKey =
+            await _secureStorage.getKey(config.serviceType.toString());
+        config = config.copyWith(apiKey: apiKey);
+
+        state = state.copyWith(
+          isLoading: false,
+          config: config,
+        );
+      }
+      // Save the initial config to persist it
+      await _directSaveConfig(config);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Failed to load settings: $e',
       );
+    }
+  }
+
+  /// Directly save the config without updating state or triggering other methods
+  /// This avoids the circular dependency problem
+  Future<void> _directSaveConfig(AIServiceConfig config) async {
+    try {
+      if (state.activeSession != null) {
+        // Apply config to the active session
+        final updatedSession = config.applyToSession(state.activeSession!);
+
+        // Save the updated session to the database
+        await _repository.updateChatSession(updatedSession);
+      }
+    } catch (e) {
+      print('Error saving config: $e');
     }
   }
 
@@ -117,34 +162,45 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
     final session = state.activeSession;
     if (session == null) return;
 
-    // Apply the current config to the session
-    final updatedSession = state.config.applyToSession(session);
+    try {
+      // Apply the current config to the session
+      final updatedSession = state.config.applyToSession(session);
 
-    // Save the updated session
-    await _repository.updateChatSession(updatedSession);
+      // Save the updated session
+      await _repository.updateChatSession(updatedSession);
 
-    // Update the state with the updated session
-    state = state.copyWith(activeSession: updatedSession);
+      // Update the state with the updated session
+      state = state.copyWith(
+        activeSession: updatedSession,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Failed to save session settings: $e',
+      );
+    }
   }
 
   /// Set the service type
   Future<void> setServiceType(models.AIServiceType type) async {
     try {
-      // Create new config with updated service type
+      // Get the appropriate API key for this service
+      final apiKey = await _secureStorage.getKey(type.toString());
+
+      // Create new config with updated service type and API key
       final newConfig = state.config.copyWith(
         serviceType: type,
-        apiKey: null, // Clear API key when switching services
+        apiKey: apiKey,
       );
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
-
-      // Update state
+      // Update state immediately
       state = state.copyWith(config: newConfig);
 
       // If there's an active session, apply the changes to it
       if (state.activeSession != null) {
         await saveConfigToActiveSession();
+      } else {
+        // Otherwise save it directly
+        await _directSaveConfig(newConfig);
       }
     } catch (e) {
       state = state.copyWith(
@@ -164,14 +220,14 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       // Create new config with updated API key
       final newConfig = state.config.copyWith(apiKey: apiKey);
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
-
-      // Update state
+      // Update state immediately
       state = state.copyWith(
         isLoading: false,
         config: newConfig,
       );
+
+      // Save the config
+      await _directSaveConfig(newConfig);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -186,15 +242,15 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       // Create new config with updated model
       final newConfig = state.config.copyWith(preferredModel: model);
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
-
-      // Update state
+      // Update state immediately
       state = state.copyWith(config: newConfig);
 
       // If there's an active session, apply the changes to it
       if (state.activeSession != null) {
         await saveConfigToActiveSession();
+      } else {
+        // Otherwise save it directly
+        await _directSaveConfig(newConfig);
       }
     } catch (e) {
       state = state.copyWith(
@@ -213,17 +269,15 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
         allowDataTraining: newAllowDataTraining,
       );
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
-
-      // Update state
-      state = state.copyWith(
-        config: newConfig,
-      );
+      // Update state immediately
+      state = state.copyWith(config: newConfig);
 
       // If there's an active session, apply the changes to it
       if (state.activeSession != null) {
         await saveConfigToActiveSession();
+      } else {
+        // Otherwise save it directly
+        await _directSaveConfig(newConfig);
       }
     } catch (e) {
       state = state.copyWith(
@@ -244,13 +298,11 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
         settings: newSettings,
       );
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
+      // Update state immediately
+      state = state.copyWith(config: newConfig);
 
-      // Update state
-      state = state.copyWith(
-        config: newConfig,
-      );
+      // Save the config
+      await _directSaveConfig(newConfig);
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to update chat history setting: $e',
@@ -270,13 +322,11 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
         settings: newSettings,
       );
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
+      // Update state immediately
+      state = state.copyWith(config: newConfig);
 
-      // Update state
-      state = state.copyWith(
-        config: newConfig,
-      );
+      // Save the config
+      await _directSaveConfig(newConfig);
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to update auto-delete days: $e',
@@ -296,13 +346,11 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
         settings: newSettings,
       );
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
+      // Update state immediately
+      state = state.copyWith(config: newConfig);
 
-      // Update state
-      state = state.copyWith(
-        config: newConfig,
-      );
+      // Save the config
+      await _directSaveConfig(newConfig);
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to update last cleared timestamp: $e',
@@ -316,15 +364,15 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       // Create new config with updated temperature
       final newConfig = state.config.copyWith(temperature: temperature);
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
-
-      // Update state
+      // Update state immediately
       state = state.copyWith(config: newConfig);
 
       // If there's an active session, apply the changes to it
       if (state.activeSession != null) {
         await saveConfigToActiveSession();
+      } else {
+        // Otherwise save it directly
+        await _directSaveConfig(newConfig);
       }
     } catch (e) {
       state = state.copyWith(
@@ -339,15 +387,15 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       // Create new config with updated max tokens
       final newConfig = state.config.copyWith(maxTokens: maxTokens);
 
-      // Save to repository
-      _repository.saveServiceConfig(newConfig);
-
-      // Update state
+      // Update state immediately
       state = state.copyWith(config: newConfig);
 
       // If there's an active session, apply the changes to it
       if (state.activeSession != null) {
         await saveConfigToActiveSession();
+      } else {
+        // Otherwise save it directly
+        await _directSaveConfig(newConfig);
       }
     } catch (e) {
       state = state.copyWith(
@@ -361,5 +409,5 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
 final aiServiceProvider =
     StateNotifierProvider<AIServiceNotifier, AIServiceState>((ref) {
   final repository = ref.watch(aiRepositoryProvider);
-  return AIServiceNotifier(repository);
+  return AIServiceNotifier(repository, ref);
 });
