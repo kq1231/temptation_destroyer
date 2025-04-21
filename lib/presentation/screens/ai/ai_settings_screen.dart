@@ -1033,7 +1033,7 @@ class AISettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildSoundSettingsSection(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
+    final settingsAsync = ref.watch(settingsProvider);
 
     return Card(
       elevation: 2,
@@ -1050,14 +1050,18 @@ class AISettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            SwitchListTile(
-              title: const Text('Enable Sound Effects'),
-              subtitle:
-                  const Text('Play sounds for messages and notifications'),
-              value: settings.soundEnabled,
-              onChanged: (_) {
-                ref.read(settingsProvider.notifier).toggleSound();
-              },
+            settingsAsync.when(
+              data: (settings) => SwitchListTile(
+                title: const Text('Enable Sound Effects'),
+                subtitle:
+                    const Text('Play sounds for messages and notifications'),
+                value: settings.soundEnabled,
+                onChanged: (_) {
+                  ref.read(settingsProvider.notifier).toggleSound();
+                },
+              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Text('Error: $error'),
             ),
           ],
         ),
