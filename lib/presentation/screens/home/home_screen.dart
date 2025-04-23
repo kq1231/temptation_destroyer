@@ -112,6 +112,14 @@ class HomeScreen extends ConsumerWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.mic),
+              title: const Text('Voice Guidance'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).pushNamed('/voice-chat');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.insights),
               title: const Text('Statistics'),
               onTap: () {
@@ -172,6 +180,7 @@ class HomeScreen extends ConsumerWidget {
               fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           const Text(
@@ -180,6 +189,7 @@ class HomeScreen extends ConsumerWidget {
               fontSize: 16,
               color: AppColors.textSecondary,
             ),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
 
@@ -238,11 +248,16 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       _buildFeatureButton(
                         context,
+                        Icons.mic,
+                        'Voice Chat',
+                        () => Navigator.of(context).pushNamed('/voice-chat'),
+                      ),
+                      _buildFeatureButton(
+                        context,
                         Icons.insights,
                         'Stats',
                         () => Navigator.of(context).pushNamed('/statistics'),
                       ),
-                      const SizedBox(width: 80), // Empty space for balance
                     ],
                   ),
                 ],
@@ -302,6 +317,7 @@ class HomeScreen extends ConsumerWidget {
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

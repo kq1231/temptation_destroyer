@@ -17,6 +17,8 @@ import 'screens/ai/ai_guidance_screen.dart';
 import 'screens/ai/chat_sessions_screen.dart';
 import 'screens/ai/ai_settings_screen.dart';
 import 'screens/statistics/statistics_dashboard_screen.dart';
+import 'screens/voice/voice_chat_screen.dart';
+import 'screens/splash_screen.dart';
 import 'providers/auth_provider.dart';
 import '../domain/usecases/auth/get_user_status_usecase.dart';
 
@@ -49,6 +51,7 @@ class TemptationDestroyerApp extends ConsumerWidget {
         '/chat-sessions': (context) => const ChatSessionsScreen(),
         '/statistics': (context) => const StatisticsDashboardScreen(),
         '/ai-settings': (context) => const AISettingsScreen(),
+        '/voice-chat': (context) => const VoiceChatScreen(),
       },
       // Add onGenerateRoute for dynamic routes
       onGenerateRoute: (settings) {
@@ -101,13 +104,9 @@ class _AuthCheckScreenState extends ConsumerState<AuthCheckScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
-    // Show loading indicator while initializing
+    // Use our new splash screen while initializing
     if (authState.isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const SplashScreen();
     }
 
     // Redirect based on auth status
@@ -121,11 +120,7 @@ class _AuthCheckScreenState extends ConsumerState<AuthCheckScreen> {
       }
     });
 
-    // Placeholder while redirecting
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
+    // Placeholder while redirecting - use splash screen here too
+    return const SplashScreen();
   }
 }

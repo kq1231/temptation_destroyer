@@ -33,6 +33,8 @@ class AISettingsScreen extends ConsumerWidget {
                   _buildAdvancedSettingsSection(context, ref, aiServiceState),
                   const SizedBox(height: 24),
                   _buildSoundSettingsSection(context, ref),
+                  const SizedBox(height: 24),
+                  _buildVoiceAISection(context, ref),
                   const SizedBox(height: 40),
                 ],
               ),
@@ -99,7 +101,7 @@ class AISettingsScreen extends ConsumerWidget {
   Widget _buildServiceOption(
     BuildContext context,
     WidgetRef ref,
-    models.AIServiceType type,
+    String type,
     String title,
     String subtitle,
     bool isSelected,
@@ -153,16 +155,17 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  IconData _getIconForServiceType(models.AIServiceType type) {
-    switch (type) {
-      case models.AIServiceType.openAI:
-        return Icons.smart_toy;
-      case models.AIServiceType.anthropic:
-        return Icons.psychology;
-      case models.AIServiceType.openRouter:
-        return Icons.router;
-      case models.AIServiceType.offline:
-        return Icons.wifi_off;
+  IconData _getIconForServiceType(String type) {
+    if (type == models.AIServiceType.openAI) {
+      return Icons.smart_toy;
+    } else if (type == models.AIServiceType.anthropic) {
+      return Icons.psychology;
+    } else if (type == models.AIServiceType.openRouter) {
+      return Icons.router;
+    } else if (type == models.AIServiceType.offline) {
+      return Icons.wifi_off;
+    } else {
+      return Icons.question_mark;
     }
   }
 
@@ -223,17 +226,17 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _getApiKeyInstructions(models.AIServiceType serviceType) {
-    final type = models.AIServiceType.values[serviceType.index];
-    switch (type) {
-      case models.AIServiceType.openAI:
-        return 'You need an OpenAI API key. Get one from https://platform.openai.com';
-      case models.AIServiceType.anthropic:
-        return 'You need an Anthropic API key. Get one from https://console.anthropic.com';
-      case models.AIServiceType.openRouter:
-        return 'You need an OpenRouter API key. Get one from https://openrouter.ai';
-      case models.AIServiceType.offline:
-        return 'No API key required for offline mode.';
+  String _getApiKeyInstructions(String serviceType) {
+    if (serviceType == models.AIServiceType.openAI) {
+      return 'You need an OpenAI API key. Get one from https://platform.openai.com';
+    } else if (serviceType == models.AIServiceType.anthropic) {
+      return 'You need an Anthropic API key. Get one from https://console.anthropic.com';
+    } else if (serviceType == models.AIServiceType.openRouter) {
+      return 'You need an OpenRouter API key. Get one from https://openrouter.ai';
+    } else if (serviceType == models.AIServiceType.offline) {
+      return 'No API key required for offline mode.';
+    } else {
+      return 'Unknown';
     }
   }
 
@@ -334,16 +337,17 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _getServiceName(models.AIServiceType type) {
-    switch (type) {
-      case models.AIServiceType.openAI:
-        return 'OpenAI';
-      case models.AIServiceType.anthropic:
-        return 'Anthropic';
-      case models.AIServiceType.openRouter:
-        return 'OpenRouter';
-      case models.AIServiceType.offline:
-        return 'Offline';
+  String _getServiceName(String type) {
+    if (type == models.AIServiceType.openAI) {
+      return 'OpenAI';
+    } else if (type == models.AIServiceType.anthropic) {
+      return 'Anthropic';
+    } else if (type == models.AIServiceType.openRouter) {
+      return 'OpenRouter';
+    } else if (type == models.AIServiceType.offline) {
+      return 'Offline';
+    } else {
+      return 'Offline';
     }
   }
 
@@ -541,39 +545,39 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  List<ModelOption> _getModelOptions(models.AIServiceType serviceType) {
-    final type = models.AIServiceType.values[serviceType.index];
+  List<ModelOption> _getModelOptions(String serviceType) {
     final defaultOption = ModelOption('default', 'Default (recommended)');
 
-    switch (type) {
-      case models.AIServiceType.openAI:
-        return [
-          defaultOption,
-          ModelOption('gpt-4o', 'GPT-4o (newest)'),
-          ModelOption('gpt-4', 'GPT-4 (standard)'),
-          ModelOption('gpt-4-turbo', 'GPT-4 Turbo (fast)'),
-          ModelOption('gpt-3.5-turbo', 'GPT-3.5 Turbo (cheaper)'),
-          ModelOption('gpt-3', 'GPT-3 (legacy)'),
-          ModelOption('gpt-3-mini', 'GPT-3 Mini (lightweight)'),
-          ModelOption('gpt-4o-mini', 'GPT-4o Mini (compact)'),
-        ];
-      case models.AIServiceType.anthropic:
-        return [
-          defaultOption,
-          ModelOption('claude-3-opus', 'Claude 3 Opus (best quality)'),
-          ModelOption('claude-3-sonnet', 'Claude 3 Sonnet (balanced)'),
-          ModelOption('claude-3-haiku', 'Claude 3 Haiku (fastest)'),
-        ];
-      case models.AIServiceType.openRouter:
-        return [
-          defaultOption,
-          ModelOption('meta/llama-3', 'Llama 3'),
-          ModelOption('anthropic/claude-3-opus', 'Claude 3 Opus'),
-          ModelOption('openai/gpt-4o', 'GPT-4o'),
-          ModelOption('google/gemini-pro', 'Gemini Pro'),
-        ];
-      case models.AIServiceType.offline:
-        return [defaultOption];
+    if (serviceType == models.AIServiceType.openAI) {
+      return [
+        defaultOption,
+        ModelOption('gpt-4o', 'GPT-4o (newest)'),
+        ModelOption('gpt-4', 'GPT-4 (standard)'),
+        ModelOption('gpt-4-turbo', 'GPT-4 Turbo (fast)'),
+        ModelOption('gpt-3.5-turbo', 'GPT-3.5 Turbo (cheaper)'),
+        ModelOption('gpt-3', 'GPT-3 (legacy)'),
+        ModelOption('gpt-3-mini', 'GPT-3 Mini (lightweight)'),
+        ModelOption('gpt-4o-mini', 'GPT-4o Mini (compact)'),
+      ];
+    } else if (serviceType == models.AIServiceType.anthropic) {
+      return [
+        defaultOption,
+        ModelOption('claude-3-opus', 'Claude 3 Opus (best quality)'),
+        ModelOption('claude-3-sonnet', 'Claude 3 Sonnet (balanced)'),
+        ModelOption('claude-3-haiku', 'Claude 3 Haiku (fastest)'),
+      ];
+    } else if (serviceType == models.AIServiceType.openRouter) {
+      return [
+        defaultOption,
+        ModelOption('meta/llama-3', 'Llama 3'),
+        ModelOption('anthropic/claude-3-opus', 'Claude 3 Opus'),
+        ModelOption('openai/gpt-4o', 'GPT-4o'),
+        ModelOption('google/gemini-pro', 'Gemini Pro'),
+      ];
+    } else if (serviceType == models.AIServiceType.offline) {
+      return [defaultOption];
+    } else {
+      return [defaultOption];
     }
   }
 
@@ -887,8 +891,7 @@ class AISettingsScreen extends ConsumerWidget {
     );
   }
 
-  String _getValidModelValue(
-      String? currentValue, models.AIServiceType serviceType) {
+  String _getValidModelValue(String? currentValue, String serviceType) {
     final modelOptions = _getModelOptions(serviceType);
     final validValues = modelOptions.map((option) => option.value).toList();
     return validValues.contains(currentValue) ? currentValue! : 'default';
@@ -929,6 +932,115 @@ class AISettingsScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildVoiceAISection(BuildContext context, WidgetRef ref) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Voice AI Settings',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Configure your VAPI credentials for voice chat functionality. You can get your VAPI key at https://vapi.ai',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.mic),
+              label: const Text('Configure VAPI Key'),
+              onPressed: () {
+                _showVapiKeyDialog(context);
+              },
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed('/voice-chat');
+              },
+              child: const Text('Open Voice Chat'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showVapiKeyDialog(BuildContext context) {
+    final keyController = TextEditingController();
+    final secureStorage = SecureStorageService.instance;
+
+    // Fetch current key if available
+    secureStorage.getKey('vapi_public_key').then((currentKey) {
+      keyController.text = currentKey ?? '';
+
+      if (context.mounted) {
+        showDialog<void>(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: const Text('VAPI Key Setup'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Please enter your VAPI public key for voice AI features.',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: keyController,
+                      decoration: const InputDecoration(
+                        labelText: 'VAPI Public Key',
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter VAPI public key',
+                      ),
+                      obscureText: true,
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Save'),
+                  onPressed: () async {
+                    final key = keyController.text.trim();
+                    if (key.isNotEmpty) {
+                      // Store the key securely
+                      await secureStorage.storeKey('vapi_public_key', key);
+
+                      if (context.mounted) {
+                        Navigator.of(dialogContext).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('VAPI key saved successfully')),
+                        );
+                      }
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    });
   }
 
   // Expanded list of popular models for OpenRouter

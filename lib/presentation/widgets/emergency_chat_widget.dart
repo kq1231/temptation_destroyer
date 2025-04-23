@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../core/context/context_manager.dart';
 import '../../data/models/ai_models.dart';
 import '../../presentation/providers/chat_provider.dart';
@@ -433,8 +433,8 @@ class _EmergencyChatWidgetState extends ConsumerState<EmergencyChatWidget> {
   }
 
   Future<void> _launchUrl(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+    if (await canLaunchUrlString(url)) {
+      await launchUrlString(url);
     }
   }
 

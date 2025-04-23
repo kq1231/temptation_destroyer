@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/common/loading_overlay.dart';
 
 /// Screen for user login
 class LoginScreen extends ConsumerStatefulWidget {
@@ -46,129 +47,135 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.login),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // App logo or icon
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 32),
-                child: Icon(
-                  Icons.shield,
-                  size: 80,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-
-            // App title and welcome message
-            const Center(
-              child: Column(
-                children: [
-                  Text(
-                    AppStrings.appName,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.text,
+    return LoadingOverlay(
+        isLoading: authState.isLoading,
+        message: 'Logging in...',
+        animationType: LoadingAnimationType.staggeredDotsWave,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text(AppStrings.login),
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // App logo or icon
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 32),
+                    child: Icon(
+                      Icons.shield,
+                      size: 80,
+                      color: AppColors.primary,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    AppStrings.appSlogan,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textSecondary,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 48),
-
-            // Password field
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: AppStrings.enterPassword,
-                border: const OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _passwordVisible = !_passwordVisible;
-                    });
-                  },
                 ),
-              ),
-              obscureText: !_passwordVisible,
-              onSubmitted: (_) => _login(),
-              onChanged: (_) => _updatePasswordState(),
-            ),
 
-            const SizedBox(height: 16),
-
-            if (authState.errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Text(
-                  authState.errorMessage!,
-                  style: const TextStyle(
-                    color: AppColors.error,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-
-            // Login button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _canLogin() ? _login : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  disabledBackgroundColor: Colors.grey.shade300,
-                ),
-                child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        AppStrings.login,
-                        style: TextStyle(fontSize: 16),
+                // App title and welcome message
+                const Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        AppStrings.appName,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.text,
+                        ),
                       ),
-              ),
-            ),
+                      SizedBox(height: 8),
+                      Text(
+                        AppStrings.appSlogan,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-            const SizedBox(height: 16),
+                const SizedBox(height: 48),
 
-            // Forgot password link
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  // Navigate to password recovery screen
-                  Navigator.of(context).pushNamed('/recovery');
-                },
-                child: const Text(AppStrings.forgotPassword),
-              ),
+                // Password field
+                TextField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: AppStrings.enterPassword,
+                    border: const OutlineInputBorder(),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _passwordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _passwordVisible = !_passwordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: !_passwordVisible,
+                  onSubmitted: (_) => _login(),
+                  onChanged: (_) => _updatePasswordState(),
+                ),
+
+                const SizedBox(height: 16),
+
+                if (authState.errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Text(
+                      authState.errorMessage!,
+                      style: const TextStyle(
+                        color: AppColors.error,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                // Login button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _canLogin() ? _login : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      disabledBackgroundColor: Colors.grey.shade300,
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            AppStrings.login,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Forgot password link
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      // Navigate to password recovery screen
+                      Navigator.of(context).pushNamed('/recovery');
+                    },
+                    child: const Text(AppStrings.forgotPassword),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 
   /// Check if login can be attempted

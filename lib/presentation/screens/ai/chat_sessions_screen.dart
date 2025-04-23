@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:temptation_destroyer/core/utils/logger.dart';
 import '../../../data/models/chat_session_model.dart';
 import '../../providers/chat_session_provider.dart';
 import '../../widgets/chat/new_chat_session_dialog.dart';
@@ -88,7 +89,7 @@ class _ChatSessionsScreenState extends ConsumerState<ChatSessionsScreen> {
               return _buildEmptyState();
             }
 
-            print(sessions.map((e) => e.title));
+            AppLogger.debug(sessions.map((e) => e.title).toString());
 
             // Filter sessions based on archived status
             final filteredSessions = _showArchived
@@ -215,22 +216,20 @@ class _ChatSessionsScreenState extends ConsumerState<ChatSessionsScreen> {
           '${_getMonthName(sessionDate.month)} ${sessionDate.day}, ${sessionDate.year}';
     }
 
-    Icon sessionIcon;
-    Color cardColor;
+    // Initialize with default values
+    Icon sessionIcon = const Icon(Icons.chat_bubble_outline);
+    Color cardColor = Theme.of(context).colorScheme.secondaryContainer;
 
-    switch (session.sessionType) {
-      case ChatSessionType.normal:
-        sessionIcon = const Icon(Icons.chat_bubble_outline);
-        cardColor = Theme.of(context).colorScheme.secondaryContainer;
-        break;
-      case ChatSessionType.emergency:
-        sessionIcon = const Icon(Icons.emergency, color: Colors.red);
-        cardColor = Colors.red.shade50;
-        break;
-      case ChatSessionType.guided:
-        sessionIcon = const Icon(Icons.mosque, color: Colors.green);
-        cardColor = Colors.green.shade50;
-        break;
+    // Set icon and color based on session type
+    if (session.sessionType == ChatSessionType.normal) {
+      sessionIcon = const Icon(Icons.chat_bubble_outline);
+      cardColor = Theme.of(context).colorScheme.secondaryContainer;
+    } else if (session.sessionType == ChatSessionType.emergency) {
+      sessionIcon = const Icon(Icons.emergency, color: Colors.red);
+      cardColor = Colors.red.shade50;
+    } else if (session.sessionType == ChatSessionType.guided) {
+      sessionIcon = const Icon(Icons.mosque, color: Colors.green);
+      cardColor = Colors.green.shade50;
     }
 
     return Card(

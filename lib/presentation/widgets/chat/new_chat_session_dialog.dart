@@ -18,7 +18,7 @@ class NewChatSessionDialog extends ConsumerStatefulWidget {
 
 class _NewChatSessionDialogState extends ConsumerState<NewChatSessionDialog> {
   final _titleController = TextEditingController();
-  ChatSessionType _sessionType = ChatSessionType.normal;
+  String _sessionType = ChatSessionType.normal;
   String? _topic;
   final List<String> _tags = [];
   bool _isCreating = false;
@@ -88,21 +88,21 @@ class _NewChatSessionDialogState extends ConsumerState<NewChatSessionDialog> {
   }
 
   Widget _buildSessionTypeSelector() {
-    return SegmentedButton<ChatSessionType>(
+    return SegmentedButton<String>(
       segments: const [
-        ButtonSegment<ChatSessionType>(
+        ButtonSegment<String>(
           value: ChatSessionType.normal,
           label: Text('Normal'),
           icon: Icon(Icons.chat_bubble_outline),
         ),
-        ButtonSegment<ChatSessionType>(
+        ButtonSegment<String>(
           value: ChatSessionType.guided,
           label: Text('Guided'),
           icon: Icon(Icons.mosque),
         ),
       ],
       selected: {_sessionType},
-      onSelectionChanged: (Set<ChatSessionType> selected) {
+      onSelectionChanged: (Set<String> selected) {
         setState(() {
           _sessionType = selected.first;
         });

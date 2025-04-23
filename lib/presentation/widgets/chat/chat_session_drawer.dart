@@ -334,14 +334,15 @@ class ChatSessionDrawer extends ConsumerWidget {
     );
   }
 
-  Icon _getIconForSessionType(ChatSessionType type) {
-    switch (type) {
-      case ChatSessionType.normal:
-        return const Icon(Icons.chat_bubble_outline);
-      case ChatSessionType.emergency:
-        return const Icon(Icons.emergency, color: Colors.red);
-      case ChatSessionType.guided:
-        return const Icon(Icons.mosque, color: Colors.green);
+  Icon _getIconForSessionType(String type) {
+    if (type == ChatSessionType.normal) {
+      return const Icon(Icons.chat_bubble_outline);
+    } else if (type == ChatSessionType.emergency) {
+      return const Icon(Icons.emergency, color: Colors.red);
+    } else if (type == ChatSessionType.guided) {
+      return const Icon(Icons.mosque, color: Colors.green);
+    } else {
+      return const Icon(Icons.chat_bubble_outline);
     }
   }
 

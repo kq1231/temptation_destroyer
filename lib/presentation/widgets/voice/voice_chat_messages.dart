@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vapi/Vapi.dart';
+import '../../../core/services/vapi_service.dart';
 
 class VoiceChatMessages extends ConsumerWidget {
   final List<VapiEvent> messages;

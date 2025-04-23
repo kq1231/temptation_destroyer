@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
+import 'package:temptation_destroyer/core/utils/logger.dart';
 import 'dart:math';
 import 'dart:convert';
 
@@ -22,7 +22,7 @@ class AIRepository {
 
   // Rate limiting configuration
   static const _maxRequestsPerMinute = 60;
-  final Map<AIServiceType, List<DateTime>> _requestTimestamps = {};
+  final Map<String, List<DateTime>> _requestTimestamps = {};
 
   /// Constructor
   AIRepository(dynamic ref)
@@ -35,13 +35,15 @@ class AIRepository {
 
   /// Initialize request tracking for rate limiting
   void _initializeRequestTracking() {
-    for (final type in AIServiceType.values) {
-      _requestTimestamps[type] = [];
-    }
+    // Initialize request tracking for all service types
+    _requestTimestamps[AIServiceType.openAI] = [];
+    _requestTimestamps[AIServiceType.anthropic] = [];
+    _requestTimestamps[AIServiceType.openRouter] = [];
+    _requestTimestamps[AIServiceType.offline] = [];
   }
 
   /// Check if we can make a request (rate limiting)
-  bool _canMakeRequest(AIServiceType serviceType) {
+  bool _canMakeRequest(String serviceType) {
     final timestamps = _requestTimestamps[serviceType]!;
     final now = DateTime.now();
 
@@ -59,7 +61,7 @@ class AIRepository {
   }
 
   /// Get API key for a service type from secure storage
-  Future<String?> _getSecureApiKey(AIServiceType type) async {
+  Future<String?> _getSecureApiKey(String type) async {
     try {
       // First check if we have a key in the config
       final config = getServiceConfig();
@@ -70,7 +72,7 @@ class AIRepository {
       }
 
       // If no key in config, try secure storage
-      final key = await _secureStorage.getKey(type.toString());
+      final key = await _secureStorage.getKey(type);
       if (key != null && key.isNotEmpty) {
         // Save the key to config for future use
         final updatedConfig = config.copyWith(
@@ -82,26 +84,27 @@ class AIRepository {
       }
       return null;
     } catch (e) {
-      debugPrint('Error getting API key: $e');
+      AppLogger.debug('Error getting API key: $e');
       return null;
     }
   }
 
   /// Validate API key for a service
-  Future<bool> _validateApiKey(AIServiceType type, String key) async {
+  Future<bool> _validateApiKey(String type, String key) async {
     // TODO: Implement key validation logic for each service
     // For now, just check if it's not empty and has a valid format
     if (key.isEmpty) return false;
 
-    switch (type) {
-      case AIServiceType.openAI:
-        return key.startsWith('sk-') && key.length > 20;
-      case AIServiceType.anthropic:
-        return key.startsWith('sk-ant-') && key.length > 20;
-      case AIServiceType.openRouter:
-        return key.length > 20;
-      case AIServiceType.offline:
-        return true;
+    if (type == AIServiceType.openAI) {
+      return key.startsWith('sk-') && key.length > 20;
+    } else if (type == AIServiceType.anthropic) {
+      return key.startsWith('sk-ant-') && key.length > 20;
+    } else if (type == AIServiceType.openRouter) {
+      return key.length > 20;
+    } else if (type == AIServiceType.offline) {
+      return true;
+    } else {
+      return true;
     }
   }
 
@@ -112,22 +115,22 @@ class AIRepository {
     config.AIServiceConfig? config,
     ChatSession? session,
   }) async {
-    print('\n=== AI Repository: Generating Response ===');
-    print('User input length: ${userInput.length}');
-    print('Context length: ${context.length}');
-    print('User input: $userInput');
-    print('Context: $context');
+    AppLogger.debug('\n=== AI Repository: Generating Response ===');
+    AppLogger.debug('User input length: ${userInput.length}');
+    AppLogger.debug('Context length: ${context.length}');
+    AppLogger.debug('User input: $userInput');
+    AppLogger.debug('Context: $context');
 
     // Get the current AI service config if not provided
     final serviceConfig = config ?? getServiceConfig();
-    print('Service type: ${serviceConfig.serviceType}');
-    print('Model: ${serviceConfig.preferredModel ?? "default"}');
-    print('Temperature: ${serviceConfig.temperature}');
-    print('Max tokens: ${serviceConfig.maxTokens}');
+    AppLogger.debug('Service type: ${serviceConfig.serviceType}');
+    AppLogger.debug('Model: ${serviceConfig.preferredModel ?? "default"}');
+    AppLogger.debug('Temperature: ${serviceConfig.temperature}');
+    AppLogger.debug('Max tokens: ${serviceConfig.maxTokens}');
 
     // Don't check for API key if we're in offline mode
     if (serviceConfig.serviceType == AIServiceType.offline) {
-      print('Using offline mode');
+      AppLogger.debug('Using offline mode');
       return await _getFallbackResponse(userInput, context, session);
     }
 
@@ -135,7 +138,7 @@ class AIRepository {
       // Get API key from secure storage
       final apiKey = await _getSecureApiKey(serviceConfig.serviceType);
       if (apiKey == null || apiKey.isEmpty) {
-        print('No API key found, returning error message');
+        AppLogger.debug('No API key found, returning error message');
         return await _getFallbackResponse(userInput, context, session,
             errorMessage:
                 "No API key found for ${serviceConfig.serviceType}. Please add your API key in the settings.");
@@ -144,7 +147,7 @@ class AIRepository {
       // Validate API key
       final isValid = await _validateApiKey(serviceConfig.serviceType, apiKey);
       if (!isValid) {
-        print('Invalid API key, returning error message');
+        AppLogger.debug('Invalid API key, returning error message');
         return await _getFallbackResponse(userInput, context, session,
             errorMessage:
                 "Invalid API key format for ${serviceConfig.serviceType}. Please check your API key in the settings.");
@@ -152,7 +155,7 @@ class AIRepository {
 
       // Check rate limiting
       if (!_canMakeRequest(serviceConfig.serviceType)) {
-        print('Rate limit exceeded');
+        AppLogger.debug('Rate limit exceeded');
         return await _getFallbackResponse(userInput, context, session,
             errorMessage:
                 "Rate limit exceeded for ${serviceConfig.serviceType}. Please try again in a minute.");
@@ -161,14 +164,14 @@ class AIRepository {
       // Create a config copy with the secure API key
       final secureConfig = serviceConfig.copyWith(apiKey: apiKey);
 
-      print('\nSending request to AI service...');
+      AppLogger.debug('\nSending request to AI service...');
       // Send the request to the appropriate AI service
       final response = await _sendRequestToAIService(
         userInput: userInput,
         context: context,
         config: secureConfig,
       );
-      print('Received response of length: ${response.length}');
+      AppLogger.debug('Received response of length: ${response.length}');
 
       // Create the AI response
       final chatMessage = ChatMessageModel(
@@ -182,10 +185,10 @@ class AIRepository {
       // Save the message using storeMessageAsync to ensure encryption
       await storeMessageAsync(chatMessage);
 
-      print('=== AI Repository: Response Generation Complete ===\n');
+      AppLogger.debug('=== AI Repository: Response Generation Complete ===\n');
       return chatMessage;
     } catch (e) {
-      print('Error generating AI response: $e');
+      AppLogger.debug('Error generating AI response: $e');
       // Return an error message instead of a fallback response
       return await _getFallbackResponse(userInput, context, session,
           errorMessage: e.toString());
@@ -198,10 +201,10 @@ class AIRepository {
     required List<ChatMessageModel> context,
     required config.AIServiceConfig config,
   }) async {
-    print('\n=== Sending Request to AI Service ===');
-    print('Service type: ${config.serviceType}');
-    print('Model: ${config.preferredModel ?? "default"}');
-    print('Context: $context');
+    AppLogger.debug('\n=== Sending Request to AI Service ===');
+    AppLogger.debug('Service type: ${config.serviceType}');
+    AppLogger.debug('Model: ${config.preferredModel ?? "default"}');
+    AppLogger.debug('Context: $context');
 
     int retryCount = 0;
     const maxRetries = 3;
@@ -211,29 +214,28 @@ class AIRepository {
       try {
         String response;
 
-        switch (config.serviceType) {
-          case AIServiceType.openAI:
-            print('Sending request to OpenAI...');
-            response = await _sendOpenAIRequest(userInput, context, config);
-            break;
-          case AIServiceType.anthropic:
-            print('Sending request to Anthropic...');
-            response = await _sendAnthropicRequest(userInput, context, config);
-            break;
-          case AIServiceType.openRouter:
-            print('Sending request to OpenRouter...');
-            response = await _sendOpenRouterRequest(userInput, context, config);
-            break;
-          case AIServiceType.offline:
-            print('Using offline mode');
-            throw AIServiceException(
-                "Currently in offline mode. Please select an online AI service in settings.");
+        if (config.serviceType == AIServiceType.openAI) {
+          AppLogger.debug('Sending request to OpenAI...');
+          response = await _sendOpenAIRequest(userInput, context, config);
+        } else if (config.serviceType == AIServiceType.anthropic) {
+          AppLogger.debug('Sending request to Anthropic...');
+          response = await _sendAnthropicRequest(userInput, context, config);
+        } else if (config.serviceType == AIServiceType.openRouter) {
+          AppLogger.debug('Sending request to OpenRouter...');
+          response = await _sendOpenRouterRequest(userInput, context, config);
+        } else if (config.serviceType == AIServiceType.offline) {
+          AppLogger.debug('Using offline mode');
+          throw AIServiceException(
+              "Currently in offline mode. Please select an online AI service in settings.");
+        } else {
+          throw AIServiceException(
+              "Invalid AI service type. Please select a valid AI service in settings.");
         }
-        print('Request successful!');
+        AppLogger.debug('Request successful!');
         return response;
       } on DioException catch (e) {
         retryCount++;
-        print('Request failed (attempt $retryCount/$maxRetries): $e');
+        AppLogger.debug('Request failed (attempt $retryCount/$maxRetries): $e');
 
         // Parse the error response to get a more specific error message
         String errorMessage = "Network error occurred";
@@ -290,13 +292,13 @@ class AIRepository {
 
         // Wait before retrying, with exponential backoff
         if (retryCount < maxRetries) {
-          print('Retrying in ${retryDelay.inSeconds} seconds...');
+          AppLogger.debug('Retrying in ${retryDelay.inSeconds} seconds...');
           await Future.delayed(retryDelay);
           retryDelay *= 2;
         }
       } catch (e) {
         retryCount++;
-        print('Request failed (attempt $retryCount/$maxRetries): $e');
+        AppLogger.debug('Request failed (attempt $retryCount/$maxRetries): $e');
 
         // If it's already an AIServiceException, just rethrow it
         if (e is AIServiceException) {
@@ -311,7 +313,7 @@ class AIRepository {
 
         // Wait before retrying, with exponential backoff
         if (retryCount < maxRetries) {
-          print('Retrying in ${retryDelay.inSeconds} seconds...');
+          AppLogger.debug('Retrying in ${retryDelay.inSeconds} seconds...');
           await Future.delayed(retryDelay);
           retryDelay *= 2;
         }
@@ -338,16 +340,16 @@ class AIRepository {
       var retryCount = 0;
       var backoffDelay = const Duration(seconds: 1);
 
-      // Debug print the context being sent
-      print('Context being sent to OpenAI:');
-      print(context);
+      // Debug AppLogger.debug the context being sent
+      AppLogger.debug('Context being sent to OpenAI:');
+      AppLogger.debug(context.toString());
 
       // Add logging for OpenAI request parameters
-      print('OpenAI Request Parameters:');
-      print('Model: ${config.preferredModel}');
-      print('Messages: ${buildContextMessages(context)}');
-      print('Temperature: ${config.temperature}');
-      print('Max Tokens: ${config.maxTokens}');
+      AppLogger.debug('OpenAI Request Parameters:');
+      AppLogger.debug('Model: ${config.preferredModel}');
+      AppLogger.debug('Messages: ${buildContextMessages(context)}');
+      AppLogger.debug('Temperature: ${config.temperature}');
+      AppLogger.debug('Max Tokens: ${config.maxTokens}');
 
       while (retryCount <= maxRetries) {
         try {
@@ -417,15 +419,15 @@ class AIRepository {
           'content': message.content.trim(),
         });
       }
-      // Debug print the parsed messages
-      print('Parsed ${messageList.length} context messages:');
+      // Debug AppLogger.debug the parsed messages
+      AppLogger.debug('Parsed ${messageList.length} context messages:');
       for (var msg in messageList) {
-        print(
+        AppLogger.debug(
             '${msg['role']}: ${msg['content']?.substring(0, min(30, msg['content']!.length))}...');
       }
       return messageList;
     } catch (e) {
-      print('Error parsing context into messages: $e');
+      AppLogger.debug('Error parsing context into messages: $e');
       return [];
     }
   }
@@ -450,12 +452,12 @@ class AIRepository {
       var backoffDelay = const Duration(seconds: 1);
 
       // Add logging for Anthropic request parameters
-      print('Anthropic Request Parameters:');
-      print('Model: $selectedModel');
-      print('Messages: '
+      AppLogger.debug('Anthropic Request Parameters:');
+      AppLogger.debug('Model: $selectedModel');
+      AppLogger.debug('Messages: '
           '[{"role": "user", "content": "$context\n\n$userInput"}]');
-      print('Temperature: ${config.temperature}');
-      print('Max Tokens: ${config.maxTokens}');
+      AppLogger.debug('Temperature: ${config.temperature}');
+      AppLogger.debug('Max Tokens: ${config.maxTokens}');
 
       while (retryCount <= maxRetries) {
         try {
@@ -535,12 +537,12 @@ class AIRepository {
       }
 
       // Add logging for OpenRouter request parameters
-      print('OpenRouter Request Parameters:');
-      print('Model: $selectedModel');
-      print('Messages: '
+      AppLogger.debug('OpenRouter Request Parameters:');
+      AppLogger.debug('Model: $selectedModel');
+      AppLogger.debug('Messages: '
           '[{"role": "system", "content": "You are a thoughtful, wise, and Islamic guidance assistant helping someone overcome temptations. Provide kind, helpful, encouraging advice based on Islamic principles and psychology. Your advice should be supportive, practical, and grounded in both religious wisdom and evidence-based approaches to behavior change. Use appropriate Quranic verses or hadith where relevant. Speak with compassion and without judgment. Keep responses concise but helpful."}, {"role": "user", "content": "Context about my situation: $context"}, {"role": "user", "content": "$userInput"}]');
-      print('Temperature: $temperature');
-      print('Max Tokens: $maxTokens');
+      AppLogger.debug('Temperature: $temperature');
+      AppLogger.debug('Max Tokens: $maxTokens');
 
       while (retryCount <= maxRetries) {
         try {
@@ -640,6 +642,9 @@ class AIRepository {
 
       case AIServiceType.offline:
         return 'offline';
+
+      default:
+        return 'Offline';
     }
   }
 
@@ -857,95 +862,95 @@ class AIRepository {
         updateChatSession(updatedSession);
       }
     } catch (e) {
-      debugPrint('Error in saveServiceConfig: $e');
+      AppLogger.debug('Error in saveServiceConfig: $e');
     }
   }
 
   /// Get available models for the selected service with pricing info
-  List<Map<String, dynamic>> getAvailableModelsWithPricing(
-      AIServiceType serviceType) {
-    switch (serviceType) {
-      case AIServiceType.openAI:
-        return [
-          {
-            'id': 'gpt-3.5-turbo',
-            'name': 'GPT-3.5 Turbo',
-            'cost_per_1k_tokens': 0.0015,
-          },
-          {
-            'id': 'gpt-4',
-            'name': 'GPT-4',
-            'cost_per_1k_tokens': 0.03,
-          },
-          {
-            'id': 'gpt-4-turbo',
-            'name': 'GPT-4 Turbo',
-            'cost_per_1k_tokens': 0.01,
-          },
-        ];
-      case AIServiceType.anthropic:
-        return [
-          {
-            'id': 'claude-3-haiku',
-            'name': 'Claude 3 Haiku',
-            'cost_per_1k_tokens': 0.0025,
-          },
-          {
-            'id': 'claude-3-sonnet',
-            'name': 'Claude 3 Sonnet',
-            'cost_per_1k_tokens': 0.008,
-          },
-          {
-            'id': 'claude-3-opus',
-            'name': 'Claude 3 Opus',
-            'cost_per_1k_tokens': 0.015,
-          },
-        ];
-      case AIServiceType.openRouter:
-        return [
-          {
-            'id': 'gpt-3.5-turbo',
-            'name': 'GPT-3.5 Turbo',
-            'cost_per_1k_tokens': 0.001,
-          },
-          {
-            'id': 'gpt-4',
-            'name': 'GPT-4',
-            'cost_per_1k_tokens': 0.025,
-          },
-          {
-            'id': 'claude-3-haiku',
-            'name': 'Claude 3 Haiku',
-            'cost_per_1k_tokens': 0.002,
-          },
-          {
-            'id': 'claude-3-sonnet',
-            'name': 'Claude 3 Sonnet',
-            'cost_per_1k_tokens': 0.007,
-          },
-          {
-            'id': 'claude-3-opus',
-            'name': 'Claude 3 Opus',
-            'cost_per_1k_tokens': 0.013,
-          },
-          {
-            'id': 'mistral-medium',
-            'name': 'Mistral Medium',
-            'cost_per_1k_tokens': 0.002,
-          },
-          {
-            'id': 'llama3-70b',
-            'name': 'Llama 3 70B',
-            'cost_per_1k_tokens': 0.0008,
-          },
-        ];
-      case AIServiceType.offline:
-        return [];
+  List<Map<String, dynamic>> getAvailableModelsWithPricing(String serviceType) {
+    if (serviceType == AIServiceType.openAI) {
+      return [
+        {
+          'id': 'gpt-3.5-turbo',
+          'name': 'GPT-3.5 Turbo',
+          'cost_per_1k_tokens': 0.0015,
+        },
+        {
+          'id': 'gpt-4',
+          'name': 'GPT-4',
+          'cost_per_1k_tokens': 0.03,
+        },
+        {
+          'id': 'gpt-4-turbo',
+          'name': 'GPT-4 Turbo',
+          'cost_per_1k_tokens': 0.01,
+        },
+      ];
+    } else if (serviceType == AIServiceType.anthropic) {
+      return [
+        {
+          'id': 'claude-3-haiku',
+          'name': 'Claude 3 Haiku',
+          'cost_per_1k_tokens': 0.0025,
+        },
+        {
+          'id': 'claude-3-sonnet',
+          'name': 'Claude 3 Sonnet',
+          'cost_per_1k_tokens': 0.008,
+        },
+        {
+          'id': 'claude-3-opus',
+          'name': 'Claude 3 Opus',
+          'cost_per_1k_tokens': 0.015,
+        },
+      ];
+    } else if (serviceType == AIServiceType.openRouter) {
+      return [
+        {
+          'id': 'gpt-3.5-turbo',
+          'name': 'GPT-3.5 Turbo',
+          'cost_per_1k_tokens': 0.001,
+        },
+        {
+          'id': 'gpt-4',
+          'name': 'GPT-4',
+          'cost_per_1k_tokens': 0.025,
+        },
+        {
+          'id': 'claude-3-haiku',
+          'name': 'Claude 3 Haiku',
+          'cost_per_1k_tokens': 0.002,
+        },
+        {
+          'id': 'claude-3-sonnet',
+          'name': 'Claude 3 Sonnet',
+          'cost_per_1k_tokens': 0.007,
+        },
+        {
+          'id': 'claude-3-opus',
+          'name': 'Claude 3 Opus',
+          'cost_per_1k_tokens': 0.013,
+        },
+        {
+          'id': 'mistral-medium',
+          'name': 'Mistral Medium',
+          'cost_per_1k_tokens': 0.002,
+        },
+        {
+          'id': 'llama3-70b',
+          'name': 'Llama 3 70B',
+          'cost_per_1k_tokens': 0.0008,
+        },
+      ];
+    } else if (serviceType == AIServiceType.offline) {
+      return [];
+    } else {
+      return [];
     }
   }
 
   /// Get available models for the selected service (IDs only)
-  List<String> getAvailableModels(AIServiceType serviceType) {
+  List<String> getAvailableModels(String serviceType) {
     return getAvailableModelsWithPricing(serviceType)
         .map((model) => model['id'] as String)
         .toList();
@@ -996,7 +1001,7 @@ class AIRepository {
 
       return messages;
     } catch (e) {
-      debugPrint('Error fetching chat messages: $e');
+      AppLogger.debug('Error fetching chat messages: $e');
       return [];
     }
   }
@@ -1016,7 +1021,7 @@ class AIRepository {
       builtQuery.close();
       return count;
     } catch (e) {
-      debugPrint('Error getting chat message count: $e');
+      AppLogger.debug('Error getting chat message count: $e');
       return 0;
     }
   }
@@ -1034,7 +1039,7 @@ class AIRepository {
       }
       _chatBox.put(message);
     } catch (e) {
-      debugPrint('Error storing chat message: $e');
+      AppLogger.debug('Error storing chat message: $e');
       rethrow;
     }
   }
@@ -1042,8 +1047,8 @@ class AIRepository {
   /// Create a new chat session
   Future<ChatSession> createChatSession({
     required String title,
-    ChatSessionType sessionType = ChatSessionType.normal,
-    AIServiceType serviceType = AIServiceType.offline,
+    String sessionType = ChatSessionType.normal,
+    String serviceType = AIServiceType.offline,
     String? topic,
   }) async {
     try {
@@ -1058,7 +1063,7 @@ class AIRepository {
       box.put(session);
       return session;
     } catch (e) {
-      debugPrint('Error creating chat session: $e');
+      AppLogger.debug('Error creating chat session: $e');
       rethrow;
     }
   }
@@ -1069,7 +1074,7 @@ class AIRepository {
       final box = ObjectBoxManager.instance.box<ChatSession>();
       return box.get(id);
     } catch (e) {
-      debugPrint('Error getting chat session: $e');
+      AppLogger.debug('Error getting chat session: $e');
       return null;
     }
   }
@@ -1077,7 +1082,7 @@ class AIRepository {
   /// Get all chat sessions with optional filtering
   Future<List<ChatSession>> getChatSessions({
     bool includeArchived = false,
-    ChatSessionType? type,
+    String? type,
     bool onlyEmergency = false,
   }) async {
     try {
@@ -1091,8 +1096,7 @@ class AIRepository {
       }
 
       if (type != null) {
-        final typeQuery =
-            box.query(ChatSession_.dbSessionType.equals(type.index));
+        final typeQuery = box.query(ChatSession_.sessionType.equals(type));
         query = typeQuery;
       }
 
@@ -1103,7 +1107,7 @@ class AIRepository {
       builtQuery.close();
       return sessions;
     } catch (e) {
-      debugPrint('Error getting chat sessions: $e');
+      AppLogger.debug('Error getting chat sessions: $e');
       return [];
     }
   }
@@ -1115,7 +1119,7 @@ class AIRepository {
       session.touch(); // Update lastModified
       box.put(session);
     } catch (e) {
-      debugPrint('Error updating chat session: $e');
+      AppLogger.debug('Error updating chat session: $e');
       rethrow;
     }
   }
@@ -1138,7 +1142,7 @@ class AIRepository {
       // Then delete the session
       box.remove(sessionId);
     } catch (e) {
-      debugPrint('Error deleting chat session: $e');
+      AppLogger.debug('Error deleting chat session: $e');
       rethrow;
     }
   }
@@ -1164,7 +1168,7 @@ class AIRepository {
         }
       }
     } catch (e) {
-      debugPrint('Error updating message rating: $e');
+      AppLogger.debug('Error updating message rating: $e');
       rethrow;
     }
   }
@@ -1176,18 +1180,18 @@ class AIRepository {
     config.AIServiceConfig? config,
     ChatSession? session,
   }) async* {
-    print('\n=== AI Repository: Generating Streaming Response ===');
-    print('User input length: ${userInput.length}');
-    print('Context length: ${context.length}');
+    AppLogger.debug('\n=== AI Repository: Generating Streaming Response ===');
+    AppLogger.debug('User input length: ${userInput.length}');
+    AppLogger.debug('Context length: ${context.length}');
 
     // Get the current AI service config if not provided
     final serviceConfig = config ?? getServiceConfig();
-    print('Service type: ${serviceConfig.serviceType}');
-    print('Model: ${serviceConfig.preferredModel ?? "default"}');
+    AppLogger.debug('Service type: ${serviceConfig.serviceType}');
+    AppLogger.debug('Model: ${serviceConfig.preferredModel ?? "default"}');
 
     // Don't check for API key if we're in offline mode
     if (serviceConfig.serviceType == AIServiceType.offline) {
-      print('Using offline mode');
+      AppLogger.debug('Using offline mode');
       yield 'I am currently in offline mode. Please switch to an online AI service for more personalized guidance.';
       return;
     }
@@ -1196,7 +1200,7 @@ class AIRepository {
       // Get API key from secure storage
       final apiKey = await _getSecureApiKey(serviceConfig.serviceType);
       if (apiKey == null || apiKey.isEmpty) {
-        print('No API key found, returning error message');
+        AppLogger.debug('No API key found, returning error message');
         yield "⚠️ Error: No API key found for ${serviceConfig.serviceType}. Please add your API key in the settings.";
         return;
       }
@@ -1204,14 +1208,14 @@ class AIRepository {
       // Validate API key
       final isValid = await _validateApiKey(serviceConfig.serviceType, apiKey);
       if (!isValid) {
-        print('Invalid API key, returning error message');
+        AppLogger.debug('Invalid API key, returning error message');
         yield "⚠️ Error: Invalid API key format for ${serviceConfig.serviceType}. Please check your API key in the settings.";
         return;
       }
 
       // Check rate limiting
       if (!_canMakeRequest(serviceConfig.serviceType)) {
-        print('Rate limit exceeded');
+        AppLogger.debug('Rate limit exceeded');
         yield "⚠️ Error: Rate limit exceeded for ${serviceConfig.serviceType}. Please try again in a minute.";
         return;
       }
@@ -1219,7 +1223,7 @@ class AIRepository {
       // Create a config copy with the secure API key
       final secureConfig = serviceConfig.copyWith(apiKey: apiKey);
 
-      print('\nSending streaming request to AI service...');
+      AppLogger.debug('\nSending streaming request to AI service...');
       // Send the streaming request to the appropriate AI service
       try {
         await for (final chunk in _sendStreamingRequestToAIService(
@@ -1234,7 +1238,7 @@ class AIRepository {
         yield "⚠️ Error: ${e.toString()}";
       }
     } catch (e) {
-      print('Error generating AI response: $e');
+      AppLogger.debug('Error generating AI response: $e');
       yield "⚠️ Error: ${e.toString()}";
     }
   }
@@ -1245,40 +1249,38 @@ class AIRepository {
     required List<ChatMessageModel> context,
     required config.AIServiceConfig config,
   }) async* {
-    print('\n=== Sending Streaming Request to AI Service ===');
-    print('Service type: ${config.serviceType}');
-    print('Model: ${config.preferredModel ?? "default"}');
+    AppLogger.debug('\n=== Sending Streaming Request to AI Service ===');
+    AppLogger.debug('Service type: ${config.serviceType}');
+    AppLogger.debug('Model: ${config.preferredModel ?? "default"}');
 
     try {
-      switch (config.serviceType) {
-        case AIServiceType.openAI:
-          print('Sending streaming request to OpenAI...');
-          await for (final chunk
-              in _sendOpenAIStreamingRequest(userInput, context, config)) {
-            yield chunk;
-          }
-          break;
-        case AIServiceType.anthropic:
-          print('Sending streaming request to Anthropic...');
-          await for (final chunk
-              in _sendAnthropicStreamingRequest(userInput, context, config)) {
-            yield chunk;
-          }
-          break;
-        case AIServiceType.openRouter:
-          print('Sending streaming request to OpenRouter...');
-          await for (final chunk
-              in _sendOpenRouterStreamingRequest(userInput, context, config)) {
-            yield chunk;
-          }
-          break;
-        case AIServiceType.offline:
-          print('Using offline mode');
-          yield "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.";
-          break;
+      if (config.serviceType == AIServiceType.openAI) {
+        AppLogger.debug('Sending streaming request to OpenAI...');
+        await for (final chunk
+            in _sendOpenAIStreamingRequest(userInput, context, config)) {
+          yield chunk;
+        }
+      } else if (config.serviceType == AIServiceType.anthropic) {
+        AppLogger.debug('Sending streaming request to Anthropic...');
+        await for (final chunk
+            in _sendAnthropicStreamingRequest(userInput, context, config)) {
+          yield chunk;
+        }
+      } else if (config.serviceType == AIServiceType.openRouter) {
+        AppLogger.debug('Sending streaming request to OpenRouter...');
+        await for (final chunk
+            in _sendOpenRouterStreamingRequest(userInput, context, config)) {
+          yield chunk;
+        }
+      } else if (config.serviceType == AIServiceType.offline) {
+        AppLogger.debug('Using offline mode');
+        yield "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.";
+      } else {
+        AppLogger.debug('Unknown AI service type');
+        yield "Unknown AI service type. Please switch to a supported AI service.";
       }
     } catch (e) {
-      print('Error in streaming request: $e');
+      AppLogger.debug('Error in streaming request: $e');
       if (e is AIServiceException) {
         yield "⚠️ Error: ${e.message}";
       } else {
@@ -1297,10 +1299,10 @@ class AIRepository {
       }
 
       // Add logging for OpenAI request parameters
-      print('OpenAI Streaming Request Parameters:');
-      print('Model: ${config.preferredModel}');
-      print('Temperature: ${config.temperature}');
-      print('Max Tokens: ${config.maxTokens}');
+      AppLogger.debug('OpenAI Streaming Request Parameters:');
+      AppLogger.debug('Model: ${config.preferredModel}');
+      AppLogger.debug('Temperature: ${config.temperature}');
+      AppLogger.debug('Max Tokens: ${config.maxTokens}');
 
       // Send the streaming request using Dio SSE
       final response = await _dio.post(
@@ -1348,7 +1350,7 @@ class AIRepository {
                 yield data['choices'][0]['delta']['content'] as String;
               }
             } catch (e) {
-              print('Error parsing SSE chunk: $e');
+              AppLogger.debug('Error parsing SSE chunk: $e');
             }
           }
         }
@@ -1380,10 +1382,10 @@ class AIRepository {
           await _selectOptimalModel(userInput, context, config);
 
       // Add logging for Anthropic request parameters
-      print('Anthropic Streaming Request Parameters:');
-      print('Model: $selectedModel');
-      print('Temperature: ${config.temperature}');
-      print('Max Tokens: ${config.maxTokens}');
+      AppLogger.debug('Anthropic Streaming Request Parameters:');
+      AppLogger.debug('Model: $selectedModel');
+      AppLogger.debug('Temperature: ${config.temperature}');
+      AppLogger.debug('Max Tokens: ${config.maxTokens}');
 
       // Send the streaming request using Dio SSE
       final response = await _dio.post(
@@ -1426,7 +1428,7 @@ class AIRepository {
                 yield data['delta']['text'] as String;
               }
             } catch (e) {
-              print('Error parsing Anthropic SSE chunk: $e');
+              AppLogger.debug('Error parsing Anthropic SSE chunk: $e');
             }
           }
         }
@@ -1471,10 +1473,10 @@ class AIRepository {
       }
 
       // Add logging for OpenRouter request parameters
-      print('OpenRouter Streaming Request Parameters:');
-      print('Model: $selectedModel');
-      print('Temperature: $temperature');
-      print('Max Tokens: $maxTokens');
+      AppLogger.debug('OpenRouter Streaming Request Parameters:');
+      AppLogger.debug('Model: $selectedModel');
+      AppLogger.debug('Temperature: $temperature');
+      AppLogger.debug('Max Tokens: $maxTokens');
 
       // Send the streaming request using Dio SSE
       final response = await _dio.post(
@@ -1524,7 +1526,7 @@ class AIRepository {
                 yield data['choices'][0]['delta']['content'] as String;
               }
             } catch (e) {
-              print('Error parsing OpenRouter SSE chunk: $e');
+              AppLogger.debug('Error parsing OpenRouter SSE chunk: $e');
             }
           }
         }

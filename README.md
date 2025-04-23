@@ -44,6 +44,21 @@ Temptation Destroyer was built with the Muslim Ummah in mind:
 
 May Allah make this app a means of guidance and strength for the Ummah.
 
+## Voice Chat Support
+
+The application includes voice chat capabilities through VAPI integration, allowing users to get guidance and support through spoken conversation. This feature:
+
+1. Provides a conversational AI voice assistant specialized in Islamic guidance
+2. Helps users in moments of temptation through voice interaction
+3. Requires a VAPI public key (get yours at https://vapi.ai)
+
+### Setting up Voice Chat
+
+1. Navigate to 'AI Service Setup' in the app menu
+2. Go to the 'Voice AI Settings' section
+3. Click 'Configure VAPI Key' and enter your VAPI public key
+4. Access the voice chat from the home screen or through the 'Voice Guidance' menu option
+
 ---
 
 *"And whoever fears Allah - He will make for him a way out." - Quran 65:2*

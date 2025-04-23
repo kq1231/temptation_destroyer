@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:temptation_destroyer/core/utils/logger.dart';
 import '../../data/models/ai_models.dart' as models;
 import '../../data/models/chat_session_model.dart';
 import '../../data/repositories/ai_repository.dart';
@@ -122,7 +123,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
         await _repository.updateChatSession(updatedSession);
       }
     } catch (e) {
-      print('Error saving config: $e');
+      AppLogger.debug('Error saving config: $e');
     }
   }
 
@@ -181,8 +182,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
   }
 
   /// Set the service type
-  Future<void> setServiceType(models.AIServiceType type,
-      {String? apiKey}) async {
+  Future<void> setServiceType(String type, {String? apiKey}) async {
     if (state.isLoading) return;
 
     try {
@@ -256,7 +256,7 @@ class AIServiceNotifier extends StateNotifier<AIServiceState> {
       // Clear chat history in repository
       await _repository.clearChatHistory();
 
-      print('Chat history cleared');
+      AppLogger.debug('Chat history cleared');
     } catch (e) {
       state = state.copyWith(
         errorMessage: 'Failed to clear chat history: $e',

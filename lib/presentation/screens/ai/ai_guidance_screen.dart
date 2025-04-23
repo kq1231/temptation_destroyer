@@ -8,6 +8,7 @@ import '../../../data/models/chat_session_model.dart';
 import '../../widgets/app_loading_indicator.dart';
 import '../../widgets/emergency_chat_widget.dart';
 import '../../widgets/chat/chat_message_bubble.dart';
+import '../../widgets/common/loading_overlay.dart' as overlay;
 import '../../../core/context/context_manager.dart';
 
 class AIGuidanceScreen extends ConsumerStatefulWidget {
@@ -81,6 +82,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
     final aiServiceState = ref.watch(aiServiceProvider);
     final isOffline =
         aiServiceState.config.serviceType == AIServiceType.offline;
+    final isAiServiceLoading = aiServiceState.isLoading;
 
     // If in emergency mode, show the emergency chat UI
     if (_isEmergencyMode) {
@@ -104,127 +106,139 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
       );
     }
 
-    // Standard chat UI
-    return Scaffold(
-      appBar: AppBar(
-        title: chatState.value?.currentSession == null
-            ? const Text('AI Guidance')
-            : Text(chatState.value?.currentSession?.title ?? 'AI Guidance'),
-        actions: [
-          // Settings button
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/ai-settings');
-            },
-          ),
-
-          // Clear chat history button
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: chatState.isLoading
-                ? null
-                : () => _showClearChatConfirmation(context),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Offline banner if in offline mode
-          if (isOffline)
-            Container(
-              color: Colors.amber.shade100,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              child: Row(
-                children: [
-                  Icon(Icons.wifi_off, color: Colors.amber.shade800),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Offline mode: Using built-in Islamic guidance',
-                      style: TextStyle(color: Colors.amber.shade900),
-                    ),
-                  ),
-                ],
-              ),
+    // Standard chat UI with loading overlay
+    return overlay.LoadingOverlay(
+      isLoading: isAiServiceLoading,
+      message: 'Loading AI service...',
+      animationType: overlay.LoadingAnimationType.staggeredDotsWave,
+      child: Scaffold(
+        appBar: AppBar(
+          title: chatState.value?.currentSession == null
+              ? const Text('AI Guidance')
+              : Text(chatState.value?.currentSession?.title ?? 'AI Guidance'),
+          actions: [
+            // Settings button
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/ai-settings');
+              },
             ),
 
-          // Main content
-          Expanded(
-            child: chatState.when(
-              data: (state) {
-                if (!state.isInitialized) {
-                  return const Center(child: AppLoadingIndicator());
-                }
-
-                if (state.messages.isEmpty) {
-                  return _buildWelcomeScreen();
-                }
-
-                List<ChatMessageModel> messages =
-                    state.messages.reversed.toList();
-
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    await ref.read(chatProvider.notifier).initialize(
-                          session: state.currentSession,
-                        );
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (_scrollController.hasClients) {
-                        _scrollController
-                            .jumpTo(_scrollController.position.minScrollExtent);
-                      }
-                    });
-                  },
-                  child: ListView.builder(
-                    reverse: true,
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: messages.length + (state.hasMore ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == messages.length) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-                      }
-                      return _buildChatMessage(messages[index]);
-                    },
-                  ),
-                );
-              },
-              loading: () => const Center(child: AppLoadingIndicator()),
-              error: (error, stack) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+            // Clear chat history button
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: chatState.isLoading
+                  ? null
+                  : () => _showClearChatConfirmation(context),
+            ),
+          ],
+        ),
+        body: Column(
+          children: [
+            // Offline banner if in offline mode and not loading
+            if (isOffline && !isAiServiceLoading)
+              Container(
+                color: Colors.amber.shade100,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: Row(
                   children: [
-                    const Icon(Icons.error_outline,
-                        color: Colors.red, size: 48),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error: $error',
-                      style: const TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        ref.read(chatProvider.notifier).initialize(
-                              session: _session,
-                            );
-                      },
-                      child: const Text('Retry'),
+                    Icon(Icons.wifi_off, color: Colors.amber.shade800),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Offline mode: Using built-in Islamic guidance',
+                        style: TextStyle(color: Colors.amber.shade900),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
 
-          // Input area
-          _buildMessageInput(chatState.isLoading),
-        ],
+            // Main content
+            Expanded(
+              child: chatState.when(
+                data: (state) {
+                  if (!state.isInitialized) {
+                    return const Center(
+                        child: AppLoadingIndicator(
+                      message: 'Initializing chat...',
+                    ));
+                  }
+
+                  if (state.messages.isEmpty) {
+                    return _buildWelcomeScreen();
+                  }
+
+                  List<ChatMessageModel> messages =
+                      state.messages.reversed.toList();
+
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      await ref.read(chatProvider.notifier).initialize(
+                            session: state.currentSession,
+                          );
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (_scrollController.hasClients) {
+                          _scrollController.jumpTo(
+                              _scrollController.position.minScrollExtent);
+                        }
+                      });
+                    },
+                    child: ListView.builder(
+                      reverse: true,
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: messages.length + (state.hasMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == messages.length) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        }
+                        return _buildChatMessage(messages[index]);
+                      },
+                    ),
+                  );
+                },
+                loading: () => const Center(
+                    child: AppLoadingIndicator(
+                  message: 'Loading chat...',
+                )),
+                error: (error, stack) => Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.error_outline,
+                          color: Colors.red, size: 48),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error: $error',
+                        style: const TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          ref.read(chatProvider.notifier).initialize(
+                                session: _session,
+                              );
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Input area
+            _buildMessageInput(chatState.isLoading),
+          ],
+        ),
       ),
     );
   }
@@ -340,7 +354,7 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 26), // 0.1 * 255 = 26
             blurRadius: 4,
             offset: const Offset(0, -1),
           ),
@@ -385,15 +399,16 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
 
               // Text input field
               Expanded(
-                child: RawKeyboardListener(
+                child: KeyboardListener(
                   focusNode: _messageFocusNode,
-                  onKey: (event) {
+                  onKeyEvent: (event) {
                     if (isLoading) return;
                     // Only handle key down events
-                    if (event.isKeyPressed(LogicalKeyboardKey.enter) &&
-                        event.runtimeType.toString() == 'RawKeyDownEvent') {
+                    if (HardwareKeyboard.instance
+                            .isLogicalKeyPressed(LogicalKeyboardKey.enter) &&
+                        event.runtimeType.toString().contains('KeyDownEvent')) {
                       // If Shift is NOT pressed, send message
-                      if (!(event.isShiftPressed)) {
+                      if (!(HardwareKeyboard.instance.isShiftPressed)) {
                         // Prevent the default behavior (new line)
                         // Send the message
                         _sendMessage();

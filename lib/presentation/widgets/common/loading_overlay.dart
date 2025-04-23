@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../../core/constants/app_colors.dart';
+import '../../../core/constants/app_colors.dart';
 
-/// A simple loading indicator with an optional message
-class AppLoadingIndicator extends StatelessWidget {
+/// A reusable loading overlay widget that can be used throughout the app
+class LoadingOverlay extends StatelessWidget {
+  /// Whether to show the loading overlay
+  final bool isLoading;
+
+  /// The child widget to display behind the loading overlay
+  final Widget child;
+
   /// The message to display below the loading indicator
   final String? message;
 
@@ -17,8 +23,10 @@ class AppLoadingIndicator extends StatelessWidget {
   final Color? color;
 
   /// Constructor
-  const AppLoadingIndicator({
+  const LoadingOverlay({
     super.key,
+    required this.isLoading,
+    required this.child,
     this.message,
     this.animationType = LoadingAnimationType.staggeredDotsWave,
     this.size = 40.0,
@@ -27,41 +35,53 @@ class AppLoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loadingColor = color ?? AppColors.primary;
+    return Stack(
+      children: [
+        // The main content
+        child,
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildLoadingAnimation(loadingColor),
-          if (message != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 16.0),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  message!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
+        // The loading overlay
+        if (isLoading)
+          Container(
+            color: Colors.black.withValues(alpha: 77), // 0.3 * 255 = 77
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildLoadingAnimation(context),
+                  if (message != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black
+                            .withValues(alpha: 179), // 0.7 * 255 = 179
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        message!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 
   /// Build the loading animation based on the animation type
-  Widget _buildLoadingAnimation(Color loadingColor) {
+  Widget _buildLoadingAnimation(BuildContext context) {
+    final loadingColor = color ?? AppColors.primary;
+
     switch (animationType) {
       case LoadingAnimationType.staggeredDotsWave:
         return LoadingAnimationWidget.staggeredDotsWave(
@@ -93,7 +113,7 @@ class AppLoadingIndicator extends StatelessWidget {
           color: loadingColor,
           size: size,
         );
-      case LoadingAnimationType.prograssiveDots:
+      case LoadingAnimationType.progressiveDots:
         return LoadingAnimationWidget.progressiveDots(
           color: loadingColor,
           size: size,
@@ -102,8 +122,9 @@ class AppLoadingIndicator extends StatelessWidget {
         return LoadingAnimationWidget.discreteCircle(
           color: loadingColor,
           size: size,
-          secondRingColor: loadingColor.withValues(alpha: 0.5),
-          thirdRingColor: loadingColor.withValues(alpha: 0.2),
+          secondRingColor:
+              loadingColor.withValues(alpha: 128), // 0.5 * 255 = 128
+          thirdRingColor: loadingColor.withValues(alpha: 51), // 0.2 * 255 = 51
         );
       case LoadingAnimationType.horizontalRotatingDots:
         return LoadingAnimationWidget.horizontalRotatingDots(
@@ -133,7 +154,7 @@ class AppLoadingIndicator extends StatelessWidget {
       case LoadingAnimationType.flickr:
         return LoadingAnimationWidget.flickr(
           leftDotColor: loadingColor,
-          rightDotColor: loadingColor.withValues(alpha: 0.5),
+          rightDotColor: loadingColor.withValues(alpha: 128), // 0.5 * 255 = 128
           size: size,
         );
       case LoadingAnimationType.hexagonDots:
@@ -173,7 +194,7 @@ enum LoadingAnimationType {
   threeArchedCircle,
   fourRotatingDots,
   fallingDot,
-  prograssiveDots,
+  progressiveDots,
   discreteCircle,
   horizontalRotatingDots,
   newtonCradle,

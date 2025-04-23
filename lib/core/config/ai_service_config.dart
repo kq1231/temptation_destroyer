@@ -4,7 +4,7 @@ import '../../data/models/chat_session_model.dart';
 /// Configuration class for AI services
 class AIServiceConfig {
   /// The type of AI service to use
-  final AIServiceType serviceType;
+  final String serviceType;
 
   /// The API key for the service (optional)
   final String? apiKey;
@@ -33,7 +33,7 @@ class AIServiceConfig {
 
   /// Create a copy with updated values
   AIServiceConfig copyWith({
-    AIServiceType? serviceType,
+    String? serviceType,
     String? apiKey,
     bool? isEncrypted,
     String? preferredModel,

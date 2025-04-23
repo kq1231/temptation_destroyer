@@ -9,7 +9,7 @@ import '../../data/models/ai_models.dart';
 /// - Emergency context detection
 class ContextManager {
   // Default token limits for different models/services
-  static final Map<AIServiceType, int> _defaultTokenLimits = {
+  static final Map<String, int> _defaultTokenLimits = {
     AIServiceType.offline: 2048, // Conservative default
     AIServiceType.openAI: 8192, // Updated GPT-3.5-Turbo default
     AIServiceType.anthropic: 200000, // Updated Claude default
@@ -69,7 +69,7 @@ class ContextManager {
   static const double _maxContextPercentage = 0.8;
 
   /// Gets the appropriate encoding for a model
-  Tiktoken? _getEncodingForModel(String? modelId, AIServiceType serviceType) {
+  Tiktoken? _getEncodingForModel(String? modelId, String serviceType) {
     // Return from cache if already loaded
     if (modelId != null && _encodingCache.containsKey(modelId)) {
       return _encodingCache[modelId];
@@ -91,20 +91,17 @@ class ContextManager {
       }
 
       // Fall back to service type based encoding
-      switch (serviceType) {
-        case AIServiceType.openAI:
-          encoding = getEncoding("cl100k_base"); // For newer GPT models
-          break;
-        case AIServiceType.anthropic:
-          encoding =
-              getEncoding("cl100k_base"); // Claude uses similar tokenization
-          break;
-        case AIServiceType.openRouter:
-          encoding = getEncoding("cl100k_base"); // Most models use this
-          break;
-        case AIServiceType.offline:
-          encoding = getEncoding("r50k_base"); // Fallback option
-          break;
+      if (serviceType == AIServiceType.openAI) {
+        encoding = getEncoding("cl100k_base"); // For newer GPT models
+      } else if (serviceType == AIServiceType.anthropic) {
+        encoding =
+            getEncoding("cl100k_base"); // Claude uses similar tokenization
+      } else if (serviceType == AIServiceType.openRouter) {
+        encoding = getEncoding("cl100k_base"); // Most models use this
+      } else if (serviceType == AIServiceType.offline) {
+        encoding = getEncoding("r50k_base"); // Fallback option
+      } else {
+        encoding = getEncoding("r50k_base"); // Fallback option
       }
 
       if (modelId != null) {
@@ -120,8 +117,7 @@ class ContextManager {
 
   /// Counts tokens accurately using tiktoken
   /// Falls back to estimation if tiktoken fails
-  int estimateTokenCount(String text,
-      {String? modelId, AIServiceType? serviceType}) {
+  int estimateTokenCount(String text, {String? modelId, String? serviceType}) {
     if (text.isEmpty) return 0;
 
     // Try to use tiktoken for accurate counting
@@ -153,7 +149,7 @@ class ContextManager {
   }
 
   /// Gets the token limit for a specific service and model
-  int getTokenLimit(AIServiceType serviceType, String? modelId) {
+  int getTokenLimit(String serviceType, String? modelId) {
     // If model ID is provided and exists in our map, use that limit
     if (modelId != null && _modelTokenLimits.containsKey(modelId)) {
       return _modelTokenLimits[modelId]!;
@@ -167,7 +163,7 @@ class ContextManager {
   /// Calculates available context window size for new messages
   /// Takes into account the system prompt and reserves space for the response
   int getAvailableContextSize(
-      AIServiceType serviceType, String? modelId, int systemPromptLength) {
+      String serviceType, String? modelId, int systemPromptLength) {
     final totalTokenLimit = getTokenLimit(serviceType, modelId);
 
     // Use tiktoken for more accurate system prompt token count if possible
@@ -187,7 +183,7 @@ class ContextManager {
   /// Uses a combination of recency and relevance scoring
   List<ChatMessageModel> selectContext(
       List<ChatMessageModel> messages, int availableTokens,
-      {String? currentQuery, String? modelId, AIServiceType? serviceType}) {
+      {String? currentQuery, String? modelId, String? serviceType}) {
     if (messages.isEmpty) return [];
 
     // First, estimate token count for each message
@@ -535,7 +531,7 @@ Your primary goal is to provide immediate support and guide them to professional
   /// Compresses the context by summarizing or removing less relevant messages
   List<ChatMessageModel> compressContext(
       List<ChatMessageModel> messages, int targetTokenCount,
-      {String? modelId, AIServiceType? serviceType}) {
+      {String? modelId, String? serviceType}) {
     if (messages.isEmpty) return [];
 
     // First, calculate token count for each message
@@ -621,7 +617,7 @@ Your primary goal is to provide immediate support and guide them to professional
   /// Returns a tuple of (selected messages, context summary)
   (List<ChatMessageModel>, String) manageContextWindow(
     List<ChatMessageModel> messages,
-    AIServiceType serviceType,
+    String serviceType,
     String? modelId,
     String? currentQuery,
     int systemPromptLength,

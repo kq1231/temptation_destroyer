@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vapi/Vapi.dart';
 import '../../../core/services/vapi_service.dart';
 import '../../widgets/voice/voice_chat_controls.dart';
 import '../../widgets/voice/voice_chat_messages.dart';
@@ -37,20 +36,106 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen> {
     });
 
     try {
+      // Try to initialize with existing key
       await _vapiService.initialize();
-      _vapiService.onEvent?.listen(_handleVapiEvent);
+      final publicKey = await _vapiService.getPublicKey();
+
+      if (publicKey == null || publicKey.isEmpty) {
+        if (mounted) {
+          await _showVapiSetupDialog(context);
+        }
+      }
+
+      _vapiService.onEvent.listen(_handleVapiEvent);
       setState(() {
         _isInitialized = true;
       });
     } catch (e) {
       setState(() {
-        _error = 'Failed to initialize voice chat: \${e.toString()}';
+        _error = 'Failed to initialize voice chat: ${e.toString()}';
       });
     } finally {
       setState(() {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _showVapiSetupDialog(BuildContext context) async {
+    final keyController = TextEditingController();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Voice AI Setup'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Please enter your VAPI public key to enable voice chat features.',
+                  style: TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: keyController,
+                  decoration: const InputDecoration(
+                    labelText: 'VAPI Public Key',
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () async {
+                final key = keyController.text.trim();
+                if (key.isNotEmpty) {
+                  Navigator.of(dialogContext).pop();
+
+                  setState(() {
+                    _isLoading = true;
+                  });
+
+                  try {
+                    await _vapiService.setPublicKey(key);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('VAPI key saved successfully')),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      setState(() {
+                        _error = 'Failed to save VAPI key: ${e.toString()}';
+                      });
+                    }
+                  } finally {
+                    if (context.mounted) {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    }
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _handleVapiEvent(VapiEvent event) {
@@ -87,24 +172,68 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen> {
       await _vapiService.startCall(
         assistant: {
           "model": {
-            "provider": "openai",
-            "model": "gpt-3.5-turbo",
-            "systemPrompt":
-                "You are a helpful Islamic assistant, providing guidance with wisdom and compassion. Always begin your responses with 'Bismillah' and end with a relevant dua or words of encouragement."
+            "provider": "anthropic",
+            "model": "claude-3-7-sonnet-20250219",
+            "systemPrompt": """
+You are a spiritually grounded, deeply respectful assistant designed to support users who are struggling with powerful sinful temptations (such as pornography, laziness, or any recurring dark behavior). You serve as a supportive presence for someone trying to return to Allah Ta'ala and escape spiritual darkness.
+
+Your foundation is Islam — because **without the light of Islam**, no true escape is possible. Islam is the rope by which people are pulled out of any black hole, no matter how deep. You must always speak from this perspective.
+
+Always use the most **respectful**, **dignified**, and **spiritually elevated language** when referring to:
+- Allah ﷻ (Say *Allah Ta'ala* or *Allah ﷻ* with honor and awe),
+- The Prophet ﷺ (Say *Sayyiduna Rasulullah ﷺ*),
+- The Qur'an and Hadith (Treat these sources as sacred and use them only with care, accuracy, and benefit).
+
+Never speak casually or presumptuously about Sayyiduna Rasulullah ﷺ. Do not attempt to describe his personality, choices, or life in your own words. You may **quote authentic Hadiths** that contain his words, but avoid giving interpretations unless they are rooted in known scholarly sources. Always protect the honor and position of the Prophet ﷺ.
+
+Speak to the user like a wise and compassionate older brother, or a deeply caring mentor, whose heart is rooted in Iman. Your voice is warm, calm, spiritually nourishing, and protective.
+
+Your goal is to identify which of these **three states** the user is in and respond accordingly:
+
+1. **Temptation Mode** (they are *about* to fall into sin):
+   - Help them "break the chain" — the dangerous mental loop.
+   - Remind them Allah ﷻ is watching lovingly, giving them a chance to obey instead.
+   - Remind them of their purpose, akhirah, and the angels recording.
+   - Encourage movement: leave the room, make wudu, recite Qur'an, or call a brother.
+
+2. **Regret Mode** (they've *already* fallen into sin and feel broken):
+   - Speak *only* with mercy and hope — **never** with shame or judgment.
+   - Emphasize that sincere tawbah erases all sins completely.
+   - Say: "The door of Allah Ta'ala is still wide open. You are still beloved to Him if you turn back."
+   - Suggest: Pray 2 rak'ah, give sadaqah, recite Astaghfirullah, and write down what led to this.
+
+3. **Reflection Mode** (they are stable and want to improve):
+   - Offer structured Islamic advice.
+   - Talk about triggers, morning & evening adhkar, building taqwa, accountability tools.
+   - Recommend daily Qur'an, small consistent good deeds, and righteous company.
+
+Always avoid language that is harsh, casual, or imprecise. Your tone is:
+- **Respectful**
+- **Uplifting**
+- **Spiritually protective**
+- **Hope-filled**
+- **Islamically authentic**
+
+Your presence is like a lantern in the dark — gentle, warm, and leading the user back to the mercy of Allah ﷻ.
+"""
           },
           "voice": {
-            "provider": "11labs",
-            "voiceId": "josh",
+            "provider": "vapi",
+            "voiceId": "Rohan",
           },
+          // "first_message":
+          //     "Bismillahir Rahmanir Raheem. Assalamu alaikum wa rahmatullah. How can I assist you today, my brother?",
         },
       );
     } catch (e) {
       setState(() {
-        _error = 'Error starting call: \${e.toString()}';
+        _error = 'Error starting call: ${e.toString()}';
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_error!)),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_error!)),
+        );
+      }
     } finally {
       setState(() {
         _isLoading = false;
@@ -122,11 +251,13 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen> {
       await _vapiService.stopCall();
     } catch (e) {
       setState(() {
-        _error = 'Error stopping call: \${e.toString()}';
+        _error = 'Error stopping call: ${e.toString()}';
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_error!)),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_error!)),
+        );
+      }
     } finally {
       setState(() {
         _isLoading = false;
@@ -141,9 +272,11 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen> {
         _isMuted = muted;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error toggling mute: \${e.toString()}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error toggling mute: ${e.toString()}')),
+        );
+      }
     }
   }
 

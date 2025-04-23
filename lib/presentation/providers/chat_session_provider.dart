@@ -26,7 +26,7 @@ class ChatSessionNotifier extends AutoDisposeAsyncNotifier<List<ChatSession>> {
 
   Future<void> createSession({
     required String title,
-    ChatSessionType sessionType = ChatSessionType.normal,
+    String sessionType = ChatSessionType.normal,
     String? topic,
     List<String>? tags,
   }) async {

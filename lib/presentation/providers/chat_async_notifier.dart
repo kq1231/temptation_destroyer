@@ -312,8 +312,8 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
 
   Future<void> createNewSession({
     required String title,
-    ChatSessionType sessionType = ChatSessionType.normal,
-    AIServiceType serviceType = AIServiceType.offline,
+    String sessionType = ChatSessionType.normal,
+    String serviceType = AIServiceType.offline,
     String? topic,
   }) async {
     final currentState = state.value;

@@ -98,7 +98,7 @@ class ChatMessageBubble extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
@@ -106,7 +106,7 @@ class ChatMessageBubble extends StatelessWidget {
                           color: Colors.white,
                           size: 16,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             'API Error',

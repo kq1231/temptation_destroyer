@@ -61,13 +61,17 @@ dependencies:
   # Voice & Audio
   flutter_tts: ^3.8.5
   speech_to_text: ^6.4.1
+  audioplayers: ^5.2.0
+  permission_handler: ^10.4.5
   
   # Networking
   url_launcher: ^6.3.1
   http: ^1.1.0
-  dio: ^5.4.1  # HTTP client for Dart
-  vapi: ^0.0.9
-  audioplayers: ^6.4.0
+  dio: ^5.4.1  
+  web_socket_channel: ^3.0.3
+  just_audio: any # substitute version number
+  just_audio_media_kit: any # substitute version number
+  media_kit_libs_linux: any # substitute version number
 
 dev_dependencies:
   flutter_test:

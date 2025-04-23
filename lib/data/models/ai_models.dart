@@ -2,12 +2,26 @@ import 'package:objectbox/objectbox.dart';
 import 'package:uuid/uuid.dart';
 import 'chat_session_model.dart';
 
-/// AI Service Type Enum
-enum AIServiceType {
-  offline, // Default, must be first (index 0)
-  openAI,
-  anthropic,
-  openRouter,
+/// AI Service Type Constants
+class AIServiceType {
+  static const String offline = 'offline'; // Default
+  static const String openAI = 'openAI';
+  static const String anthropic = 'anthropic';
+  static const String openRouter = 'openRouter';
+  static const String vapiPublic =
+      'vapiPublic'; // VAPI public key for accessing endpoints like /assistants
+  static const String vapiPrivate =
+      'vapiPrivate'; // VAPI private key for creating calls and WebSocket connections
+
+  // List of all available service types
+  static const List<String> values = [
+    offline,
+    openAI,
+    anthropic,
+    openRouter,
+    vapiPublic,
+    vapiPrivate
+  ];
 }
 
 /// Chat Message Model that represents a single message in a conversation
