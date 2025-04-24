@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
-import '../../providers/emergency_session_provider.dart';
+import '../../providers/emergency_session_provider_refactored.dart';
 
 /// Form for completing an emergency session
 class EmergencyResolutionForm extends ConsumerStatefulWidget {
@@ -231,15 +231,29 @@ class _EmergencyResolutionFormState
     });
 
     try {
-      // Get the active session
-      final activeSession = ref.read(emergencySessionProvider).activeSession;
+      // Get the active session from the AsyncValue
+      final asyncState = ref.read(emergencySessionNotifierProvider);
 
+      // Handle possible error states
+      if (asyncState is AsyncError) {
+        throw Exception('Error loading emergency session: ${asyncState.error}');
+      }
+
+      // Get the value from AsyncData
+      final state = asyncState.value;
+      if (state == null) {
+        throw Exception('Emergency session state is null');
+      }
+
+      final activeSession = state.activeSession;
       if (activeSession == null) {
         throw Exception('No active session found');
       }
 
       // End the emergency session
-      await ref.read(emergencySessionProvider.notifier).endEmergencySession(
+      await ref
+          .read(emergencySessionNotifierProvider.notifier)
+          .endEmergencySession(
             wasSuccessful: _wasSuccessful,
             notes: _notesController.text,
             helpfulStrategies: _strategiesController.text,

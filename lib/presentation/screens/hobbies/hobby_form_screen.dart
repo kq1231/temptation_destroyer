@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:temptation_destroyer/data/models/hobby_model.dart';
-import 'package:temptation_destroyer/presentation/providers/hobby_provider.dart';
+import 'package:temptation_destroyer/presentation/providers/hobby_provider_refactored.dart';
 
 class HobbyFormScreen extends ConsumerStatefulWidget {
   static const routeNameAdd = '/hobbies/add';
@@ -249,7 +249,7 @@ class _HobbyFormScreenState extends ConsumerState<HobbyFormScreen> {
 
       if (_isEdit) {
         // Update existing hobby
-        ref.read(hobbyProvider.notifier).updateHobby(
+        ref.read(hobbyNotifierProvider.notifier).updateHobby(
               id: widget.hobby!.id,
               name: _name,
               description: _description.isNotEmpty ? _description : null,
@@ -260,7 +260,7 @@ class _HobbyFormScreenState extends ConsumerState<HobbyFormScreen> {
             );
       } else {
         // Add new hobby
-        ref.read(hobbyProvider.notifier).addHobby(
+        ref.read(hobbyNotifierProvider.notifier).addHobby(
               name: _name,
               description: _description.isNotEmpty ? _description : null,
               category: _category,

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
-import '../../providers/emergency_session_provider.dart';
+import '../../providers/emergency_session_provider_refactored.dart';
 import '../../providers/emergency_timer_provider.dart';
+import '../../widgets/emergency/emergency_widgets.dart';
 import 'emergency_resolution_form.dart';
 
 /// Screen that displays when the user is in an active emergency session
@@ -14,20 +15,26 @@ class EmergencyScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch emergency session state
-    final emergencyState = ref.watch(emergencySessionProvider);
+    final asyncEmergencyState = ref.watch(emergencySessionNotifierProvider);
 
     // Watch timer state
     final timerState = ref.watch(emergencyTimerProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.emergencyScreenTitle),
-        backgroundColor: AppColors.emergencyRed,
-        foregroundColor: Colors.white,
-      ),
-      body: emergencyState.activeSession == null
-          ? _buildNoActiveSessionView(context)
-          : _buildActiveSessionView(context, ref, timerState),
+    return asyncEmergencyState.when(
+      loading: () => _buildLoadingView(),
+      error: (error, stackTrace) => _buildErrorView(error),
+      data: (emergencyState) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(AppStrings.emergencyScreenTitle),
+            backgroundColor: AppColors.emergencyRed,
+            foregroundColor: Colors.white,
+          ),
+          body: emergencyState.activeSession == null
+              ? _buildNoActiveSessionView(context)
+              : _buildActiveSessionView(context, ref, timerState),
+        );
+      },
     );
   }
 
@@ -183,28 +190,28 @@ class EmergencyScreen extends ConsumerWidget {
               ],
             ),
             SizedBox(height: 16),
-            _EmergencyTip(
+            EmergencyTip(
               title: 'Step away',
               description:
                   'Change your environment immediately. Walk outside, go to a different room, or just stand up.',
               icon: Icons.directions_walk,
             ),
             SizedBox(height: 12),
-            _EmergencyTip(
+            EmergencyTip(
               title: 'Deep breathing',
               description:
                   'Take 5 deep breaths, inhaling for 4 seconds and exhaling for 6 seconds.',
               icon: Icons.air,
             ),
             SizedBox(height: 12),
-            _EmergencyTip(
+            EmergencyTip(
               title: 'Call someone',
               description:
                   'Reach out to a trusted friend or family member who knows about your struggle.',
               icon: Icons.phone,
             ),
             SizedBox(height: 12),
-            _EmergencyTip(
+            EmergencyTip(
               title: 'Remember your "why"',
               description:
                   'Think about why you started this journey and the person you want to become.',
@@ -246,7 +253,7 @@ class EmergencyScreen extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _QuickActionButton(
+                  QuickActionButton(
                     label: 'Call Friend',
                     icon: Icons.phone,
                     color: AppColors.secondary,
@@ -255,7 +262,7 @@ class EmergencyScreen extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(width: 12),
-                  _QuickActionButton(
+                  QuickActionButton(
                     label: 'Go for a Walk',
                     icon: Icons.directions_walk,
                     color: AppColors.primary,
@@ -264,7 +271,7 @@ class EmergencyScreen extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(width: 12),
-                  _QuickActionButton(
+                  QuickActionButton(
                     label: 'Cold Shower',
                     icon: Icons.shower,
                     color: AppColors.info,
@@ -273,7 +280,7 @@ class EmergencyScreen extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(width: 12),
-                  _QuickActionButton(
+                  QuickActionButton(
                     label: 'Push-ups',
                     icon: Icons.fitness_center,
                     color: AppColors.emotionalTrigger,
@@ -301,97 +308,86 @@ class EmergencyScreen extends ConsumerWidget {
       builder: (context) => const EmergencyResolutionForm(),
     );
   }
-}
 
-/// Widget for displaying an emergency tip
-class _EmergencyTip extends StatelessWidget {
-  final String title;
-  final String description;
-  final IconData icon;
-
-  const _EmergencyTip({
-    required this.title,
-    required this.description,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CircleAvatar(
-          backgroundColor: AppColors.primary.withAlpha(51),
-          radius: 20,
-          child: Icon(icon, color: AppColors.primary),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+  /// Build a loading view
+  Widget _buildLoadingView() {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(AppStrings.emergencyScreenTitle),
+        backgroundColor: AppColors.emergencyRed,
+        foregroundColor: Colors.white,
+      ),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              color: AppColors.emergencyRed,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Loading emergency session...',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(height: 4),
-              Text(
-                description,
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
-}
 
-/// Widget for a quick action button
-class _QuickActionButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onPressed;
-
-  const _QuickActionButton({
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 100,
-      child: Column(
-        children: [
-          ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              shape: const CircleBorder(),
-              padding: const EdgeInsets.all(16),
-              backgroundColor: color,
-              foregroundColor: Colors.white,
+  /// Build an error view
+  Widget _buildErrorView(Object error) {
+    // We need to use a Consumer widget here to get access to the ref
+    return Consumer(
+      builder: (context, ref, child) => Scaffold(
+        appBar: AppBar(
+          title: const Text(AppStrings.emergencyScreenTitle),
+          backgroundColor: AppColors.emergencyRed,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: AppColors.emergencyRed,
+                  size: 64,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Error Loading Emergency Session',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  error.toString(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    // Refresh the provider and ignore the result
+                    final _ = ref.refresh(emergencySessionNotifierProvider);
+                  },
+                  child: const Text('Try Again'),
+                ),
+              ],
             ),
-            child: Icon(icon, size: 32),
           ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -5,8 +5,19 @@ import 'package:temptation_destroyer/data/models/trigger_model.dart';
 import 'package:temptation_destroyer/presentation/providers/hobby_provider.dart';
 import 'package:temptation_destroyer/presentation/screens/hobbies/hobby_details_screen.dart';
 
+/// Provider for hobby suggestions based on a trigger
+final hobbySuggestionsProvider = FutureProvider.family<List<HobbyModel>, int>(
+  (ref, triggerId) async {
+    // Use the existing hobby provider to get suggestions
+    await ref
+        .read(hobbyProvider.notifier)
+        .getSuggestedHobbiesForTrigger(triggerId);
+    return ref.read(hobbyProvider).suggestedHobbies;
+  },
+);
+
 /// A widget that displays hobby suggestions based on a trigger
-class HobbySuggestionsWidget extends ConsumerStatefulWidget {
+class HobbySuggestionsWidget extends ConsumerWidget {
   final Trigger trigger;
   final String title;
   final bool showTitle;
@@ -21,79 +32,49 @@ class HobbySuggestionsWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<HobbySuggestionsWidget> createState() =>
-      _HobbySuggestionsWidgetState();
-}
-
-class _HobbySuggestionsWidgetState
-    extends ConsumerState<HobbySuggestionsWidget> {
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSuggestions();
-  }
-
-  Future<void> _loadSuggestions() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Load suggested hobbies for the trigger
-    await ref
-        .read(hobbyProvider.notifier)
-        .getSuggestedHobbiesForTrigger(widget.trigger.id);
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(hobbyProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Use the future provider to get suggestions
+    final suggestionsAsync = ref.watch(hobbySuggestionsProvider(trigger.id));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.showTitle)
+        if (showTitle)
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Text(
-              widget.title,
+              title,
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-        if (_isLoading)
-          const Center(
+        suggestionsAsync.when(
+          loading: () => const Center(
             child: Padding(
               padding: EdgeInsets.all(16.0),
               child: CircularProgressIndicator(),
             ),
-          )
-        else if (state.suggestedHobbies.isEmpty)
-          Card(
+          ),
+          error: (error, stackTrace) => Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   const Icon(
-                    Icons.info_outline,
-                    color: Colors.blue,
+                    Icons.error_outline,
+                    color: Colors.red,
                     size: 36,
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'No hobby suggestions found',
+                    'Error loading suggestions',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Try adding some hobbies first or import presets from the hobby management screen.',
+                    error.toString(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey[600],
@@ -103,19 +84,52 @@ class _HobbySuggestionsWidgetState
                 ],
               ),
             ),
-          )
-        else
-          SizedBox(
-            height: 180,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: state.suggestedHobbies.length,
-              itemBuilder: (context, index) {
-                final hobby = state.suggestedHobbies[index];
-                return _buildHobbyCard(context, hobby);
-              },
-            ),
           ),
+          data: (suggestions) {
+            if (suggestions.isEmpty) {
+              return Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        color: Colors.blue,
+                        size: 36,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'No hobby suggestions found',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Try adding some hobbies first or import presets from the hobby management screen.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              return SizedBox(
+                height: 180,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: suggestions.length,
+                  itemBuilder: (context, index) {
+                    final hobby = suggestions[index];
+                    return _buildHobbyCard(context, hobby);
+                  },
+                ),
+              );
+            }
+          },
+        ),
       ],
     );
   }
@@ -123,8 +137,8 @@ class _HobbySuggestionsWidgetState
   Widget _buildHobbyCard(BuildContext context, HobbyModel hobby) {
     return GestureDetector(
       onTap: () {
-        if (widget.onHobbySelected != null) {
-          widget.onHobbySelected!(hobby);
+        if (onHobbySelected != null) {
+          onHobbySelected!(hobby);
         } else {
           Navigator.of(context).push(
             MaterialPageRoute(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:temptation_destroyer/data/models/hobby_model.dart';
-import 'package:temptation_destroyer/presentation/providers/hobby_provider.dart';
+import 'package:temptation_destroyer/presentation/providers/hobby_provider_refactored.dart';
 import 'package:temptation_destroyer/presentation/widgets/app_loading_indicator.dart';
 
 class HobbyManagementScreen extends ConsumerStatefulWidget {
@@ -17,7 +17,6 @@ class HobbyManagementScreen extends ConsumerStatefulWidget {
 class _HobbyManagementScreenState extends ConsumerState<HobbyManagementScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -34,47 +33,102 @@ class _HobbyManagementScreenState extends ConsumerState<HobbyManagementScreen>
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      // Load hobbies when the screen first loads
-      Future.microtask(() => ref.read(hobbyProvider.notifier).loadHobbies());
-      _isInitialized = true;
-    }
+  Widget build(BuildContext context) {
+    final asyncHobbyState = ref.watch(hobbyNotifierProvider);
+
+    return asyncHobbyState.when(
+      loading: () => _buildLoadingScreen(),
+      error: (error, stackTrace) => _buildErrorScreen(error),
+      data: (hobbyState) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Manage Hobbies'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.playlist_add_check),
+                onPressed: () => _importPresetHobbies(context),
+                tooltip: 'Import preset hobbies',
+              ),
+            ],
+            bottom: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabs: [
+                const Tab(text: 'All'),
+                ...HobbyCategory.values.map((category) => Tab(
+                      text: _getCategoryName(category),
+                    ))
+              ],
+            ),
+          ),
+          body: hobbyState.isLoading
+              ? const AppLoadingIndicator()
+              : _buildBody(hobbyState),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _navigateToAddHobby(context),
+            tooltip: 'Add new hobby',
+            child: const Icon(Icons.add),
+          ),
+        );
+      },
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final hobbyState = ref.watch(hobbyProvider);
-
+  // Build a loading screen
+  Widget _buildLoadingScreen() {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manage Hobbies'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.playlist_add_check),
-            onPressed: () => _importPresetHobbies(context),
-            tooltip: 'Import preset hobbies',
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: [
-            const Tab(text: 'All'),
-            ...HobbyCategory.values.map((category) => Tab(
-                  text: _getCategoryName(category),
-                ))
+      ),
+      body: const AppLoadingIndicator(),
+    );
+  }
+
+  // Build an error screen
+  Widget _buildErrorScreen(Object error) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Manage Hobbies'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: Colors.red,
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Error Loading Hobbies',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                error.toString(),
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // Refresh the provider
+                final _ = ref.refresh(hobbyNotifierProvider);
+              },
+              child: const Text('Try Again'),
+            ),
           ],
         ),
-      ),
-      body: hobbyState.isLoading
-          ? const AppLoadingIndicator()
-          : _buildBody(hobbyState),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddHobby(context),
-        tooltip: 'Add new hobby',
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -235,7 +289,7 @@ class _HobbyManagementScreenState extends ConsumerState<HobbyManagementScreen>
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              ref.read(hobbyProvider.notifier).deleteHobby(hobby.id);
+              ref.read(hobbyNotifierProvider.notifier).deleteHobby(hobby.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('${hobby.name} deleted')),
               );
@@ -264,7 +318,7 @@ class _HobbyManagementScreenState extends ConsumerState<HobbyManagementScreen>
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              ref.read(hobbyProvider.notifier).importPresetHobbies();
+              ref.read(hobbyNotifierProvider.notifier).importPresetHobbies();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Preset hobbies imported')),
               );

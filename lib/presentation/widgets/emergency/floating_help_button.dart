@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../providers/emergency_session_provider.dart';
+import '../../providers/emergency_session_provider_refactored.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 
@@ -30,10 +30,14 @@ class FloatingHelpButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Get emergency session state
-    final emergencyState = ref.watch(emergencySessionProvider);
+    final asyncEmergencyState = ref.watch(emergencySessionNotifierProvider);
 
-    // Determine if the button should be expanded
-    final isExpanded = emergencyState.activeSession == null;
+    // Determine if the button should be expanded based on AsyncValue state
+    final isExpanded = asyncEmergencyState.when(
+      data: (state) => state.activeSession == null,
+      loading: () => true, // Expanded when loading
+      error: (_, __) => true, // Expanded on error
+    );
 
     return AnimatedContainer(
       duration: animationDuration,
@@ -86,15 +90,28 @@ class FloatingHelpButton extends ConsumerWidget {
 
   /// Handle the emergency button press
   void _handleEmergencyButtonPress(BuildContext context, WidgetRef ref) {
-    final emergencyState = ref.read(emergencySessionProvider);
+    final asyncEmergencyState = ref.read(emergencySessionNotifierProvider);
 
-    if (emergencyState.activeSession == null) {
-      // Show quick response dialog if no active session
-      _showQuickResponseDialog(context, ref);
-    } else {
-      // Navigate to the emergency screen if there's an active session
-      Navigator.of(context).pushNamed('/emergency');
-    }
+    // Handle based on AsyncValue state
+    asyncEmergencyState.when(
+      data: (state) {
+        if (state.activeSession == null) {
+          // Show quick response dialog if no active session
+          _showQuickResponseDialog(context, ref);
+        } else {
+          // Navigate to the emergency screen if there's an active session
+          Navigator.of(context).pushNamed('/emergency');
+        }
+      },
+      loading: () {
+        // Show quick response dialog when loading
+        _showQuickResponseDialog(context, ref);
+      },
+      error: (_, __) {
+        // Show quick response dialog on error
+        _showQuickResponseDialog(context, ref);
+      },
+    );
   }
 
   /// Show the quick response dialog
@@ -120,7 +137,7 @@ class FloatingHelpButton extends ConsumerWidget {
             onPressed: () {
               // Start a new emergency session
               ref
-                  .read(emergencySessionProvider.notifier)
+                  .read(emergencySessionNotifierProvider.notifier)
                   .startEmergencySession();
 
               // Close dialog and navigate to emergency screen

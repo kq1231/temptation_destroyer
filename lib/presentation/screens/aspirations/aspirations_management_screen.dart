@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:temptation_destroyer/data/models/aspiration_model.dart';
-import 'package:temptation_destroyer/presentation/providers/aspiration_provider.dart';
+import 'package:temptation_destroyer/presentation/providers/aspiration_provider_refactored.dart';
 import 'package:temptation_destroyer/presentation/screens/aspirations/aspiration_entry_screen.dart';
 import 'package:temptation_destroyer/presentation/widgets/app_loading_indicator.dart';
 import 'package:temptation_destroyer/presentation/widgets/aspirations/category_selector.dart';
@@ -19,64 +19,120 @@ class AspirationsManagementScreen extends ConsumerStatefulWidget {
 
 class _AspirationsManagementScreenState
     extends ConsumerState<AspirationsManagementScreen> {
-  bool _isInitialized = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_isInitialized) {
-      // Load aspirations when the screen first loads
-      Future.microtask(
-          () => ref.read(aspirationProvider.notifier).loadAspirations());
-      _isInitialized = true;
-    }
-  }
+  // No need for initialization logic - the AsyncNotifier will handle it
 
   @override
   Widget build(BuildContext context) {
-    final aspirationState = ref.watch(aspirationProvider);
+    final asyncAspirationState = ref.watch(aspirationNotifierProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aspirations & Duas'),
-        actions: [
-          // Status filter button
-          PopupMenuButton<bool?>(
-            icon: const Icon(Icons.filter_list),
-            tooltip: 'Filter by status',
-            onSelected: (value) {
-              ref.read(aspirationProvider.notifier).filterByStatus(value);
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: null,
-                child: Text('All'),
+    return asyncAspirationState.when(
+      loading: () => _buildLoadingScreen(),
+      error: (error, stackTrace) => _buildErrorScreen(error),
+      data: (aspirationState) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Aspirations & Duas'),
+            actions: [
+              // Status filter button
+              PopupMenuButton<bool?>(
+                icon: const Icon(Icons.filter_list),
+                tooltip: 'Filter by status',
+                onSelected: (value) {
+                  ref
+                      .read(aspirationNotifierProvider.notifier)
+                      .filterByStatus(value);
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: null,
+                    child: Text('All'),
+                  ),
+                  const PopupMenuItem(
+                    value: true,
+                    child: Text('Achieved'),
+                  ),
+                  const PopupMenuItem(
+                    value: false,
+                    child: Text('Not Achieved'),
+                  ),
+                ],
               ),
-              const PopupMenuItem(
-                value: true,
-                child: Text('Achieved'),
-              ),
-              const PopupMenuItem(
-                value: false,
-                child: Text('Not Achieved'),
+              // Import presets button
+              IconButton(
+                icon: const Icon(Icons.playlist_add_check),
+                onPressed: () => _importPresetAspirations(context),
+                tooltip: 'Import preset aspirations',
               ),
             ],
           ),
-          // Import presets button
-          IconButton(
-            icon: const Icon(Icons.playlist_add_check),
-            onPressed: () => _importPresetAspirations(context),
-            tooltip: 'Import preset aspirations',
+          body: aspirationState.isLoading
+              ? const AppLoadingIndicator()
+              : _buildBody(aspirationState),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _navigateToAddAspiration(context),
+            tooltip: 'Add new aspiration',
+            child: const Icon(Icons.add),
           ),
-        ],
+        );
+      },
+    );
+  }
+
+  // Build a loading screen
+  Widget _buildLoadingScreen() {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Aspirations & Duas'),
       ),
-      body: aspirationState.isLoading
-          ? const AppLoadingIndicator()
-          : _buildBody(aspirationState),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddAspiration(context),
-        tooltip: 'Add new aspiration',
-        child: const Icon(Icons.add),
+      body: const AppLoadingIndicator(),
+    );
+  }
+
+  // Build an error screen
+  Widget _buildErrorScreen(Object error) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Aspirations & Duas'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: Colors.red,
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Error Loading Aspirations',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                error.toString(),
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // Refresh the provider
+                final _ = ref.refresh(aspirationNotifierProvider);
+              },
+              child: const Text('Try Again'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -103,7 +159,9 @@ class _AspirationsManagementScreenState
           child: CategorySelector(
             selectedCategory: state.currentFilter,
             onCategorySelected: (category) {
-              ref.read(aspirationProvider.notifier).filterByCategory(category);
+              ref
+                  .read(aspirationNotifierProvider.notifier)
+                  .filterByCategory(category);
             },
           ),
         ),
@@ -117,7 +175,7 @@ class _AspirationsManagementScreenState
               onTap: (aspiration) => _viewAspiration(context, aspiration),
               onToggleAchieved: (aspiration) {
                 ref
-                    .read(aspirationProvider.notifier)
+                    .read(aspirationNotifierProvider.notifier)
                     .toggleAchievementStatus(aspiration.id);
               },
               onEdit: (aspiration) =>
@@ -304,7 +362,7 @@ class _AspirationsManagementScreenState
                     ),
                     onPressed: () {
                       ref
-                          .read(aspirationProvider.notifier)
+                          .read(aspirationNotifierProvider.notifier)
                           .toggleAchievementStatus(aspiration.id);
                       Navigator.pop(context);
                     },
@@ -346,7 +404,7 @@ class _AspirationsManagementScreenState
             onPressed: () {
               Navigator.of(ctx).pop();
               ref
-                  .read(aspirationProvider.notifier)
+                  .read(aspirationNotifierProvider.notifier)
                   .deleteAspiration(aspiration.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Aspiration deleted')),
@@ -375,7 +433,9 @@ class _AspirationsManagementScreenState
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              ref.read(aspirationProvider.notifier).importPresetAspirations();
+              ref
+                  .read(aspirationNotifierProvider.notifier)
+                  .importPresetAspirations();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Preset aspirations imported')),
               );

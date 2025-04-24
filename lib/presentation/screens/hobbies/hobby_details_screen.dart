@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:temptation_destroyer/data/models/hobby_model.dart';
-import 'package:temptation_destroyer/presentation/providers/hobby_provider.dart';
+import 'package:temptation_destroyer/presentation/providers/hobby_provider_refactored.dart';
 import 'package:temptation_destroyer/presentation/screens/hobbies/hobby_form_screen.dart';
 
 class HobbyDetailsScreen extends ConsumerWidget {
@@ -199,7 +199,7 @@ class HobbyDetailsScreen extends ConsumerWidget {
   }
 
   void _trackEngagement(BuildContext context, WidgetRef ref) {
-    ref.read(hobbyProvider.notifier).trackEngagement(hobby.id);
+    ref.read(hobbyNotifierProvider.notifier).trackEngagement(hobby.id);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Activity logged for ${hobby.name}')),
     );
@@ -232,7 +232,7 @@ class HobbyDetailsScreen extends ConsumerWidget {
           pickedTime.minute,
         );
 
-        ref.read(hobbyProvider.notifier).trackEngagement(
+        ref.read(hobbyNotifierProvider.notifier).trackEngagement(
               hobby.id,
               engagementTime: fullDateTime,
             );

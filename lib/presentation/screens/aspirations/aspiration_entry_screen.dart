@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:temptation_destroyer/data/models/aspiration_model.dart';
-import 'package:temptation_destroyer/presentation/providers/aspiration_provider.dart';
+import 'package:temptation_destroyer/presentation/providers/aspiration_provider_refactored.dart';
 import 'package:temptation_destroyer/presentation/widgets/app_loading_indicator.dart';
 
 class AspirationEntryScreen extends ConsumerStatefulWidget {
@@ -56,150 +56,167 @@ class _AspirationEntryScreenState extends ConsumerState<AspirationEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final aspirationState = ref.watch(aspirationProvider);
+    final asyncAspirationState = ref.watch(aspirationNotifierProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Aspiration' : 'Add New Aspiration'),
+    return asyncAspirationState.when(
+      loading: () => Scaffold(
+        appBar: AppBar(
+          title: Text(_isEditing ? 'Edit Aspiration' : 'Add New Aspiration'),
+        ),
+        body: const AppLoadingIndicator(),
       ),
-      body: aspirationState.isLoading
-          ? const AppLoadingIndicator()
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Dua/Text field
-                    TextFormField(
-                      controller: _duaController,
-                      decoration: const InputDecoration(
-                        labelText: 'Dua or Aspiration',
-                        hintText: 'Enter your dua or aspiration',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 3,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your dua or aspiration';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Category dropdown
-                    DropdownButtonFormField<String>(
-                      value: _selectedCategory,
-                      decoration: const InputDecoration(
-                        labelText: 'Category',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: AspirationCategory.values.map((category) {
-                        return DropdownMenuItem(
-                          value: category,
-                          child: Text(_getCategoryName(category)),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _selectedCategory = value;
-                          });
-                        }
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Target date selector
-                    InkWell(
-                      onTap: () => _selectDate(context),
-                      child: InputDecorator(
+      error: (error, stackTrace) => Scaffold(
+        appBar: AppBar(
+          title: Text(_isEditing ? 'Edit Aspiration' : 'Add New Aspiration'),
+        ),
+        body: Center(
+          child: Text('Error: $error'),
+        ),
+      ),
+      data: (aspirationState) => Scaffold(
+        appBar: AppBar(
+          title: Text(_isEditing ? 'Edit Aspiration' : 'Add New Aspiration'),
+        ),
+        body: aspirationState.isLoading
+            ? const AppLoadingIndicator()
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Dua/Text field
+                      TextFormField(
+                        controller: _duaController,
                         decoration: const InputDecoration(
-                          labelText: 'Target Date (Optional)',
+                          labelText: 'Dua or Aspiration',
+                          hintText: 'Enter your dua or aspiration',
                           border: OutlineInputBorder(),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _targetDate == null
-                                  ? 'No date selected'
-                                  : _formatDate(_targetDate!),
-                              style: TextStyle(
-                                color: _targetDate == null
-                                    ? Colors.grey[600]
-                                    : Colors.black,
+                        maxLines: 3,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your dua or aspiration';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Category dropdown
+                      DropdownButtonFormField<String>(
+                        value: _selectedCategory,
+                        decoration: const InputDecoration(
+                          labelText: 'Category',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: AspirationCategory.values.map((category) {
+                          return DropdownMenuItem(
+                            value: category,
+                            child: Text(_getCategoryName(category)),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _selectedCategory = value;
+                            });
+                          }
+                        },
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Target date selector
+                      InkWell(
+                        onTap: () => _selectDate(context),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Target Date (Optional)',
+                            border: OutlineInputBorder(),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _targetDate == null
+                                    ? 'No date selected'
+                                    : _formatDate(_targetDate!),
+                                style: TextStyle(
+                                  color: _targetDate == null
+                                      ? Colors.grey[600]
+                                      : Colors.black,
+                                ),
                               ),
-                            ),
-                            Row(
-                              children: [
-                                if (_targetDate != null)
-                                  IconButton(
-                                    icon: const Icon(Icons.clear),
-                                    onPressed: () {
-                                      setState(() {
-                                        _targetDate = null;
-                                      });
-                                    },
-                                  ),
-                                const Icon(Icons.calendar_today),
-                              ],
-                            ),
-                          ],
+                              Row(
+                                children: [
+                                  if (_targetDate != null)
+                                    IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        setState(() {
+                                          _targetDate = null;
+                                        });
+                                      },
+                                    ),
+                                  const Icon(Icons.calendar_today),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Notes field
-                    TextFormField(
-                      controller: _noteController,
-                      decoration: const InputDecoration(
-                        labelText: 'Notes (Optional)',
-                        hintText: 'Add any additional notes',
-                        border: OutlineInputBorder(),
+                      // Notes field
+                      TextFormField(
+                        controller: _noteController,
+                        decoration: const InputDecoration(
+                          labelText: 'Notes (Optional)',
+                          hintText: 'Add any additional notes',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 3,
                       ),
-                      maxLines: 3,
-                    ),
 
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                    // Achievement checkbox
-                    CheckboxListTile(
-                      title: const Text('Already Achieved'),
-                      value: _isAchieved,
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _isAchieved = value;
-                          });
-                        }
-                      },
-                      controlAffinity: ListTileControlAffinity.leading,
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Submit button
-                    ElevatedButton(
-                      onPressed: aspirationState.isLoading ? null : _submitForm,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      // Achievement checkbox
+                      CheckboxListTile(
+                        title: const Text('Already Achieved'),
+                        value: _isAchieved,
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _isAchieved = value;
+                            });
+                          }
+                        },
+                        controlAffinity: ListTileControlAffinity.leading,
                       ),
-                      child: Text(
-                        _isEditing ? 'Update Aspiration' : 'Add Aspiration',
-                        style: const TextStyle(fontSize: 16),
+
+                      const SizedBox(height: 24),
+
+                      // Submit button
+                      ElevatedButton(
+                        onPressed:
+                            aspirationState.isLoading ? null : _submitForm,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: Text(
+                          _isEditing ? 'Update Aspiration' : 'Add Aspiration',
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 
@@ -243,7 +260,7 @@ class _AspirationEntryScreenState extends ConsumerState<AspirationEntryScreen> {
 
       if (_isEditing && widget.aspiration != null) {
         // Update existing aspiration
-        await ref.read(aspirationProvider.notifier).updateAspiration(
+        await ref.read(aspirationNotifierProvider.notifier).updateAspiration(
               id: widget.aspiration!.id,
               dua: dua,
               category: _selectedCategory,
@@ -260,7 +277,7 @@ class _AspirationEntryScreenState extends ConsumerState<AspirationEntryScreen> {
         }
       } else {
         // Add new aspiration
-        await ref.read(aspirationProvider.notifier).addAspiration(
+        await ref.read(aspirationNotifierProvider.notifier).addAspiration(
               dua: dua,
               category: _selectedCategory,
               isAchieved: _isAchieved,
