@@ -23,7 +23,7 @@ class _TriggerCollectionScreenState
   final TextEditingController _searchController = TextEditingController();
   bool _isSearchMode = false;
   bool _isMultiSelectMode = false;
-  TriggerType? _currentFilter;
+  String? _currentFilter;
 
   @override
   void initState() {
@@ -50,7 +50,7 @@ class _TriggerCollectionScreenState
           children: [
             ListTile(
               title: const Text('All Triggers'),
-              leading: Radio<TriggerType?>(
+              leading: Radio<String?>(
                 value: null,
                 groupValue: _currentFilter,
                 onChanged: (value) {
@@ -64,7 +64,7 @@ class _TriggerCollectionScreenState
             ),
             ...TriggerType.values.map((type) => ListTile(
                   title: Text(_getTriggerTypeLabel(type)),
-                  leading: Radio<TriggerType?>(
+                  leading: Radio<String?>(
                     value: type,
                     groupValue: _currentFilter,
                     onChanged: (value) {
@@ -185,34 +185,22 @@ class _TriggerCollectionScreenState
     );
   }
 
-  Color _getTriggerTypeColor(TriggerType type) {
-    switch (type) {
-      case TriggerType.emotional:
-        return AppColors.emotionalTrigger;
-      case TriggerType.situational:
-        return AppColors.socialTrigger;
-      case TriggerType.temporal:
-        return AppColors.timeTrigger;
-      case TriggerType.physical:
-        return AppColors.locationTrigger;
-      case TriggerType.custom:
-        return AppColors.customTrigger;
-    }
+  Color _getTriggerTypeColor(String type) {
+    if (type == TriggerType.emotional) return AppColors.emotionalTrigger;
+    if (type == TriggerType.situational) return AppColors.socialTrigger;
+    if (type == TriggerType.temporal) return AppColors.timeTrigger;
+    if (type == TriggerType.physical) return AppColors.locationTrigger;
+    if (type == TriggerType.custom) return AppColors.customTrigger;
+    return Colors.grey; // Fallback
   }
 
-  String _getTriggerTypeLabel(TriggerType type) {
-    switch (type) {
-      case TriggerType.emotional:
-        return AppStrings.triggerEmotion;
-      case TriggerType.situational:
-        return AppStrings.triggerSocial;
-      case TriggerType.temporal:
-        return AppStrings.triggerTime;
-      case TriggerType.physical:
-        return AppStrings.triggerLocation;
-      case TriggerType.custom:
-        return AppStrings.triggerCustom;
-    }
+  String _getTriggerTypeLabel(String type) {
+    if (type == TriggerType.emotional) return AppStrings.triggerEmotion;
+    if (type == TriggerType.situational) return AppStrings.triggerSocial;
+    if (type == TriggerType.temporal) return AppStrings.triggerTime;
+    if (type == TriggerType.physical) return AppStrings.triggerLocation;
+    if (type == TriggerType.custom) return AppStrings.triggerCustom;
+    return type; // Fallback
   }
 
   @override
@@ -307,15 +295,13 @@ class _TriggerCollectionScreenState
                               width: 24,
                               height: 24,
                               decoration: BoxDecoration(
-                                color: _getTriggerTypeColor(
-                                    trigger.triggerType ??
-                                        TriggerType.emotional),
+                                color:
+                                    _getTriggerTypeColor(trigger.triggerType),
                                 shape: BoxShape.circle,
                               ),
                             ),
                       title: Text(trigger.description),
-                      subtitle: Text(_getTriggerTypeLabel(
-                          trigger.triggerType ?? TriggerType.emotional)),
+                      subtitle: Text(_getTriggerTypeLabel(trigger.triggerType)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [

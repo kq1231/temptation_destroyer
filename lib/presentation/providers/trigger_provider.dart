@@ -38,7 +38,7 @@ class TriggerState {
   final bool isLoading;
   final String? errorMessage;
   final List<Trigger> filteredTriggers;
-  final TriggerType? currentFilter;
+  final String? currentFilter;
   final List<int> selectedTriggerIds;
 
   TriggerState({
@@ -56,7 +56,7 @@ class TriggerState {
     bool? isLoading,
     String? errorMessage,
     List<Trigger>? filteredTriggers,
-    TriggerType? currentFilter,
+    String? currentFilter,
     List<int>? selectedTriggerIds,
   }) {
     return TriggerState(
@@ -109,7 +109,7 @@ class TriggerNotifier extends StateNotifier<TriggerState> {
   // Add a new trigger
   Future<void> addTrigger({
     required String description,
-    required TriggerType triggerType,
+    required String triggerType,
     int intensity = 5,
     String? notes,
     List<String>? activeTimes,
@@ -193,7 +193,7 @@ class TriggerNotifier extends StateNotifier<TriggerState> {
   }
 
   // Filter triggers by type
-  void filterByType(TriggerType? type) {
+  void filterByType(String? type) {
     if (type == null) {
       // Clear filter
       state = state.copyWith(

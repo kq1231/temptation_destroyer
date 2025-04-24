@@ -1,8 +1,23 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:uuid/uuid.dart';
 
-/// Enum for different types of triggers
-enum TriggerType { emotional, situational, temporal, physical, custom }
+/// Constants for different types of triggers
+class TriggerType {
+  static const String emotional = 'emotional';
+  static const String situational = 'situational';
+  static const String temporal = 'temporal';
+  static const String physical = 'physical';
+  static const String custom = 'custom';
+
+  /// Get all available trigger types
+  static List<String> get values => [
+        emotional,
+        situational,
+        temporal,
+        physical,
+        custom,
+      ];
+}
 
 /// TriggerModel represents things that trigger temptation for the user
 ///
@@ -23,29 +38,9 @@ class Trigger {
   @Property()
   String description;
 
-  /// The actual enum type as a transient property
-  @Transient()
-  TriggerType? triggerType;
-
-  /// Type of trigger (emotional, situational, etc.) stored as integer
-  int? get dbTriggerType {
-    _ensureStableEnumValues();
-    return triggerType?.index;
-  }
-
-  /// Set the trigger type value
-  set dbTriggerType(int? value) {
-    _ensureStableEnumValues();
-    if (value == null) {
-      triggerType = null;
-    } else {
-      if (value >= 0 && value < TriggerType.values.length) {
-        triggerType = TriggerType.values[value];
-      } else {
-        triggerType = TriggerType.emotional;
-      }
-    }
-  }
+  /// Type of trigger (emotional, situational, etc.)
+  @Property()
+  String triggerType = TriggerType.emotional;
 
   /// Intensity/severity of the trigger (1-10)
   @Property()
@@ -72,13 +67,14 @@ class Trigger {
     this.id = 0,
     String? triggerId,
     required this.description,
-    TriggerType triggerType = TriggerType.emotional,
+    String? triggerTypeParam,
     this.intensity = 5,
     DateTime? createdAt,
     this.notes,
     this.activeTimes,
     this.activeDays,
   })  : triggerId = triggerId ?? const Uuid().v4(),
+        triggerType = triggerTypeParam ?? TriggerType.emotional,
         createdAt = createdAt ?? DateTime.now();
 
   /// Get list of active times
@@ -139,14 +135,5 @@ class Trigger {
     if (hour >= 12 && hour < 17) return 'afternoon';
     if (hour >= 17 && hour < 21) return 'evening';
     return 'night';
-  }
-
-  /// Ensure enum values have stable indices
-  void _ensureStableEnumValues() {
-    assert(TriggerType.emotional.index == 0);
-    assert(TriggerType.situational.index == 1);
-    assert(TriggerType.temporal.index == 2);
-    assert(TriggerType.physical.index == 3);
-    assert(TriggerType.custom.index == 4);
   }
 }

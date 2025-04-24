@@ -5,7 +5,7 @@ import 'package:temptation_destroyer/presentation/screens/hobbies/hobby_details_
 
 /// A widget that displays hobbies grouped by category
 class CategoryBasedHobbyList extends ConsumerWidget {
-  final Map<HobbyCategory, List<HobbyModel>> hobbiesByCategory;
+  final Map<String, List<HobbyModel>> hobbiesByCategory;
   final void Function(HobbyModel)? onHobbyTap;
   final bool showEmptyCategories;
 
@@ -23,8 +23,35 @@ class CategoryBasedHobbyList extends ConsumerWidget {
         ? HobbyCategory.values
         : hobbiesByCategory.keys.toList();
 
-    // Sort categories by enum order
-    categories.sort((a, b) => a.index.compareTo(b.index));
+    // Sort categories based on a predefined order
+    categories.sort((a, b) {
+      // Define the order of categories
+      final order = [
+        HobbyCategory.physical,
+        HobbyCategory.mental,
+        HobbyCategory.social,
+        HobbyCategory.spiritual,
+        HobbyCategory.creative,
+        HobbyCategory.productive,
+        HobbyCategory.relaxing,
+      ];
+
+      // Get the index of each category in the order list
+      final indexA = order.indexOf(a);
+      final indexB = order.indexOf(b);
+
+      // If both categories are in the order list, sort by their position
+      if (indexA >= 0 && indexB >= 0) {
+        return indexA.compareTo(indexB);
+      }
+
+      // If only one is in the list, prioritize it
+      if (indexA >= 0) return -1;
+      if (indexB >= 0) return 1;
+
+      // If neither is in the list, sort alphabetically
+      return a.compareTo(b);
+    });
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -126,60 +153,36 @@ class CategoryBasedHobbyList extends ConsumerWidget {
     );
   }
 
-  String _getCategoryName(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return 'Physical Activities';
-      case HobbyCategory.mental:
-        return 'Mental Activities';
-      case HobbyCategory.social:
-        return 'Social Activities';
-      case HobbyCategory.spiritual:
-        return 'Spiritual Activities';
-      case HobbyCategory.creative:
-        return 'Creative Activities';
-      case HobbyCategory.productive:
-        return 'Productive Activities';
-      case HobbyCategory.relaxing:
-        return 'Relaxing Activities';
-    }
+  String _getCategoryName(String category) {
+    if (category == HobbyCategory.physical) return 'Physical Activities';
+    if (category == HobbyCategory.mental) return 'Mental Activities';
+    if (category == HobbyCategory.social) return 'Social Activities';
+    if (category == HobbyCategory.spiritual) return 'Spiritual Activities';
+    if (category == HobbyCategory.creative) return 'Creative Activities';
+    if (category == HobbyCategory.productive) return 'Productive Activities';
+    if (category == HobbyCategory.relaxing) return 'Relaxing Activities';
+    return category; // Fallback
   }
 
-  IconData _getCategoryIcon(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return Icons.fitness_center;
-      case HobbyCategory.mental:
-        return Icons.psychology;
-      case HobbyCategory.social:
-        return Icons.people;
-      case HobbyCategory.spiritual:
-        return Icons.self_improvement;
-      case HobbyCategory.creative:
-        return Icons.brush;
-      case HobbyCategory.productive:
-        return Icons.work;
-      case HobbyCategory.relaxing:
-        return Icons.spa;
-    }
+  IconData _getCategoryIcon(String category) {
+    if (category == HobbyCategory.physical) return Icons.fitness_center;
+    if (category == HobbyCategory.mental) return Icons.psychology;
+    if (category == HobbyCategory.social) return Icons.people;
+    if (category == HobbyCategory.spiritual) return Icons.self_improvement;
+    if (category == HobbyCategory.creative) return Icons.brush;
+    if (category == HobbyCategory.productive) return Icons.work;
+    if (category == HobbyCategory.relaxing) return Icons.spa;
+    return Icons.category; // Fallback
   }
 
-  Color _getCategoryColor(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return Colors.green;
-      case HobbyCategory.mental:
-        return Colors.purple;
-      case HobbyCategory.social:
-        return Colors.orange;
-      case HobbyCategory.spiritual:
-        return Colors.indigo;
-      case HobbyCategory.creative:
-        return Colors.pink;
-      case HobbyCategory.productive:
-        return Colors.teal;
-      case HobbyCategory.relaxing:
-        return Colors.blue;
-    }
+  Color _getCategoryColor(String category) {
+    if (category == HobbyCategory.physical) return Colors.green;
+    if (category == HobbyCategory.mental) return Colors.purple;
+    if (category == HobbyCategory.social) return Colors.orange;
+    if (category == HobbyCategory.spiritual) return Colors.indigo;
+    if (category == HobbyCategory.creative) return Colors.pink;
+    if (category == HobbyCategory.productive) return Colors.teal;
+    if (category == HobbyCategory.relaxing) return Colors.blue;
+    return Colors.grey; // Fallback
   }
 }

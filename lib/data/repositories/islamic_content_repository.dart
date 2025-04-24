@@ -56,10 +56,10 @@ class IslamicContentRepository {
   }
 
   // Get content by type
-  List<IslamicContentModel> getContentByType(ContentType type) {
+  List<IslamicContentModel> getContentByType(String type) {
     try {
       final query = _contentBox
-          .query(IslamicContentModel_.dbContentType.equals(type.index))
+          .query(IslamicContentModel_.contentType.equals(type))
           .build();
 
       final content = query.find();
@@ -74,10 +74,10 @@ class IslamicContentRepository {
   }
 
   // Get content by category
-  List<IslamicContentModel> getContentByCategory(ContentCategory category) {
+  List<IslamicContentModel> getContentByCategory(String category) {
     try {
       final query = _contentBox
-          .query(IslamicContentModel_.dbCategory.equals(category.index))
+          .query(IslamicContentModel_.category.equals(category))
           .build();
 
       final content = query.find();
@@ -93,12 +93,12 @@ class IslamicContentRepository {
 
   // Get content by type and category
   List<IslamicContentModel> getContentByTypeAndCategory(
-      ContentType type, ContentCategory category) {
+      String type, String category) {
     try {
       final query = _contentBox
-          .query(IslamicContentModel_.dbContentType
-              .equals(type.index)
-              .and(IslamicContentModel_.dbCategory.equals(category.index)))
+          .query(IslamicContentModel_.contentType
+              .equals(type)
+              .and(IslamicContentModel_.category.equals(category)))
           .build();
 
       final content = query.find();
@@ -193,8 +193,7 @@ class IslamicContentRepository {
   }
 
   // Get daily content
-  IslamicContentModel getDailyContent(
-      {ContentType? type, ContentCategory? category}) {
+  IslamicContentModel getDailyContent({String? type, String? category}) {
     try {
       List<IslamicContentModel> candidates;
 
@@ -251,8 +250,7 @@ class IslamicContentRepository {
   }
 
   // Get random content
-  IslamicContentModel getRandomContent(
-      {ContentType? type, ContentCategory? category}) {
+  IslamicContentModel getRandomContent({String? type, String? category}) {
     try {
       List<IslamicContentModel> candidates;
 

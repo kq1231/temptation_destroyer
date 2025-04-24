@@ -9,8 +9,8 @@ class CreateDailyChallengeUseCase {
 
   /// Create a new daily challenge
   Future<ChallengeModel> call({
-    ChallengeDifficulty difficulty = ChallengeDifficulty.medium,
-    ChallengeCategory? preferredCategory,
+    String difficulty = ChallengeDifficulty.medium,
+    String? preferredCategory,
   }) async {
     try {
       return await _repository.createDailyChallenge(

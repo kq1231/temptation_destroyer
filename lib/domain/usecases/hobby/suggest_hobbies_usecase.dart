@@ -32,54 +32,43 @@ class SuggestHobbiesUseCase {
       // Filter hobbies based on trigger type
       List<HobbyModel> suggestedHobbies = [];
 
-      switch (trigger.triggerType) {
-        case TriggerType.emotional:
-          // For emotional triggers, suggest creative and relaxing hobbies
-          suggestedHobbies = allHobbies
-              .where((hobby) =>
-                  hobby.category == HobbyCategory.creative ||
-                  hobby.category == HobbyCategory.relaxing ||
-                  hobby.category == HobbyCategory.spiritual)
-              .toList();
-          break;
-
-        case TriggerType.physical:
-          // For physical triggers, suggest physical and productive hobbies
-          suggestedHobbies = allHobbies
-              .where((hobby) =>
-                  hobby.category == HobbyCategory.physical ||
-                  hobby.category == HobbyCategory.productive)
-              .toList();
-          break;
-
-        case TriggerType.situational:
-          // For situational triggers, suggest social hobbies
-          suggestedHobbies = allHobbies
-              .where((hobby) =>
-                  hobby.category == HobbyCategory.social ||
-                  hobby.category == HobbyCategory.mental)
-              .toList();
-          break;
-
-        case TriggerType.temporal:
-          // For temporal triggers, suggest quick hobbies
-          suggestedHobbies = allHobbies
-              .where((hobby) =>
-                  hobby.durationGoalMinutes != null &&
-                  hobby.durationGoalMinutes! <= 30)
-              .toList();
-          break;
-
-        case TriggerType.custom:
-          // For custom triggers, provide a balanced mix
-          suggestedHobbies = allHobbies;
-          suggestedHobbies =
-              _getRandomSubset(allHobbies, min(5, allHobbies.length));
-          break;
-
-        default:
-          // Default to suggesting all hobbies
-          suggestedHobbies = allHobbies;
+      if (trigger.triggerType == TriggerType.emotional) {
+        // For emotional triggers, suggest creative and relaxing hobbies
+        suggestedHobbies = allHobbies
+            .where((hobby) =>
+                hobby.category == HobbyCategory.creative ||
+                hobby.category == HobbyCategory.relaxing ||
+                hobby.category == HobbyCategory.spiritual)
+            .toList();
+      } else if (trigger.triggerType == TriggerType.physical) {
+        // For physical triggers, suggest physical and productive hobbies
+        suggestedHobbies = allHobbies
+            .where((hobby) =>
+                hobby.category == HobbyCategory.physical ||
+                hobby.category == HobbyCategory.productive)
+            .toList();
+      } else if (trigger.triggerType == TriggerType.situational) {
+        // For situational triggers, suggest social hobbies
+        suggestedHobbies = allHobbies
+            .where((hobby) =>
+                hobby.category == HobbyCategory.social ||
+                hobby.category == HobbyCategory.mental)
+            .toList();
+      } else if (trigger.triggerType == TriggerType.temporal) {
+        // For temporal triggers, suggest quick hobbies
+        suggestedHobbies = allHobbies
+            .where((hobby) =>
+                hobby.durationGoalMinutes != null &&
+                hobby.durationGoalMinutes! <= 30)
+            .toList();
+      } else if (trigger.triggerType == TriggerType.custom) {
+        // For custom triggers, provide a balanced mix
+        suggestedHobbies = allHobbies;
+        suggestedHobbies =
+            _getRandomSubset(allHobbies, min(5, allHobbies.length));
+      } else {
+        // Default to suggesting all hobbies
+        suggestedHobbies = allHobbies;
       }
 
       // If no specific suggestions, return a subset of all hobbies

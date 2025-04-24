@@ -16,8 +16,8 @@ class _ChallengeFormState extends ConsumerState<ChallengeForm> {
   late String _description;
   late int _pointValue;
   late String _verificationSteps;
-  ChallengeCategory _category = ChallengeCategory.custom;
-  ChallengeDifficulty _difficulty = ChallengeDifficulty.medium;
+  String _category = ChallengeCategory.custom;
+  String _difficulty = ChallengeDifficulty.medium;
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
@@ -89,7 +89,7 @@ class _ChallengeFormState extends ConsumerState<ChallengeForm> {
               onSaved: (value) => _description = value!,
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<ChallengeCategory>(
+            DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Category',
                 border: OutlineInputBorder(),
@@ -98,7 +98,7 @@ class _ChallengeFormState extends ConsumerState<ChallengeForm> {
               items: ChallengeCategory.values.map((category) {
                 return DropdownMenuItem(
                   value: category,
-                  child: Text(category.toString().split('.').last),
+                  child: Text(category.split('.').last),
                 );
               }).toList(),
               onChanged: (value) {
@@ -108,7 +108,7 @@ class _ChallengeFormState extends ConsumerState<ChallengeForm> {
               },
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<ChallengeDifficulty>(
+            DropdownButtonFormField<String>(
               decoration: const InputDecoration(
                 labelText: 'Difficulty',
                 border: OutlineInputBorder(),
@@ -117,7 +117,7 @@ class _ChallengeFormState extends ConsumerState<ChallengeForm> {
               items: ChallengeDifficulty.values.map((difficulty) {
                 return DropdownMenuItem(
                   value: difficulty,
-                  child: Text(difficulty.toString().split('.').last),
+                  child: Text(difficulty.split('.').last),
                 );
               }).toList(),
               onChanged: (value) {

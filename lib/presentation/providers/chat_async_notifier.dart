@@ -5,6 +5,7 @@ import '../../data/models/chat_session_model.dart';
 import '../../core/context/context_manager.dart';
 import '../../core/services/sound_service.dart';
 import '../../data/repositories/ai_repository.dart';
+import 'chat_provider.dart';
 import 'chat_state.dart';
 
 class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
@@ -15,12 +16,11 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
   @override
   Future<ChatState> build() async {
     _repository = AIRepository(ref);
-    return const ChatState();
-  }
 
-  Future<void> initialize({ChatSession? session}) async {
-    state = const AsyncValue.loading();
     try {
+      // Get session from the session parameter provider
+      final session = ref.watch(chatSessionParam);
+
       // Load initial messages from repository
       final messages = await _repository.getChatMessages(
         session: session,
@@ -32,7 +32,7 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
       final hasMore = messages.length < totalCount;
 
       // Create initial state
-      final initialState = ChatState(
+      return ChatState(
         messages: messages,
         isInitialized: true,
         isLoading: false,
@@ -40,8 +40,23 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
         hasMore: hasMore,
         currentSession: session,
       );
+    } catch (error) {
+      // Return empty state on error, the error will be handled by Riverpod
+      return const ChatState();
+    }
+  }
 
-      state = AsyncValue.data(initialState);
+  // This method is kept for backward compatibility
+  // but should be removed once all code is updated
+  @Deprecated('Use the build method instead')
+  Future<void> initialize({ChatSession? session}) async {
+    state = const AsyncValue.loading();
+    try {
+      // Set the session parameter
+      ref.read(chatSessionParam.notifier).state = session;
+
+      // Refresh the state
+      ref.invalidateSelf();
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -280,7 +295,8 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
     state = const AsyncValue.loading();
     try {
       await _repository.clearChatHistory();
-      await initialize();
+      final newState = await build();
+      state = AsyncValue.data(newState);
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
     }
@@ -334,8 +350,9 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
         hasMore: false,
       ));
 
-      // Initialize the new session
-      await initialize(session: newSession);
+      // Set the session parameter and refresh
+      ref.read(chatSessionParam.notifier).state = newSession;
+      ref.invalidateSelf();
     } catch (error) {
       state = AsyncValue.data(currentState.copyWith(
         errorMessage: error.toString(),

@@ -1,21 +1,61 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:intl/intl.dart';
 
-enum ChallengeCategory {
-  prayer,
-  quran,
-  dhikr,
-  selfImprovement,
-  charity,
-  knowledge,
-  social,
-  physical,
-  custom
+/// Challenge category constants
+class ChallengeCategory {
+  static const String prayer = 'prayer';
+  static const String quran = 'quran';
+  static const String dhikr = 'dhikr';
+  static const String selfImprovement = 'selfImprovement';
+  static const String charity = 'charity';
+  static const String knowledge = 'knowledge';
+  static const String social = 'social';
+  static const String physical = 'physical';
+  static const String custom = 'custom';
+
+  /// Get all available categories
+  static List<String> get values => [
+        prayer,
+        quran,
+        dhikr,
+        selfImprovement,
+        charity,
+        knowledge,
+        social,
+        physical,
+        custom,
+      ];
 }
 
-enum ChallengeDifficulty { easy, medium, hard }
+/// Challenge difficulty constants
+class ChallengeDifficulty {
+  static const String easy = 'easy';
+  static const String medium = 'medium';
+  static const String hard = 'hard';
 
-enum ChallengeStatus { pending, completed, failed, skipped }
+  /// Get all available difficulties
+  static List<String> get values => [
+        easy,
+        medium,
+        hard,
+      ];
+}
+
+/// Challenge status constants
+class ChallengeStatus {
+  static const String pending = 'pending';
+  static const String completed = 'completed';
+  static const String failed = 'failed';
+  static const String skipped = 'skipped';
+
+  /// Get all available statuses
+  static List<String> get values => [
+        pending,
+        completed,
+        failed,
+        skipped,
+      ];
+}
 
 @Entity()
 class ChallengeModel {
@@ -25,23 +65,9 @@ class ChallengeModel {
   String title;
   String description;
 
-  @Transient()
-  ChallengeCategory category;
-
-  @Property()
-  int? dbCategory;
-
-  @Transient()
-  ChallengeDifficulty difficulty;
-
-  @Property()
-  int? dbDifficulty;
-
-  @Transient()
-  ChallengeStatus status;
-
-  @Property()
-  int? dbStatus;
+  String category = ChallengeCategory.custom;
+  String difficulty = ChallengeDifficulty.easy;
+  String status = ChallengeStatus.pending;
 
   DateTime assignedDate;
   DateTime? completedDate;
@@ -61,31 +87,7 @@ class ChallengeModel {
     this.isCustom = false,
     required this.pointValue,
     required this.verificationSteps,
-  }) {
-    // Initialize db fields from enums
-    dbCategory = category.index;
-    dbDifficulty = difficulty.index;
-    dbStatus = status.index;
-  }
-
-  // Getters and setters for db fields
-  int? get dbCategoryValue => dbCategory;
-  set dbCategoryValue(int? value) {
-    dbCategory = value;
-    category = ChallengeCategory.values[value ?? 0];
-  }
-
-  int? get dbDifficultyValue => dbDifficulty;
-  set dbDifficultyValue(int? value) {
-    dbDifficulty = value;
-    difficulty = ChallengeDifficulty.values[value ?? 0];
-  }
-
-  int? get dbStatusValue => dbStatus;
-  set dbStatusValue(int? value) {
-    dbStatus = value;
-    status = ChallengeStatus.values[value ?? 0];
-  }
+  });
 
   // Formatted date getters for UI display
   String get assignedDateFormatted {
@@ -100,50 +102,33 @@ class ChallengeModel {
 
   // For UI display
   String get categoryLabel {
-    switch (category) {
-      case ChallengeCategory.prayer:
-        return 'Prayer';
-      case ChallengeCategory.quran:
-        return 'Quran';
-      case ChallengeCategory.dhikr:
-        return 'Dhikr';
-      case ChallengeCategory.selfImprovement:
-        return 'Self Improvement';
-      case ChallengeCategory.charity:
-        return 'Charity';
-      case ChallengeCategory.knowledge:
-        return 'Knowledge';
-      case ChallengeCategory.social:
-        return 'Social';
-      case ChallengeCategory.physical:
-        return 'Physical';
-      case ChallengeCategory.custom:
-        return 'Custom';
+    if (category == ChallengeCategory.prayer) return 'Prayer';
+    if (category == ChallengeCategory.quran) return 'Quran';
+    if (category == ChallengeCategory.dhikr) return 'Dhikr';
+    if (category == ChallengeCategory.selfImprovement) {
+      return 'Self Improvement';
     }
+    if (category == ChallengeCategory.charity) return 'Charity';
+    if (category == ChallengeCategory.knowledge) return 'Knowledge';
+    if (category == ChallengeCategory.social) return 'Social';
+    if (category == ChallengeCategory.physical) return 'Physical';
+    if (category == ChallengeCategory.custom) return 'Custom';
+    return category; // Fallback
   }
 
   String get difficultyLabel {
-    switch (difficulty) {
-      case ChallengeDifficulty.easy:
-        return 'Easy';
-      case ChallengeDifficulty.medium:
-        return 'Medium';
-      case ChallengeDifficulty.hard:
-        return 'Hard';
-    }
+    if (difficulty == ChallengeDifficulty.easy) return 'Easy';
+    if (difficulty == ChallengeDifficulty.medium) return 'Medium';
+    if (difficulty == ChallengeDifficulty.hard) return 'Hard';
+    return difficulty; // Fallback
   }
 
   String get statusLabel {
-    switch (status) {
-      case ChallengeStatus.pending:
-        return 'Pending';
-      case ChallengeStatus.completed:
-        return 'Completed';
-      case ChallengeStatus.failed:
-        return 'Failed';
-      case ChallengeStatus.skipped:
-        return 'Skipped';
-    }
+    if (status == ChallengeStatus.pending) return 'Pending';
+    if (status == ChallengeStatus.completed) return 'Completed';
+    if (status == ChallengeStatus.failed) return 'Failed';
+    if (status == ChallengeStatus.skipped) return 'Skipped';
+    return status; // Fallback
   }
 
   // Helper methods
@@ -155,26 +140,22 @@ class ChallengeModel {
   // Mark challenge as completed
   void complete() {
     status = ChallengeStatus.completed;
-    dbStatus = status.index;
     completedDate = DateTime.now();
   }
 
   // Mark challenge as failed
   void fail() {
     status = ChallengeStatus.failed;
-    dbStatus = status.index;
   }
 
   // Mark challenge as skipped
   void skip() {
     status = ChallengeStatus.skipped;
-    dbStatus = status.index;
   }
 
   // Reset challenge to pending
   void reset() {
     status = ChallengeStatus.pending;
-    dbStatus = status.index;
     completedDate = null;
   }
 
@@ -183,9 +164,9 @@ class ChallengeModel {
     int? id,
     String? title,
     String? description,
-    ChallengeCategory? category,
-    ChallengeDifficulty? difficulty,
-    ChallengeStatus? status,
+    String? category,
+    String? difficulty,
+    String? status,
     DateTime? assignedDate,
     DateTime? completedDate,
     bool? isCustom,

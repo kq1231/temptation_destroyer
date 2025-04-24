@@ -223,7 +223,7 @@ class _AspirationsManagementScreenState
                   const Icon(Icons.category, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'Category: ${_getCategoryName(aspiration.category!)}',
+                    'Category: ${_getCategoryName(aspiration.category)}',
                     style: const TextStyle(fontSize: 16),
                   ),
                 ],
@@ -393,25 +393,16 @@ class _AspirationsManagementScreenState
   }
 
   /// Get a user-friendly name for a category
-  String _getCategoryName(AspirationCategory category) {
-    switch (category) {
-      case AspirationCategory.personal:
-        return 'Personal';
-      case AspirationCategory.family:
-        return 'Family';
-      case AspirationCategory.career:
-        return 'Career';
-      case AspirationCategory.spiritual:
-        return 'Spiritual';
-      case AspirationCategory.health:
-        return 'Health';
-      case AspirationCategory.social:
-        return 'Social';
-      case AspirationCategory.financial:
-        return 'Financial';
-      case AspirationCategory.customized:
-        return 'Custom';
-    }
+  String _getCategoryName(String category) {
+    if (category == AspirationCategory.personal) return 'Personal';
+    if (category == AspirationCategory.family) return 'Family';
+    if (category == AspirationCategory.career) return 'Career';
+    if (category == AspirationCategory.spiritual) return 'Spiritual';
+    if (category == AspirationCategory.health) return 'Health';
+    if (category == AspirationCategory.social) return 'Social';
+    if (category == AspirationCategory.financial) return 'Financial';
+    if (category == AspirationCategory.customized) return 'Custom';
+    return category; // Fallback
   }
 
   /// Check if text contains Arabic characters

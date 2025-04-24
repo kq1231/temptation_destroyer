@@ -90,11 +90,10 @@ class AchievementRepository {
   }
 
   // Get achievements by type
-  List<AchievementModel> getAchievementsByType(AchievementType type) {
+  List<AchievementModel> getAchievementsByType(String type) {
     try {
-      final query = _achievementBox
-          .query(AchievementModel_.dbType.equals(type.index))
-          .build();
+      final query =
+          _achievementBox.query(AchievementModel_.type.equals(type)).build();
 
       final achievements = query.find();
       query.close();
@@ -108,10 +107,10 @@ class AchievementRepository {
   }
 
   // Get achievements by rarity
-  List<AchievementModel> getAchievementsByRarity(AchievementRarity rarity) {
+  List<AchievementModel> getAchievementsByRarity(String rarity) {
     try {
       final query = _achievementBox
-          .query(AchievementModel_.dbRarity.equals(rarity.index))
+          .query(AchievementModel_.rarity.equals(rarity))
           .build();
 
       final achievements = query.find();

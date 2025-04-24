@@ -112,24 +112,21 @@ class ChallengeCard extends ConsumerWidget {
   }
 
   Widget _buildDifficultyChip() {
-    Color color;
-    switch (challenge.difficulty) {
-      case ChallengeDifficulty.easy:
-        color = Colors.green;
-        break;
-      case ChallengeDifficulty.medium:
-        color = Colors.orange;
-        break;
-      case ChallengeDifficulty.hard:
-        color = Colors.red;
-        break;
+    Color color = Colors.grey; // Default color
+
+    if (challenge.difficulty == ChallengeDifficulty.easy) {
+      color = Colors.green;
+    } else if (challenge.difficulty == ChallengeDifficulty.medium) {
+      color = Colors.orange;
+    } else if (challenge.difficulty == ChallengeDifficulty.hard) {
+      color = Colors.red;
     }
 
     return Chip(
       backgroundColor: color.withValues(alpha: 0.1),
       side: BorderSide(color: color),
       label: Text(
-        challenge.difficulty.toString().split('.').last,
+        challenge.difficultyLabel,
         style: TextStyle(color: color),
       ),
     );

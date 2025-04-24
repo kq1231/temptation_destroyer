@@ -40,34 +40,22 @@ class TriggerDetailScreen extends ConsumerWidget {
     return activeDays.join(', ');
   }
 
-  Color _getTriggerTypeColor(TriggerType type) {
-    switch (type) {
-      case TriggerType.emotional:
-        return AppColors.emotionalTrigger;
-      case TriggerType.situational:
-        return AppColors.socialTrigger;
-      case TriggerType.temporal:
-        return AppColors.timeTrigger;
-      case TriggerType.physical:
-        return AppColors.locationTrigger;
-      case TriggerType.custom:
-        return AppColors.customTrigger;
-    }
+  Color _getTriggerTypeColor(String type) {
+    if (type == TriggerType.emotional) return AppColors.emotionalTrigger;
+    if (type == TriggerType.situational) return AppColors.socialTrigger;
+    if (type == TriggerType.temporal) return AppColors.timeTrigger;
+    if (type == TriggerType.physical) return AppColors.locationTrigger;
+    if (type == TriggerType.custom) return AppColors.customTrigger;
+    return Colors.grey; // Fallback
   }
 
-  String _getTriggerTypeLabel(TriggerType type) {
-    switch (type) {
-      case TriggerType.emotional:
-        return AppStrings.triggerEmotion;
-      case TriggerType.situational:
-        return AppStrings.triggerSocial;
-      case TriggerType.temporal:
-        return AppStrings.triggerTime;
-      case TriggerType.physical:
-        return AppStrings.triggerLocation;
-      case TriggerType.custom:
-        return AppStrings.triggerCustom;
-    }
+  String _getTriggerTypeLabel(String type) {
+    if (type == TriggerType.emotional) return AppStrings.triggerEmotion;
+    if (type == TriggerType.situational) return AppStrings.triggerSocial;
+    if (type == TriggerType.temporal) return AppStrings.triggerTime;
+    if (type == TriggerType.physical) return AppStrings.triggerLocation;
+    if (type == TriggerType.custom) return AppStrings.triggerCustom;
+    return type; // Fallback
   }
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
@@ -104,10 +92,8 @@ class TriggerDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final triggerTypeColor =
-        _getTriggerTypeColor(trigger.triggerType ?? TriggerType.emotional);
-    final triggerTypeLabel =
-        _getTriggerTypeLabel(trigger.triggerType ?? TriggerType.emotional);
+    final triggerTypeColor = _getTriggerTypeColor(trigger.triggerType);
+    final triggerTypeLabel = _getTriggerTypeLabel(trigger.triggerType);
 
     return Scaffold(
       appBar: AppBar(

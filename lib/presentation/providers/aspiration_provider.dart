@@ -46,8 +46,8 @@ class AspirationState {
   final bool isLoading;
   final String? errorMessage;
   final List<AspirationModel> filteredAspirations;
-  final AspirationCategory? currentFilter;
-  final Map<AspirationCategory, List<AspirationModel>> aspirationsByCategory;
+  final String? currentFilter;
+  final Map<String, List<AspirationModel>> aspirationsByCategory;
   final Map<String, dynamic>? achievementStats;
   final bool?
       statusFilter; // null = show all, true = achieved, false = not achieved
@@ -69,8 +69,8 @@ class AspirationState {
     bool? isLoading,
     String? errorMessage,
     List<AspirationModel>? filteredAspirations,
-    AspirationCategory? currentFilter,
-    Map<AspirationCategory, List<AspirationModel>>? aspirationsByCategory,
+    String? currentFilter,
+    Map<String, List<AspirationModel>>? aspirationsByCategory,
     Map<String, dynamic>? achievementStats,
     bool? statusFilter,
   }) {
@@ -144,7 +144,7 @@ class AspirationNotifier extends StateNotifier<AspirationState> {
   // Add a new aspiration
   Future<void> addAspiration({
     required String dua,
-    AspirationCategory category = AspirationCategory.personal,
+    String category = AspirationCategory.personal,
     bool isAchieved = false,
     DateTime? targetDate,
     String? note,
@@ -174,7 +174,7 @@ class AspirationNotifier extends StateNotifier<AspirationState> {
   Future<void> updateAspiration({
     required int id,
     String? dua,
-    AspirationCategory? category,
+    String? category,
     bool? isAchieved,
     DateTime? targetDate,
     String? note,
@@ -221,7 +221,7 @@ class AspirationNotifier extends StateNotifier<AspirationState> {
   }
 
   // Filter aspirations by category
-  void filterByCategory(AspirationCategory? category) {
+  void filterByCategory(String? category) {
     final filtered =
         _applyFilters(state.aspirations, category, state.statusFilter);
     state = state.copyWith(
@@ -252,7 +252,7 @@ class AspirationNotifier extends StateNotifier<AspirationState> {
   // Apply both category and status filters
   List<AspirationModel> _applyFilters(
     List<AspirationModel> aspirations,
-    AspirationCategory? category,
+    String? category,
     bool? isAchieved,
   ) {
     var result = aspirations;

@@ -39,7 +39,7 @@ class UpdateHobbyUseCase {
     required int id,
     String? name,
     String? description,
-    HobbyCategory? category,
+    String? category,
     String? frequencyGoal,
     int? durationGoalMinutes,
     int? satisfactionRating,

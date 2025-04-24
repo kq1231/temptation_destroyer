@@ -4,8 +4,8 @@ import 'package:temptation_destroyer/data/models/aspiration_model.dart';
 /// A widget that displays a horizontal scrollable list of category chips
 /// for filtering aspirations by category.
 class CategorySelector extends StatelessWidget {
-  final AspirationCategory? selectedCategory;
-  final Function(AspirationCategory?) onCategorySelected;
+  final String? selectedCategory;
+  final Function(String?) onCategorySelected;
 
   const CategorySelector({
     super.key,
@@ -62,47 +62,29 @@ class CategorySelector extends StatelessWidget {
   }
 
   /// Get a user-friendly name for a category
-  String _getCategoryName(AspirationCategory category) {
-    switch (category) {
-      case AspirationCategory.personal:
-        return 'Personal';
-      case AspirationCategory.family:
-        return 'Family';
-      case AspirationCategory.career:
-        return 'Career';
-      case AspirationCategory.spiritual:
-        return 'Spiritual';
-      case AspirationCategory.health:
-        return 'Health';
-      case AspirationCategory.social:
-        return 'Social';
-      case AspirationCategory.financial:
-        return 'Financial';
-      case AspirationCategory.customized:
-        return 'Custom';
-    }
+  String _getCategoryName(String category) {
+    if (category == AspirationCategory.personal) return 'Personal';
+    if (category == AspirationCategory.family) return 'Family';
+    if (category == AspirationCategory.career) return 'Career';
+    if (category == AspirationCategory.spiritual) return 'Spiritual';
+    if (category == AspirationCategory.health) return 'Health';
+    if (category == AspirationCategory.social) return 'Social';
+    if (category == AspirationCategory.financial) return 'Financial';
+    if (category == AspirationCategory.customized) return 'Custom';
+    return category; // Fallback
   }
 
   /// Get a color for a category
-  Color _getCategoryColor(AspirationCategory category) {
-    switch (category) {
-      case AspirationCategory.personal:
-        return Colors.blue;
-      case AspirationCategory.family:
-        return Colors.green;
-      case AspirationCategory.career:
-        return Colors.amber.shade700;
-      case AspirationCategory.spiritual:
-        return Colors.purple;
-      case AspirationCategory.health:
-        return Colors.red;
-      case AspirationCategory.social:
-        return Colors.teal;
-      case AspirationCategory.financial:
-        return Colors.indigo;
-      case AspirationCategory.customized:
-        return Colors.grey;
-    }
+  Color _getCategoryColor(String category) {
+    if (category == AspirationCategory.personal) return Colors.blue;
+    if (category == AspirationCategory.family) return Colors.green;
+    if (category == AspirationCategory.career) return Colors.amber.shade700;
+    if (category == AspirationCategory.spiritual) return Colors.purple;
+    if (category == AspirationCategory.health) return Colors.red;
+    if (category == AspirationCategory.social) return Colors.teal;
+    if (category == AspirationCategory.financial) return Colors.indigo;
+    if (category == AspirationCategory.customized) return Colors.grey;
+    return Colors.grey; // Fallback
   }
 }
 

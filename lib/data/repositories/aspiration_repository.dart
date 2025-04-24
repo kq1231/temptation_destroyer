@@ -81,12 +81,11 @@ class AspirationRepository {
   ///
   /// Returns aspirations of the specified category
   Future<List<AspirationModel>> getAspirationsByCategory(
-      AspirationCategory category) async {
+      String category) async {
     final box = ObjectBoxManager.instance.box<AspirationModel>();
 
     // Query for aspirations of the specified category
-    final query =
-        box.query(AspirationModel_.dbCategory.equals(category.index)).build();
+    final query = box.query(AspirationModel_.category.equals(category)).build();
     final results = query.find();
     query.close();
 

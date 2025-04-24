@@ -77,11 +77,11 @@ class TriggerRepository {
   /// Get triggers by type
   ///
   /// Returns triggers of the specified type, sorted by intensity (highest first)
-  Future<List<Trigger>> getTriggersByType(TriggerType type) async {
+  Future<List<Trigger>> getTriggersByType(String type) async {
     final box = ObjectBoxManager.instance.box<Trigger>();
 
     // Query for triggers of the specified type
-    final query = box.query(Trigger_.dbTriggerType.equals(type.index)).build();
+    final query = box.query(Trigger_.triggerType.equals(type)).build();
     final results = query.find();
     query.close();
 

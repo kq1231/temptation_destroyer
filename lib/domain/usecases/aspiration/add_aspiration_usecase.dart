@@ -24,7 +24,7 @@ class AddAspirationUseCase {
   /// Convenience method that creates an AspirationModel object from parameters
   Future<int> addAspiration({
     required String dua,
-    AspirationCategory category = AspirationCategory.personal,
+    String category = AspirationCategory.personal,
     bool isAchieved = false,
     DateTime? targetDate,
     String? note,

@@ -19,8 +19,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize the auth provider
-    _initializeApp();
+    // Initialize the auth provider after the build is complete
+    Future.microtask(() {
+      _initializeApp();
+    });
   }
 
   /// Initialize the app and navigate to the appropriate screen

@@ -22,7 +22,7 @@ class _TriggerFormScreenState extends ConsumerState<TriggerFormScreen> {
   final _descriptionController = TextEditingController();
   final _notesController = TextEditingController();
 
-  TriggerType _selectedType = TriggerType.emotional;
+  String _selectedType = TriggerType.emotional;
   int _intensity = 5;
   final List<String> _selectedTimes = [];
   final List<int> _selectedDays = [];
@@ -52,7 +52,7 @@ class _TriggerFormScreenState extends ConsumerState<TriggerFormScreen> {
     if (widget.trigger != null) {
       _descriptionController.text = widget.trigger!.description;
       _notesController.text = widget.trigger!.notes ?? '';
-      _selectedType = widget.trigger!.triggerType ?? TriggerType.emotional;
+      _selectedType = widget.trigger!.triggerType;
       _intensity = widget.trigger!.intensity;
       _selectedTimes.addAll(widget.trigger!.activeTimesList);
       _selectedDays.addAll(widget.trigger!.activeDaysList);
@@ -98,7 +98,7 @@ class _TriggerFormScreenState extends ConsumerState<TriggerFormScreen> {
         id: widget.trigger!.id,
         triggerId: widget.trigger!.triggerId,
         description: description,
-        triggerType: _selectedType,
+        triggerTypeParam: _selectedType,
         intensity: _intensity,
         notes: notes.isNotEmpty ? notes : null,
         activeTimes:
@@ -137,34 +137,22 @@ class _TriggerFormScreenState extends ConsumerState<TriggerFormScreen> {
     });
   }
 
-  Color _getTriggerTypeColor(TriggerType type) {
-    switch (type) {
-      case TriggerType.emotional:
-        return AppColors.emotionalTrigger;
-      case TriggerType.situational:
-        return AppColors.socialTrigger;
-      case TriggerType.temporal:
-        return AppColors.timeTrigger;
-      case TriggerType.physical:
-        return AppColors.locationTrigger;
-      case TriggerType.custom:
-        return AppColors.customTrigger;
-    }
+  Color _getTriggerTypeColor(String type) {
+    if (type == TriggerType.emotional) return AppColors.emotionalTrigger;
+    if (type == TriggerType.situational) return AppColors.socialTrigger;
+    if (type == TriggerType.temporal) return AppColors.timeTrigger;
+    if (type == TriggerType.physical) return AppColors.locationTrigger;
+    if (type == TriggerType.custom) return AppColors.customTrigger;
+    return Colors.grey; // Fallback
   }
 
-  String _getTriggerTypeLabel(TriggerType type) {
-    switch (type) {
-      case TriggerType.emotional:
-        return AppStrings.triggerEmotion;
-      case TriggerType.situational:
-        return AppStrings.triggerSocial;
-      case TriggerType.temporal:
-        return AppStrings.triggerTime;
-      case TriggerType.physical:
-        return AppStrings.triggerLocation;
-      case TriggerType.custom:
-        return AppStrings.triggerCustom;
-    }
+  String _getTriggerTypeLabel(String type) {
+    if (type == TriggerType.emotional) return AppStrings.triggerEmotion;
+    if (type == TriggerType.situational) return AppStrings.triggerSocial;
+    if (type == TriggerType.temporal) return AppStrings.triggerTime;
+    if (type == TriggerType.physical) return AppStrings.triggerLocation;
+    if (type == TriggerType.custom) return AppStrings.triggerCustom;
+    return type; // Fallback
   }
 
   Widget _buildTypeSelector() {

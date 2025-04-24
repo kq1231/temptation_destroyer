@@ -27,12 +27,9 @@ final activeChallengesProvider =
   return await useCase();
 });
 
-final dailyChallengeProvider = FutureProvider.autoDispose.family<
-    ChallengeModel,
-    ({
-      ChallengeDifficulty? difficulty,
-      ChallengeCategory? category
-    })>((ref, params) async {
+final dailyChallengeProvider = FutureProvider.autoDispose
+    .family<ChallengeModel, ({String? difficulty, String? category})>(
+        (ref, params) async {
   final useCase = ref.watch(createDailyChallengeUseCaseProvider);
   return await useCase(
     difficulty: params.difficulty ?? ChallengeDifficulty.medium,

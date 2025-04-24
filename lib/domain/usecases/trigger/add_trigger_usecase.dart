@@ -24,7 +24,7 @@ class AddTriggerUseCase {
   /// Convenience method that creates a Trigger object from parameters
   Future<int> addTrigger({
     required String description,
-    required TriggerType triggerType,
+    required String triggerType,
     int intensity = 5,
     String? notes,
     List<String>? activeTimes,
@@ -32,7 +32,7 @@ class AddTriggerUseCase {
   }) async {
     final trigger = Trigger(
       description: description,
-      triggerType: triggerType,
+      triggerTypeParam: triggerType,
       intensity: intensity,
       notes: notes,
       activeTimes: activeTimes?.join(','),

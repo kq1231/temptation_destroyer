@@ -34,7 +34,7 @@ class GetAspirationsUseCase {
   ///
   /// Returns a list of aspirations in the given category
   Future<List<AspirationModel>> getAspirationsByCategory(
-      AspirationCategory category) async {
+      String category) async {
     try {
       return await _repository.getAspirationsByCategory(category);
     } catch (e) {
@@ -56,11 +56,11 @@ class GetAspirationsUseCase {
   /// Get aspirations grouped by category
   ///
   /// Returns a map of categories to lists of aspirations
-  Future<Map<AspirationCategory, List<AspirationModel>>>
+  Future<Map<String, List<AspirationModel>>>
       getAspirationsGroupedByCategory() async {
     try {
       final allAspirations = await _repository.getAllAspirations();
-      final result = <AspirationCategory, List<AspirationModel>>{};
+      final result = <String, List<AspirationModel>>{};
 
       // Organize aspirations by category
       for (final category in AspirationCategory.values) {

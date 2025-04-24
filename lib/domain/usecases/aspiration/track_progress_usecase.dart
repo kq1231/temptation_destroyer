@@ -68,7 +68,7 @@ class TrackProgressUseCase {
           totalCount > 0 ? (achievedCount / totalCount) * 100 : 0.0;
 
       // Group achieved aspirations by category
-      final achievedByCategory = <AspirationCategory, int>{};
+      final achievedByCategory = <String, int>{};
       for (final category in AspirationCategory.values) {
         final count = achievedAspirations
             .where((aspiration) => aspiration.category == category)

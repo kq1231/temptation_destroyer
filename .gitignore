@@ -12,6 +12,8 @@
 .swiftpm/
 migrate_working_dir/
 **/*.g.dart
+**/objectbox.g.dart
+lib/objectbox.g.dart
 
 # IntelliJ related
 *.iml

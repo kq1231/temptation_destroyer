@@ -51,9 +51,9 @@ class HobbyState {
   final bool isLoading;
   final String? errorMessage;
   final List<HobbyModel> filteredHobbies;
-  final HobbyCategory? currentFilter;
+  final String? currentFilter;
   final List<HobbyModel> suggestedHobbies;
-  final Map<HobbyCategory, List<HobbyModel>> hobbiesByCategory;
+  final Map<String, List<HobbyModel>> hobbiesByCategory;
   final List<HobbyModel> recentlyPracticedHobbies;
 
   HobbyState({
@@ -73,9 +73,9 @@ class HobbyState {
     bool? isLoading,
     String? errorMessage,
     List<HobbyModel>? filteredHobbies,
-    HobbyCategory? currentFilter,
+    String? currentFilter,
     List<HobbyModel>? suggestedHobbies,
-    Map<HobbyCategory, List<HobbyModel>>? hobbiesByCategory,
+    Map<String, List<HobbyModel>>? hobbiesByCategory,
     List<HobbyModel>? recentlyPracticedHobbies,
   }) {
     return HobbyState(
@@ -148,7 +148,7 @@ class HobbyNotifier extends StateNotifier<HobbyState> {
   Future<void> addHobby({
     required String name,
     String? description,
-    HobbyCategory category = HobbyCategory.physical,
+    String category = HobbyCategory.physical,
     String? frequencyGoal,
     int? durationGoalMinutes,
     int? satisfactionRating,
@@ -180,7 +180,7 @@ class HobbyNotifier extends StateNotifier<HobbyState> {
     required int id,
     String? name,
     String? description,
-    HobbyCategory? category,
+    String? category,
     String? frequencyGoal,
     int? durationGoalMinutes,
     int? satisfactionRating,
@@ -228,7 +228,7 @@ class HobbyNotifier extends StateNotifier<HobbyState> {
   }
 
   // Filter hobbies by category
-  void filterByCategory(HobbyCategory? category) {
+  void filterByCategory(String? category) {
     if (category == null) {
       // Clear filter
       state = state.copyWith(

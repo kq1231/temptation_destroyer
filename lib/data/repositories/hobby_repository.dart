@@ -80,12 +80,11 @@ class HobbyRepository {
   /// Get hobbies by category
   ///
   /// Returns hobbies of the specified category
-  Future<List<HobbyModel>> getHobbiesByCategory(HobbyCategory category) async {
+  Future<List<HobbyModel>> getHobbiesByCategory(String category) async {
     final box = ObjectBoxManager.instance.box<HobbyModel>();
 
     // Query for hobbies of the specified category
-    final query =
-        box.query(HobbyModel_.dbCategory.equals(category.index)).build();
+    final query = box.query(HobbyModel_.category.equals(category)).build();
     final results = query.find();
     query.close();
 

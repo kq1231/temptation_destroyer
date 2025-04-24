@@ -1,15 +1,31 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:uuid/uuid.dart';
 
-/// Hobby Category Enum
-enum HobbyCategory {
-  physical, // Physical activities like sports
-  mental, // Mental activities like reading, puzzles
-  social, // Social activities like gatherings
-  spiritual, // Spiritual activities like meditation
-  creative, // Creative activities like art, music
-  productive, // Productive activities like learning new skills
-  relaxing, // Relaxing activities like nature walks
+/// Hobby Category constants
+class HobbyCategory {
+  static const String physical = 'physical'; // Physical activities like sports
+  static const String mental =
+      'mental'; // Mental activities like reading, puzzles
+  static const String social = 'social'; // Social activities like gatherings
+  static const String spiritual =
+      'spiritual'; // Spiritual activities like meditation
+  static const String creative =
+      'creative'; // Creative activities like art, music
+  static const String productive =
+      'productive'; // Productive activities like learning new skills
+  static const String relaxing =
+      'relaxing'; // Relaxing activities like nature walks
+
+  /// Get all available categories
+  static List<String> get values => [
+        physical,
+        mental,
+        social,
+        spiritual,
+        creative,
+        productive,
+        relaxing,
+      ];
 }
 
 /// Hobby Model for tracking activities
@@ -28,29 +44,8 @@ class HobbyModel {
   /// Description of the hobby
   String? description;
 
-  /// The actual enum type as a transient property
-  @Transient()
-  HobbyCategory? category;
-
-  /// Category stored as an integer in the database
-  int? get dbCategory {
-    _ensureStableEnumValues();
-    return category?.index;
-  }
-
-  /// Setter for the category integer
-  set dbCategory(int? value) {
-    _ensureStableEnumValues();
-    if (value == null) {
-      category = null;
-    } else {
-      if (value >= 0 && value < HobbyCategory.values.length) {
-        category = HobbyCategory.values[value];
-      } else {
-        category = HobbyCategory.physical;
-      }
-    }
-  }
+  /// Category of the hobby (physical, mental, etc.)
+  String category = HobbyCategory.physical;
 
   /// Frequency goal (e.g., daily, weekly)
   String? frequencyGoal;
@@ -77,13 +72,14 @@ class HobbyModel {
     String? uid,
     required this.name,
     this.description,
-    HobbyCategory category = HobbyCategory.physical,
+    String? categoryParam,
     this.frequencyGoal,
     this.durationGoalMinutes,
     this.satisfactionRating,
     DateTime? createdAt,
     this.lastPracticedAt,
   })  : uid = uid ?? const Uuid().v4(),
+        category = categoryParam ?? HobbyCategory.physical,
         createdAt = createdAt ?? DateTime.now();
 
   /// Create a copy with updated values
@@ -92,7 +88,7 @@ class HobbyModel {
     String? uid,
     String? name,
     String? description,
-    HobbyCategory? category,
+    String? category,
     String? frequencyGoal,
     int? durationGoalMinutes,
     int? satisfactionRating,
@@ -105,7 +101,7 @@ class HobbyModel {
       uid: uid ?? this.uid,
       name: name ?? this.name,
       description: description ?? this.description,
-      category: category ?? this.category!,
+      categoryParam: category ?? this.category,
       frequencyGoal: frequencyGoal ?? this.frequencyGoal,
       durationGoalMinutes: durationGoalMinutes ?? this.durationGoalMinutes,
       satisfactionRating: satisfactionRating ?? this.satisfactionRating,
@@ -117,14 +113,14 @@ class HobbyModel {
   /// Create a preset hobby
   static HobbyModel preset({
     required String name,
-    required HobbyCategory category,
+    required String category,
     String? description,
     String? frequencyGoal,
     int? durationGoalMinutes,
   }) {
     return HobbyModel(
       name: name,
-      category: category,
+      categoryParam: category,
       description: description,
       frequencyGoal: frequencyGoal,
       durationGoalMinutes: durationGoalMinutes,
@@ -218,16 +214,5 @@ class HobbyModel {
         durationGoalMinutes: 60,
       ),
     ];
-  }
-
-  /// Ensure enum values have stable indices
-  void _ensureStableEnumValues() {
-    assert(HobbyCategory.physical.index == 0);
-    assert(HobbyCategory.mental.index == 1);
-    assert(HobbyCategory.social.index == 2);
-    assert(HobbyCategory.spiritual.index == 3);
-    assert(HobbyCategory.creative.index == 4);
-    assert(HobbyCategory.productive.index == 5);
-    assert(HobbyCategory.relaxing.index == 6);
   }
 }

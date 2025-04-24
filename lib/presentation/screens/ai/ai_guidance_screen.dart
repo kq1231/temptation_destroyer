@@ -53,9 +53,9 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
         }
       }
 
-      // Initialize chat with the session
-      Future.microtask(
-          () => ref.read(chatProvider.notifier).initialize(session: _session));
+      // Set the session parameter for the chat provider
+      ref.read(chatSessionParam.notifier).state = _session;
+
       _isInitialized = true;
     }
   }
@@ -176,9 +176,8 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
 
                   return RefreshIndicator(
                     onRefresh: () async {
-                      await ref.read(chatProvider.notifier).initialize(
-                            session: state.currentSession,
-                          );
+                      // Refresh the chat provider by invalidating it
+                      ref.invalidate(chatProvider);
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (_scrollController.hasClients) {
                           _scrollController.jumpTo(
@@ -223,9 +222,8 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          ref.read(chatProvider.notifier).initialize(
-                                session: _session,
-                              );
+                          // Refresh the chat provider by invalidating it
+                          ref.invalidate(chatProvider);
                         },
                         child: const Text('Retry'),
                       ),

@@ -147,8 +147,7 @@ class _HobbySuggestionsWidgetState
             children: [
               // Category banner
               Container(
-                color:
-                    _getCategoryColor(hobby.category!).withValues(alpha: 0.2),
+                color: _getCategoryColor(hobby.category).withValues(alpha: 0.2),
                 padding: const EdgeInsets.symmetric(
                   vertical: 6,
                   horizontal: 12,
@@ -156,16 +155,16 @@ class _HobbySuggestionsWidgetState
                 child: Row(
                   children: [
                     Icon(
-                      _getCategoryIcon(hobby.category!),
-                      color: _getCategoryColor(hobby.category!),
+                      _getCategoryIcon(hobby.category),
+                      color: _getCategoryColor(hobby.category),
                       size: 16,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        _getCategoryName(hobby.category!),
+                        _getCategoryName(hobby.category),
                         style: TextStyle(
-                          color: _getCategoryColor(hobby.category!),
+                          color: _getCategoryColor(hobby.category),
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -238,60 +237,36 @@ class _HobbySuggestionsWidgetState
     );
   }
 
-  String _getCategoryName(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return 'Physical';
-      case HobbyCategory.mental:
-        return 'Mental';
-      case HobbyCategory.social:
-        return 'Social';
-      case HobbyCategory.spiritual:
-        return 'Spiritual';
-      case HobbyCategory.creative:
-        return 'Creative';
-      case HobbyCategory.productive:
-        return 'Productive';
-      case HobbyCategory.relaxing:
-        return 'Relaxing';
-    }
+  String _getCategoryName(String category) {
+    if (category == HobbyCategory.physical) return 'Physical';
+    if (category == HobbyCategory.mental) return 'Mental';
+    if (category == HobbyCategory.social) return 'Social';
+    if (category == HobbyCategory.spiritual) return 'Spiritual';
+    if (category == HobbyCategory.creative) return 'Creative';
+    if (category == HobbyCategory.productive) return 'Productive';
+    if (category == HobbyCategory.relaxing) return 'Relaxing';
+    return category; // Fallback
   }
 
-  IconData _getCategoryIcon(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return Icons.fitness_center;
-      case HobbyCategory.mental:
-        return Icons.psychology;
-      case HobbyCategory.social:
-        return Icons.people;
-      case HobbyCategory.spiritual:
-        return Icons.self_improvement;
-      case HobbyCategory.creative:
-        return Icons.brush;
-      case HobbyCategory.productive:
-        return Icons.work;
-      case HobbyCategory.relaxing:
-        return Icons.spa;
-    }
+  IconData _getCategoryIcon(String category) {
+    if (category == HobbyCategory.physical) return Icons.fitness_center;
+    if (category == HobbyCategory.mental) return Icons.psychology;
+    if (category == HobbyCategory.social) return Icons.people;
+    if (category == HobbyCategory.spiritual) return Icons.self_improvement;
+    if (category == HobbyCategory.creative) return Icons.brush;
+    if (category == HobbyCategory.productive) return Icons.work;
+    if (category == HobbyCategory.relaxing) return Icons.spa;
+    return Icons.category; // Fallback
   }
 
-  Color _getCategoryColor(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return Colors.green;
-      case HobbyCategory.mental:
-        return Colors.purple;
-      case HobbyCategory.social:
-        return Colors.orange;
-      case HobbyCategory.spiritual:
-        return Colors.indigo;
-      case HobbyCategory.creative:
-        return Colors.pink;
-      case HobbyCategory.productive:
-        return Colors.teal;
-      case HobbyCategory.relaxing:
-        return Colors.blue;
-    }
+  Color _getCategoryColor(String category) {
+    if (category == HobbyCategory.physical) return Colors.green;
+    if (category == HobbyCategory.mental) return Colors.purple;
+    if (category == HobbyCategory.social) return Colors.orange;
+    if (category == HobbyCategory.spiritual) return Colors.indigo;
+    if (category == HobbyCategory.creative) return Colors.pink;
+    if (category == HobbyCategory.productive) return Colors.teal;
+    if (category == HobbyCategory.relaxing) return Colors.blue;
+    return Colors.grey; // Fallback
   }
 }

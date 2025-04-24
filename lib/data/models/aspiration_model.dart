@@ -1,16 +1,28 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:uuid/uuid.dart';
 
-/// Aspiration Category Enum
-enum AspirationCategory {
-  personal, // Personal growth goals
-  family, // Family-related goals
-  career, // Career or educational goals
-  spiritual, // Spiritual growth goals
-  health, // Health and fitness goals
-  social, // Social life goals
-  financial, // Financial goals
-  customized, // User-defined category
+/// Aspiration Category constants
+class AspirationCategory {
+  static const String personal = 'personal'; // Personal growth goals
+  static const String family = 'family'; // Family-related goals
+  static const String career = 'career'; // Career or educational goals
+  static const String spiritual = 'spiritual'; // Spiritual growth goals
+  static const String health = 'health'; // Health and fitness goals
+  static const String social = 'social'; // Social life goals
+  static const String financial = 'financial'; // Financial goals
+  static const String customized = 'customized'; // User-defined category
+
+  /// Get all available categories
+  static List<String> get values => [
+        personal,
+        family,
+        career,
+        spiritual,
+        health,
+        social,
+        financial,
+        customized,
+      ];
 }
 
 /// Aspiration Model for goals and duas
@@ -26,29 +38,8 @@ class AspirationModel {
   /// The dua or aspiration text
   String dua;
 
-  /// The actual enum type as a transient property
-  @Transient()
-  AspirationCategory? category;
-
-  /// Category stored as an integer in the database
-  int? get dbCategory {
-    _ensureStableEnumValues();
-    return category?.index;
-  }
-
-  /// Setter for the category enum
-  set dbCategory(int? value) {
-    _ensureStableEnumValues();
-    if (value == null) {
-      category = null;
-    } else {
-      if (value >= 0 && value < AspirationCategory.values.length) {
-        category = AspirationCategory.values[value];
-      } else {
-        category = AspirationCategory.personal;
-      }
-    }
-  }
+  /// Category stored as a string in the database
+  String category = AspirationCategory.personal;
 
   /// Whether the aspiration has been achieved
   bool isAchieved;
@@ -75,7 +66,7 @@ class AspirationModel {
     this.id = 0,
     String? uid,
     required this.dua,
-    AspirationCategory category = AspirationCategory.personal,
+    String category = AspirationCategory.personal,
     this.isAchieved = false,
     this.targetDate,
     this.note,
@@ -89,7 +80,7 @@ class AspirationModel {
     int? id,
     String? uid,
     String? dua,
-    AspirationCategory? category,
+    String? category,
     bool? isAchieved,
     DateTime? targetDate,
     String? note,
@@ -101,7 +92,7 @@ class AspirationModel {
       id: id ?? this.id,
       uid: uid ?? this.uid,
       dua: dua ?? this.dua,
-      category: category ?? this.category!,
+      category: category ?? this.category,
       isAchieved: isAchieved ?? this.isAchieved,
       targetDate: targetDate ?? this.targetDate,
       note: note ?? this.note,
@@ -113,7 +104,7 @@ class AspirationModel {
   /// Create a preset aspiration
   static AspirationModel preset({
     required String dua,
-    required AspirationCategory category,
+    required String category,
     String? note,
   }) {
     return AspirationModel(
@@ -203,17 +194,5 @@ class AspirationModel {
         note: 'Savings goal for pilgrimage',
       ),
     ];
-  }
-
-  /// Ensure enum values have stable indices
-  void _ensureStableEnumValues() {
-    assert(AspirationCategory.personal.index == 0);
-    assert(AspirationCategory.family.index == 1);
-    assert(AspirationCategory.career.index == 2);
-    assert(AspirationCategory.spiritual.index == 3);
-    assert(AspirationCategory.health.index == 4);
-    assert(AspirationCategory.social.index == 5);
-    assert(AspirationCategory.financial.index == 6);
-    assert(AspirationCategory.customized.index == 7);
   }
 }

@@ -34,14 +34,11 @@ class HobbyDetailsScreen extends ConsumerWidget {
               spacing: 8,
               children: [
                 Chip(
-                  label: Text(_getCategoryName(
-                      hobby.category ?? HobbyCategory.physical)),
-                  backgroundColor: _getCategoryColor(
-                          hobby.category ?? HobbyCategory.physical)
-                      .withValues(alpha: 0.2),
+                  label: Text(_getCategoryName(hobby.category)),
+                  backgroundColor:
+                      _getCategoryColor(hobby.category).withValues(alpha: 0.2),
                   labelStyle: TextStyle(
-                    color: _getCategoryColor(
-                        hobby.category ?? HobbyCategory.physical),
+                    color: _getCategoryColor(hobby.category),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -253,42 +250,26 @@ class HobbyDetailsScreen extends ConsumerWidget {
     }
   }
 
-  String _getCategoryName(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return 'Physical';
-      case HobbyCategory.mental:
-        return 'Mental';
-      case HobbyCategory.social:
-        return 'Social';
-      case HobbyCategory.spiritual:
-        return 'Spiritual';
-      case HobbyCategory.creative:
-        return 'Creative';
-      case HobbyCategory.productive:
-        return 'Productive';
-      case HobbyCategory.relaxing:
-        return 'Relaxing';
-    }
+  String _getCategoryName(String category) {
+    if (category == HobbyCategory.physical) return 'Physical';
+    if (category == HobbyCategory.mental) return 'Mental';
+    if (category == HobbyCategory.social) return 'Social';
+    if (category == HobbyCategory.spiritual) return 'Spiritual';
+    if (category == HobbyCategory.creative) return 'Creative';
+    if (category == HobbyCategory.productive) return 'Productive';
+    if (category == HobbyCategory.relaxing) return 'Relaxing';
+    return category; // Fallback
   }
 
-  Color _getCategoryColor(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return Colors.green;
-      case HobbyCategory.mental:
-        return Colors.purple;
-      case HobbyCategory.social:
-        return Colors.orange;
-      case HobbyCategory.spiritual:
-        return Colors.indigo;
-      case HobbyCategory.creative:
-        return Colors.pink;
-      case HobbyCategory.productive:
-        return Colors.teal;
-      case HobbyCategory.relaxing:
-        return Colors.blue;
-    }
+  Color _getCategoryColor(String category) {
+    if (category == HobbyCategory.physical) return Colors.green;
+    if (category == HobbyCategory.mental) return Colors.purple;
+    if (category == HobbyCategory.social) return Colors.orange;
+    if (category == HobbyCategory.spiritual) return Colors.indigo;
+    if (category == HobbyCategory.creative) return Colors.pink;
+    if (category == HobbyCategory.productive) return Colors.teal;
+    if (category == HobbyCategory.relaxing) return Colors.blue;
+    return Colors.grey; // Fallback
   }
 
   String _formatDate(DateTime date) {

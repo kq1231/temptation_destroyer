@@ -25,7 +25,7 @@ class UpdateTriggerUseCase {
   Future<bool> updateTriggerProperties({
     required int triggerId,
     String? description,
-    TriggerType? triggerType,
+    String? triggerType,
     int? intensity,
     String? notes,
     List<String>? activeTimes,

@@ -33,7 +33,7 @@ class GetHobbiesUseCase {
   /// Get hobbies by category
   ///
   /// Returns hobbies filtered by category
-  Future<List<HobbyModel>> getHobbiesByCategory(HobbyCategory category) async {
+  Future<List<HobbyModel>> getHobbiesByCategory(String category) async {
     try {
       return await _repository.getHobbiesByCategory(category);
     } catch (e) {
@@ -55,21 +55,18 @@ class GetHobbiesUseCase {
   /// Get hobbies grouped by category
   ///
   /// Returns a map of categories to list of hobbies
-  Future<Map<HobbyCategory, List<HobbyModel>>>
-      getHobbiesGroupedByCategory() async {
+  Future<Map<String, List<HobbyModel>>> getHobbiesGroupedByCategory() async {
     try {
       final allHobbies = await _repository.getAllHobbies();
 
       // Group hobbies by category
-      final Map<HobbyCategory, List<HobbyModel>> groupedHobbies = {};
+      final Map<String, List<HobbyModel>> groupedHobbies = {};
 
       for (final hobby in allHobbies) {
-        if (hobby.category != null) {
-          if (!groupedHobbies.containsKey(hobby.category)) {
-            groupedHobbies[hobby.category!] = [];
-          }
-          groupedHobbies[hobby.category!]!.add(hobby);
+        if (!groupedHobbies.containsKey(hobby.category)) {
+          groupedHobbies[hobby.category] = [];
         }
+        groupedHobbies[hobby.category]!.add(hobby);
       }
 
       return groupedHobbies;

@@ -25,7 +25,7 @@ class UpdateAspirationUseCase {
   Future<bool> updateAspiration({
     required int id,
     String? dua,
-    AspirationCategory? category,
+    String? category,
     bool? isAchieved,
     DateTime? targetDate,
     String? note,

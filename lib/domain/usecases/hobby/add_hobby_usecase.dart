@@ -25,7 +25,7 @@ class AddHobbyUseCase {
   Future<int> addHobby({
     required String name,
     String? description,
-    HobbyCategory category = HobbyCategory.physical,
+    String category = HobbyCategory.physical,
     String? frequencyGoal,
     int? durationGoalMinutes,
     int? satisfactionRating,
@@ -33,7 +33,7 @@ class AddHobbyUseCase {
     final hobby = HobbyModel(
       name: name,
       description: description,
-      category: category,
+      categoryParam: category,
       frequencyGoal: frequencyGoal,
       durationGoalMinutes: durationGoalMinutes,
       satisfactionRating: satisfactionRating,

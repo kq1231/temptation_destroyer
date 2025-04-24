@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/usecases/auth/get_user_status_usecase.dart';
@@ -98,7 +100,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Initialize the auth state
   Future<void> initialize() async {
     state = state.copyWith(isLoading: true);
-
     try {
       final status = await _getUserStatusUseCase.execute();
       final user = await _getUserStatusUseCase.getUser();

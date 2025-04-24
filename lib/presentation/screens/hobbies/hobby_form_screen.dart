@@ -20,7 +20,7 @@ class _HobbyFormScreenState extends ConsumerState<HobbyFormScreen> {
 
   late String _name;
   late String _description;
-  late HobbyCategory _category;
+  late String _category;
   late String? _frequencyGoal;
   late int? _durationGoalMinutes;
   late int? _satisfactionRating;
@@ -38,7 +38,7 @@ class _HobbyFormScreenState extends ConsumerState<HobbyFormScreen> {
     if (_isEdit) {
       _name = widget.hobby!.name;
       _description = widget.hobby!.description ?? '';
-      _category = widget.hobby!.category ?? HobbyCategory.physical;
+      _category = widget.hobby!.category;
       _frequencyGoal = widget.hobby!.frequencyGoal;
       _durationGoalMinutes = widget.hobby!.durationGoalMinutes;
       _satisfactionRating = widget.hobby!.satisfactionRating;
@@ -101,14 +101,14 @@ class _HobbyFormScreenState extends ConsumerState<HobbyFormScreen> {
                     const SizedBox(height: 16),
 
                     // Category dropdown
-                    DropdownButtonFormField<HobbyCategory>(
+                    DropdownButtonFormField<String>(
                       value: _category,
                       decoration: const InputDecoration(
                         labelText: 'Category',
                         border: OutlineInputBorder(),
                       ),
                       items: HobbyCategory.values.map((category) {
-                        return DropdownMenuItem<HobbyCategory>(
+                        return DropdownMenuItem<String>(
                           value: category,
                           child: Text(_getCategoryName(category)),
                         );
@@ -274,23 +274,15 @@ class _HobbyFormScreenState extends ConsumerState<HobbyFormScreen> {
     }
   }
 
-  String _getCategoryName(HobbyCategory category) {
-    switch (category) {
-      case HobbyCategory.physical:
-        return 'Physical';
-      case HobbyCategory.mental:
-        return 'Mental';
-      case HobbyCategory.social:
-        return 'Social';
-      case HobbyCategory.spiritual:
-        return 'Spiritual';
-      case HobbyCategory.creative:
-        return 'Creative';
-      case HobbyCategory.productive:
-        return 'Productive';
-      case HobbyCategory.relaxing:
-        return 'Relaxing';
-    }
+  String _getCategoryName(String category) {
+    if (category == HobbyCategory.physical) return 'Physical';
+    if (category == HobbyCategory.mental) return 'Mental';
+    if (category == HobbyCategory.social) return 'Social';
+    if (category == HobbyCategory.spiritual) return 'Spiritual';
+    if (category == HobbyCategory.creative) return 'Creative';
+    if (category == HobbyCategory.productive) return 'Productive';
+    if (category == HobbyCategory.relaxing) return 'Relaxing';
+    return category; // Fallback
   }
 
   String _getRatingDescription(int rating) {

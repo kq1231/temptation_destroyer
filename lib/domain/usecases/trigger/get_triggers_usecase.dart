@@ -33,7 +33,7 @@ class GetTriggersUseCase {
   /// Get triggers by type
   ///
   /// Returns triggers of the specified type, sorted by intensity
-  Future<List<Trigger>> getTriggersByType(TriggerType type) async {
+  Future<List<Trigger>> getTriggersByType(String type) async {
     try {
       return await _repository.getTriggersByType(type);
     } catch (e) {

@@ -47,8 +47,8 @@ class _EmergencyChatWidgetState extends ConsumerState<EmergencyChatWidget> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      // Initialize and send the emergency message
-      Future.microtask(() => _sendEmergencyMessage());
+      // Send the emergency message
+      _sendEmergencyMessage();
       _isInitialized = true;
     }
   }
@@ -252,9 +252,8 @@ class _EmergencyChatWidgetState extends ConsumerState<EmergencyChatWidget> {
 
         return RefreshIndicator(
           onRefresh: () async {
-            await ref.read(chatProvider.notifier).initialize(
-                  session: state.currentSession,
-                );
+            // Refresh the chat provider by invalidating it
+            ref.invalidate(chatProvider);
             _scrollController.jumpTo(0);
           },
           child: ListView.builder(
@@ -292,7 +291,8 @@ class _EmergencyChatWidgetState extends ConsumerState<EmergencyChatWidget> {
             ),
             TextButton(
               onPressed: () {
-                ref.read(chatProvider.notifier).initialize();
+                // Refresh the chat provider by invalidating it
+                ref.invalidate(chatProvider);
               },
               child: const Text('Retry'),
             ),

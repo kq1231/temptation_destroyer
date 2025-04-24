@@ -1,18 +1,47 @@
 import 'package:objectbox/objectbox.dart';
 import 'package:intl/intl.dart';
 
-enum AchievementType {
-  streak,
-  emergency,
-  challenge,
-  quran,
-  prayer,
-  community,
-  knowledge,
-  general
+/// Achievement type constants
+class AchievementType {
+  static const String streak = 'streak';
+  static const String emergency = 'emergency';
+  static const String challenge = 'challenge';
+  static const String quran = 'quran';
+  static const String prayer = 'prayer';
+  static const String community = 'community';
+  static const String knowledge = 'knowledge';
+  static const String general = 'general';
+
+  /// Get all available achievement types
+  static List<String> get values => [
+        streak,
+        emergency,
+        challenge,
+        quran,
+        prayer,
+        community,
+        knowledge,
+        general,
+      ];
 }
 
-enum AchievementRarity { common, uncommon, rare, epic, legendary }
+/// Achievement rarity constants
+class AchievementRarity {
+  static const String common = 'common';
+  static const String uncommon = 'uncommon';
+  static const String rare = 'rare';
+  static const String epic = 'epic';
+  static const String legendary = 'legendary';
+
+  /// Get all available rarities
+  static List<String> get values => [
+        common,
+        uncommon,
+        rare,
+        epic,
+        legendary,
+      ];
+}
 
 @Entity()
 class AchievementModel {
@@ -30,27 +59,8 @@ class AchievementModel {
   bool isUnlocked;
   DateTime? unlockedDate;
 
-  @Transient()
-  AchievementType type;
-
-  @Transient()
-  AchievementRarity rarity;
-
-  int? get dbType {
-    return type.index;
-  }
-
-  set dbType(int? value) {
-    type = AchievementType.values[value ?? 0];
-  }
-
-  int? get dbRarity {
-    return rarity.index;
-  }
-
-  set dbRarity(int? value) {
-    rarity = AchievementRarity.values[value ?? 0];
-  }
+  String type = AchievementType.general;
+  String rarity = AchievementRarity.common;
 
   AchievementModel({
     this.id = 0,
@@ -68,39 +78,24 @@ class AchievementModel {
 
   // For UI display
   String get typeLabel {
-    switch (type) {
-      case AchievementType.streak:
-        return 'Streak';
-      case AchievementType.emergency:
-        return 'Emergency';
-      case AchievementType.challenge:
-        return 'Challenge';
-      case AchievementType.quran:
-        return 'Quran';
-      case AchievementType.prayer:
-        return 'Prayer';
-      case AchievementType.community:
-        return 'Community';
-      case AchievementType.knowledge:
-        return 'Knowledge';
-      case AchievementType.general:
-        return 'General';
-    }
+    if (type == AchievementType.streak) return 'Streak';
+    if (type == AchievementType.emergency) return 'Emergency';
+    if (type == AchievementType.challenge) return 'Challenge';
+    if (type == AchievementType.quran) return 'Quran';
+    if (type == AchievementType.prayer) return 'Prayer';
+    if (type == AchievementType.community) return 'Community';
+    if (type == AchievementType.knowledge) return 'Knowledge';
+    if (type == AchievementType.general) return 'General';
+    return type; // Fallback
   }
 
   String get rarityLabel {
-    switch (rarity) {
-      case AchievementRarity.common:
-        return 'Common';
-      case AchievementRarity.uncommon:
-        return 'Uncommon';
-      case AchievementRarity.rare:
-        return 'Rare';
-      case AchievementRarity.epic:
-        return 'Epic';
-      case AchievementRarity.legendary:
-        return 'Legendary';
-    }
+    if (rarity == AchievementRarity.common) return 'Common';
+    if (rarity == AchievementRarity.uncommon) return 'Uncommon';
+    if (rarity == AchievementRarity.rare) return 'Rare';
+    if (rarity == AchievementRarity.epic) return 'Epic';
+    if (rarity == AchievementRarity.legendary) return 'Legendary';
+    return rarity; // Fallback
   }
 
   // Formatted date for UI display
@@ -143,8 +138,8 @@ class AchievementModel {
     String? description,
     String? iconName,
     int? pointValue,
-    AchievementType? type,
-    AchievementRarity? rarity,
+    String? type,
+    String? rarity,
     int? progressCurrent,
     int? progressTarget,
     bool? isUnlocked,
@@ -172,7 +167,7 @@ class AchievementModel {
     required String iconName,
     required int daysRequired,
     int pointValue = 10,
-    AchievementRarity rarity = AchievementRarity.common,
+    String rarity = AchievementRarity.common,
   }) {
     return AchievementModel(
       title: title,
@@ -191,7 +186,7 @@ class AchievementModel {
     required String iconName,
     required int emergenciesResolved,
     int pointValue = 15,
-    AchievementRarity rarity = AchievementRarity.uncommon,
+    String rarity = AchievementRarity.uncommon,
   }) {
     return AchievementModel(
       title: title,
@@ -210,7 +205,7 @@ class AchievementModel {
     required String iconName,
     required int challengesCompleted,
     int pointValue = 20,
-    AchievementRarity rarity = AchievementRarity.uncommon,
+    String rarity = AchievementRarity.uncommon,
   }) {
     return AchievementModel(
       title: title,

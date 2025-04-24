@@ -1,23 +1,59 @@
 import 'package:objectbox/objectbox.dart';
 
-enum ContentType { hadith, quran, dua, quote, reflection }
+/// Content type constants
+class ContentType {
+  static const String hadith = 'hadith';
+  static const String quran = 'quran';
+  static const String dua = 'dua';
+  static const String quote = 'quote';
+  static const String reflection = 'reflection';
 
-enum ContentCategory {
-  strength,
-  patience,
-  forgiveness,
-  gratitude,
-  purification,
-  repentance,
-  discipline,
-  selfControl,
-  general,
-  charity,
-  hope,
-  determination,
-  mercy,
-  relief,
-  guidance,
+  /// Get all available content types
+  static List<String> get values => [
+        hadith,
+        quran,
+        dua,
+        quote,
+        reflection,
+      ];
+}
+
+/// Content category constants
+class ContentCategory {
+  static const String strength = 'strength';
+  static const String patience = 'patience';
+  static const String forgiveness = 'forgiveness';
+  static const String gratitude = 'gratitude';
+  static const String purification = 'purification';
+  static const String repentance = 'repentance';
+  static const String discipline = 'discipline';
+  static const String selfControl = 'selfControl';
+  static const String general = 'general';
+  static const String charity = 'charity';
+  static const String hope = 'hope';
+  static const String determination = 'determination';
+  static const String mercy = 'mercy';
+  static const String relief = 'relief';
+  static const String guidance = 'guidance';
+
+  /// Get all available categories
+  static List<String> get values => [
+        strength,
+        patience,
+        forgiveness,
+        gratitude,
+        purification,
+        repentance,
+        discipline,
+        selfControl,
+        general,
+        charity,
+        hope,
+        determination,
+        mercy,
+        relief,
+        guidance,
+      ];
 }
 
 @Entity()
@@ -31,25 +67,9 @@ class IslamicContentModel {
   String? translation;
   String? explanation;
 
-  ContentType contentType;
+  String contentType = ContentType.hadith;
 
-  ContentCategory category;
-
-  int? get dbContentType {
-    return contentType.index;
-  }
-
-  set dbContentType(int? value) {
-    contentType = ContentType.values[value ?? 0];
-  }
-
-  int? get dbCategory {
-    return category.index;
-  }
-
-  set dbCategory(int? value) {
-    category = ContentCategory.values[value ?? 0];
-  }
+  String category = ContentCategory.general;
 
   bool isFavorite;
   DateTime dateAdded = DateTime.now(); // Initialize with default value
@@ -87,53 +107,31 @@ class IslamicContentModel {
 
   // For UI display
   String get contentTypeLabel {
-    switch (contentType) {
-      case ContentType.hadith:
-        return 'Hadith';
-      case ContentType.quran:
-        return 'Quran';
-      case ContentType.dua:
-        return 'Dua';
-      case ContentType.quote:
-        return 'Quote';
-      case ContentType.reflection:
-        return 'Reflection';
-    }
+    if (contentType == ContentType.hadith) return 'Hadith';
+    if (contentType == ContentType.quran) return 'Quran';
+    if (contentType == ContentType.dua) return 'Dua';
+    if (contentType == ContentType.quote) return 'Quote';
+    if (contentType == ContentType.reflection) return 'Reflection';
+    return contentType; // Fallback
   }
 
   String get categoryLabel {
-    switch (category) {
-      case ContentCategory.strength:
-        return 'Strength';
-      case ContentCategory.patience:
-        return 'Patience';
-      case ContentCategory.forgiveness:
-        return 'Forgiveness';
-      case ContentCategory.gratitude:
-        return 'Gratitude';
-      case ContentCategory.purification:
-        return 'Purification';
-      case ContentCategory.repentance:
-        return 'Repentance';
-      case ContentCategory.discipline:
-        return 'Discipline';
-      case ContentCategory.selfControl:
-        return 'Self Control';
-      case ContentCategory.general:
-        return 'General';
-      case ContentCategory.charity:
-        return 'Charity';
-      case ContentCategory.hope:
-        return 'Hope';
-      case ContentCategory.determination:
-        return 'Determination';
-      case ContentCategory.mercy:
-        return 'Mercy';
-      case ContentCategory.relief:
-        return 'Relief';
-      case ContentCategory.guidance:
-        return 'Guidance';
-    }
+    if (category == ContentCategory.strength) return 'Strength';
+    if (category == ContentCategory.patience) return 'Patience';
+    if (category == ContentCategory.forgiveness) return 'Forgiveness';
+    if (category == ContentCategory.gratitude) return 'Gratitude';
+    if (category == ContentCategory.purification) return 'Purification';
+    if (category == ContentCategory.repentance) return 'Repentance';
+    if (category == ContentCategory.discipline) return 'Discipline';
+    if (category == ContentCategory.selfControl) return 'Self Control';
+    if (category == ContentCategory.general) return 'General';
+    if (category == ContentCategory.charity) return 'Charity';
+    if (category == ContentCategory.hope) return 'Hope';
+    if (category == ContentCategory.determination) return 'Determination';
+    if (category == ContentCategory.mercy) return 'Mercy';
+    if (category == ContentCategory.relief) return 'Relief';
+    if (category == ContentCategory.guidance) return 'Guidance';
+    return category; // Fallback
   }
 
   // Helper method to update display tracking
@@ -155,8 +153,8 @@ class IslamicContentModel {
     String? reference,
     String? translation,
     String? explanation,
-    ContentType? contentType,
-    ContentCategory? category,
+    String? contentType,
+    String? category,
     bool? isFavorite,
     DateTime? dateAdded,
     DateTime? lastDisplayed,
@@ -186,7 +184,7 @@ class IslamicContentModel {
     required String source,
     required String reference,
     String? translation,
-    ContentCategory category = ContentCategory.general,
+    String category = ContentCategory.general,
     List<String> tags = const [],
   }) {
     return IslamicContentModel(
@@ -206,7 +204,7 @@ class IslamicContentModel {
     required String reference, // e.g. "2:255" for Ayatul Kursi
     required String translation,
     String? explanation,
-    ContentCategory category = ContentCategory.general,
+    String category = ContentCategory.general,
     List<String> tags = const [],
   }) {
     return IslamicContentModel(
@@ -227,7 +225,7 @@ class IslamicContentModel {
     required String source,
     required String reference,
     required String translation,
-    ContentCategory category = ContentCategory.general,
+    String category = ContentCategory.general,
     List<String> tags = const [],
   }) {
     return IslamicContentModel(

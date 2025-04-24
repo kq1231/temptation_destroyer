@@ -22,7 +22,7 @@ class _AspirationEntryScreenState extends ConsumerState<AspirationEntryScreen> {
   final _duaController = TextEditingController();
   final _noteController = TextEditingController();
 
-  AspirationCategory _selectedCategory = AspirationCategory.personal;
+  String _selectedCategory = AspirationCategory.personal;
   bool _isAchieved = false;
   DateTime? _targetDate;
   bool _isEditing = false;
@@ -41,7 +41,7 @@ class _AspirationEntryScreenState extends ConsumerState<AspirationEntryScreen> {
         _noteController.text = widget.aspiration!.note!;
       }
 
-      _selectedCategory = widget.aspiration!.category!;
+      _selectedCategory = widget.aspiration!.category;
       _isAchieved = widget.aspiration!.isAchieved;
       _targetDate = widget.aspiration!.targetDate;
     }
@@ -91,7 +91,7 @@ class _AspirationEntryScreenState extends ConsumerState<AspirationEntryScreen> {
                     const SizedBox(height: 16),
 
                     // Category dropdown
-                    DropdownButtonFormField<AspirationCategory>(
+                    DropdownButtonFormField<String>(
                       value: _selectedCategory,
                       decoration: const InputDecoration(
                         labelText: 'Category',
@@ -222,25 +222,16 @@ class _AspirationEntryScreenState extends ConsumerState<AspirationEntryScreen> {
     return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
   }
 
-  String _getCategoryName(AspirationCategory category) {
-    switch (category) {
-      case AspirationCategory.personal:
-        return 'Personal';
-      case AspirationCategory.family:
-        return 'Family';
-      case AspirationCategory.career:
-        return 'Career';
-      case AspirationCategory.spiritual:
-        return 'Spiritual';
-      case AspirationCategory.health:
-        return 'Health';
-      case AspirationCategory.social:
-        return 'Social';
-      case AspirationCategory.financial:
-        return 'Financial';
-      case AspirationCategory.customized:
-        return 'Custom';
-    }
+  String _getCategoryName(String category) {
+    if (category == AspirationCategory.personal) return 'Personal';
+    if (category == AspirationCategory.family) return 'Family';
+    if (category == AspirationCategory.career) return 'Career';
+    if (category == AspirationCategory.spiritual) return 'Spiritual';
+    if (category == AspirationCategory.health) return 'Health';
+    if (category == AspirationCategory.social) return 'Social';
+    if (category == AspirationCategory.financial) return 'Financial';
+    if (category == AspirationCategory.customized) return 'Custom';
+    return category; // Fallback
   }
 
   Future<void> _submitForm() async {
