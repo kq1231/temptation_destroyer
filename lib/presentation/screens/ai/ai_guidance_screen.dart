@@ -5,6 +5,8 @@ import '../../../presentation/providers/ai_service_provider.dart';
 import '../../../presentation/providers/chat_provider.dart';
 import '../../../data/models/ai_models.dart';
 import '../../../data/models/chat_session_model.dart';
+import '../../../data/models/emergency_session_model.dart';
+import '../../../core/utils/emergency_context_builder.dart';
 import '../../widgets/app_loading_indicator.dart';
 import '../../widgets/emergency_chat_widget.dart';
 import '../../widgets/chat/chat_message_bubble.dart';
@@ -50,6 +52,31 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
         final args = ModalRoute.of(context)?.settings.arguments;
         if (args is ChatSession) {
           _session = args;
+        } else if (args is Map<String, dynamic>) {
+          // Handle emergency session arguments
+          final emergencySession =
+              args['emergencySession'] as EmergencySession?;
+          final isEmergency = args['isEmergency'] as bool? ?? false;
+
+          if (isEmergency && emergencySession != null) {
+            // Set emergency mode
+            setState(() {
+              _isEmergencyMode = true;
+              _emergencyTriggerMessage =
+                  'Emergency Session: ${emergencySession.sessionId}';
+            });
+
+            // Get personalized context for AI guidance
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              final context = await EmergencyContextBuilder.buildContext(
+                  ref, emergencySession);
+
+              // Send the context as a system message
+              ref.read(chatProvider.notifier).sendSystemMessage(
+                    'EMERGENCY MODE ACTIVATED\n\n$context',
+                  );
+            });
+          }
         }
       }
 

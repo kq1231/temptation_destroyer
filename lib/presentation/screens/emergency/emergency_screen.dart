@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/utils/emergency_context_builder.dart';
 import '../../providers/emergency_session_provider_refactored.dart';
 import '../../providers/emergency_timer_provider.dart';
 import '../../widgets/emergency/emergency_widgets.dart';
+import '../../widgets/emergency/emergency_timer_widget.dart';
 import 'emergency_resolution_form.dart';
 
 /// Screen that displays when the user is in an active emergency session
@@ -84,8 +86,12 @@ class EmergencyScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Emergency timer display
-            _buildTimerCard(context, timerState),
+            // Emergency timer display - using dedicated widget
+            const EmergencyTimerWidget(),
+            const SizedBox(height: 24),
+
+            // AI Guidance section
+            _buildAIGuidanceCard(context, ref),
             const SizedBox(height: 24),
 
             // Emergency tips
@@ -123,8 +129,15 @@ class EmergencyScreen extends ConsumerWidget {
     );
   }
 
-  /// Build the timer card
-  Widget _buildTimerCard(BuildContext context, EmergencyTimerState timerState) {
+  /// Build the AI guidance card
+  Widget _buildAIGuidanceCard(BuildContext context, WidgetRef ref) {
+    // Get the active emergency session
+    final emergencyState = ref.watch(emergencySessionNotifierProvider).value;
+    final activeSession = emergencyState?.activeSession;
+
+    // Get personalized context for AI guidance
+    final contextAsync = ref.watch(emergencyContextProvider(activeSession));
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -133,30 +146,57 @@ class EmergencyScreen extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              AppStrings.emergencyTimerLabel,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            const Row(
+              children: [
+                Icon(Icons.psychology, color: AppColors.primary),
+                SizedBox(width: 8),
+                Text(
+                  'AI Guidance',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            contextAsync.when(
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+              error: (error, stack) => Text(
+                'Error loading personalized guidance: $error',
+                style: const TextStyle(fontSize: 16, color: Colors.red),
+              ),
+              data: (context) => const Text(
+                'Remember your aspirations and goals. Focus on what truly matters to you. '
+                'Consider engaging in one of your hobbies to redirect your energy positively.',
+                style: TextStyle(fontSize: 16),
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              timerState.formattedTime,
-              style: const TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: AppColors.emergencyRed,
+            ElevatedButton.icon(
+              onPressed: () {
+                // Navigate to AI guidance screen with context for more detailed help
+                Navigator.of(context).pushNamed(
+                  '/ai-guidance',
+                  arguments: {
+                    'emergencySession': activeSession,
+                    'isEmergency': true,
+                  },
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: AppColors.primary,
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              timerState.humanReadableTime,
-              style: const TextStyle(
-                fontSize: 16,
-                color: AppColors.textSecondary,
-              ),
+              icon: const Icon(Icons.chat),
+              label: const Text('Get Personalized Guidance'),
             ),
           ],
         ),
@@ -258,7 +298,8 @@ class EmergencyScreen extends ConsumerWidget {
                     icon: Icons.phone,
                     color: AppColors.secondary,
                     onPressed: () {
-                      // TODO: Implement call friend action
+                      // Show a dialog with suggested contacts
+                      _showContactsDialog(context);
                     },
                   ),
                   const SizedBox(width: 12),
@@ -267,7 +308,8 @@ class EmergencyScreen extends ConsumerWidget {
                     icon: Icons.directions_walk,
                     color: AppColors.primary,
                     onPressed: () {
-                      // TODO: Implement go for a walk action
+                      // Show a dialog with walking suggestions
+                      _showWalkingTipsDialog(context);
                     },
                   ),
                   const SizedBox(width: 12),
@@ -276,7 +318,8 @@ class EmergencyScreen extends ConsumerWidget {
                     icon: Icons.shower,
                     color: AppColors.info,
                     onPressed: () {
-                      // TODO: Implement cold shower action
+                      // Show a dialog with cold shower benefits
+                      _showColdShowerDialog(context);
                     },
                   ),
                   const SizedBox(width: 12),
@@ -285,7 +328,8 @@ class EmergencyScreen extends ConsumerWidget {
                     icon: Icons.fitness_center,
                     color: AppColors.emotionalTrigger,
                     onPressed: () {
-                      // TODO: Implement push-ups action
+                      // Show a dialog with exercise suggestions
+                      _showExerciseDialog(context);
                     },
                   ),
                 ],
@@ -306,6 +350,151 @@ class EmergencyScreen extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => const EmergencyResolutionForm(),
+    );
+  }
+
+  /// Show a dialog with suggested contacts
+  void _showContactsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Call a Friend'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Reaching out to someone you trust can help during difficult moments.',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Consider calling:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('• A close friend who knows about your struggles'),
+            Text('• A family member who supports you'),
+            Text('• A mentor or religious leader'),
+            Text('• A support group member'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show a dialog with walking suggestions
+  void _showWalkingTipsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Go for a Walk'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Walking can help clear your mind and reduce temptation.',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Tips for an effective walk:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('• Leave your devices at home if possible'),
+            Text('• Focus on your surroundings and nature'),
+            Text('• Practice deep breathing while walking'),
+            Text('• Set a destination goal (e.g., walk to the park and back)'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show a dialog with cold shower benefits
+  void _showColdShowerDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cold Shower'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Cold showers can help reset your mind and body during moments of temptation.',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Benefits:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('• Increases alertness and focus'),
+            Text('• Reduces stress hormones'),
+            Text('• Builds mental resilience'),
+            Text('• Shifts your attention away from temptation'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show a dialog with exercise suggestions
+  void _showExerciseDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Quick Exercise'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Physical exercise can help redirect energy and reduce temptation.',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Try this quick workout:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('• 20 push-ups (or as many as you can)'),
+            Text('• 20 jumping jacks'),
+            Text('• 20 squats'),
+            Text('• 30-second plank'),
+            Text('• Repeat 2-3 times if needed'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
     );
   }
 

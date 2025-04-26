@@ -20,7 +20,9 @@ import 'screens/statistics/statistics_dashboard_screen.dart';
 import 'screens/voice/voice_chat_screen.dart';
 import 'screens/splash_screen.dart';
 import 'providers/auth_provider.dart';
+import 'providers/app_start_provider.dart';
 import '../domain/usecases/auth/get_user_status_usecase.dart';
+import '../core/services/notification_service.dart';
 
 /// Main app widget
 class TemptationDestroyerApp extends ConsumerWidget {
@@ -29,7 +31,11 @@ class TemptationDestroyerApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Get the notification service
+    final notificationService = ref.watch(notificationServiceProvider);
+
     return MaterialApp(
+      navigatorKey: notificationService.navigatorKey,
       title: 'Temptation Destroyer',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
@@ -94,8 +100,12 @@ class _AuthCheckScreenState extends ConsumerState<AuthCheckScreen> {
   void initState() {
     super.initState();
 
-    // Initialize authentication state
+    // Initialize app and authentication state
     Future.microtask(() {
+      // Initialize app start provider (which checks for active emergency sessions)
+      ref.read(appStartProvider);
+
+      // Initialize authentication state
       ref.read(authProvider.notifier).initialize();
     });
   }
@@ -103,6 +113,24 @@ class _AuthCheckScreenState extends ConsumerState<AuthCheckScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+
+    // Check if we should show the active session notification
+    final shouldShowNotification =
+        ref.watch(shouldShowActiveSessionNotificationProvider);
+
+    // Show notification if needed
+    if (shouldShowNotification &&
+        authState.status == AuthStatus.authenticated) {
+      // Reset the notification flag
+      ref.read(shouldShowActiveSessionNotificationProvider.notifier).state =
+          false;
+
+      // Show the notification after the build is complete
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final notificationService = ref.read(notificationServiceProvider);
+        notificationService.showActiveSessionNotification(context);
+      });
+    }
 
     // Use our new splash screen while initializing
     if (authState.isLoading) {

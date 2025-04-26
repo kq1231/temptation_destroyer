@@ -369,6 +369,77 @@ class ChatAsyncNotifier extends AutoDisposeAsyncNotifier<ChatState> {
     ));
   }
 
+  /// Send a system message (not from the user)
+  Future<void> sendSystemMessage(String content) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    try {
+      // Get the current config from the service provider
+      final config = ref.read(aiServiceProvider).config;
+
+      // Create a system message
+      final systemMessage = ChatMessageModel(
+        content: content,
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: null,
+      );
+
+      // Store the system message
+      await _repository.storeMessageAsync(systemMessage);
+
+      // Generate AI response based on the system message
+      final aiResponse = await _repository.generateResponse(
+        userInput: "Please provide guidance based on the above context.",
+        context: [systemMessage],
+        config: config.copyWith(
+          temperature: 0.3, // Lower temperature for more focused response
+        ),
+      );
+
+      // Create AI message
+      final aiMessage = ChatMessageModel(
+        content: aiResponse.content,
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: null,
+      );
+
+      // Store AI message
+      await _repository.storeMessageAsync(aiMessage);
+
+      // Play message received sound
+      _soundService.playSound(SoundEffect.notification);
+
+      // Update state with the new messages
+      state = AsyncValue.data(currentState.copyWith(
+        messages: [systemMessage, aiMessage, ...currentState.messages],
+      ));
+    } catch (error) {
+      // Play error sound
+      _soundService.playSound(SoundEffect.error);
+
+      // Create an error message
+      final errorMessage = ChatMessageModel(
+        content: "Error processing system message: ${error.toString()}",
+        isUserMessage: false,
+        session: currentState.currentSession,
+        wasHelpful: null,
+        isError: true,
+      );
+
+      // Store the error message
+      await _repository.storeMessageAsync(errorMessage);
+
+      // Update state with the error message
+      state = AsyncValue.data(currentState.copyWith(
+        messages: [errorMessage, ...currentState.messages],
+        errorMessage: error.toString(),
+      ));
+    }
+  }
+
   /// Send a message with streaming response
   Future<void> sendStreamingMessage(String content) async {
     final currentState = state.value;
