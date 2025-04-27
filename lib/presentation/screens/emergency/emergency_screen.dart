@@ -4,9 +4,10 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/utils/emergency_context_builder.dart';
 import '../../providers/emergency_session_provider_refactored.dart';
-import '../../providers/emergency_timer_provider.dart';
+import '../../providers/chat_provider.dart';
 import '../../widgets/emergency/emergency_widgets.dart';
 import '../../widgets/emergency/emergency_timer_widget.dart';
+import '../../widgets/emergency_chat_widget.dart';
 import 'emergency_resolution_form.dart';
 
 /// Screen that displays when the user is in an active emergency session
@@ -18,9 +19,6 @@ class EmergencyScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch emergency session state
     final asyncEmergencyState = ref.watch(emergencySessionNotifierProvider);
-
-    // Watch timer state
-    final timerState = ref.watch(emergencyTimerProvider);
 
     return asyncEmergencyState.when(
       loading: () => _buildLoadingView(),
@@ -34,7 +32,7 @@ class EmergencyScreen extends ConsumerWidget {
           ),
           body: emergencyState.activeSession == null
               ? _buildNoActiveSessionView(context)
-              : _buildActiveSessionView(context, ref, timerState),
+              : _buildActiveSessionView(context, ref),
         );
       },
     );
@@ -78,7 +76,6 @@ class EmergencyScreen extends ConsumerWidget {
   Widget _buildActiveSessionView(
     BuildContext context,
     WidgetRef ref,
-    EmergencyTimerState timerState,
   ) {
     return SingleChildScrollView(
       child: Padding(
@@ -136,7 +133,7 @@ class EmergencyScreen extends ConsumerWidget {
     final activeSession = emergencyState?.activeSession;
 
     // Get personalized context for AI guidance
-    final contextAsync = ref.watch(emergencyContextProvider(activeSession));
+    final guidanceText = ref.watch(emergencyContextProvider(activeSession));
 
     return Card(
       elevation: 4,
@@ -162,33 +159,34 @@ class EmergencyScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            contextAsync.when(
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-              error: (error, stack) => Text(
-                'Error loading personalized guidance: $error',
-                style: const TextStyle(fontSize: 16, color: Colors.red),
-              ),
-              data: (context) => const Text(
-                'Remember your aspirations and goals. Focus on what truly matters to you. '
-                'Consider engaging in one of your hobbies to redirect your energy positively.',
-                style: TextStyle(fontSize: 16),
-              ),
+            Text(
+              guidanceText,
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () {
-                // Navigate to AI guidance screen with context for more detailed help
-                Navigator.of(context).pushNamed(
-                  '/ai-guidance',
-                  arguments: {
-                    'emergencySession': activeSession,
-                    'isEmergency': true,
-                  },
+              onPressed: () async {
+                // Clear any existing chat session
+                ref.invalidate(chatProvider);
+
+                // Navigate to AI guidance screen with emergency mode activated
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Consumer(
+                      builder: (context, ref, _) {
+                        // Activate emergency mode directly
+                        return Scaffold(
+                          body: EmergencyChatWidget(
+                            triggerMessage:
+                                'Emergency Session: ${activeSession?.sessionId ?? "Active"}',
+                            onExit: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 );
               },
               style: ElevatedButton.styleFrom(

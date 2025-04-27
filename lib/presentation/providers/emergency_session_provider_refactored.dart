@@ -91,7 +91,8 @@ class EmergencySessionNotifier extends _$EmergencySessionNotifier {
 
     try {
       final activeSession = await _getActiveUseCase.execute();
-      final recentSessions = await _getSessionsUseCase.getSessionsForCurrentWeek();
+      final recentSessions =
+          await _getSessionsUseCase.getSessionsForCurrentWeek();
 
       return EmergencySessionState(
         activeSession: activeSession,
@@ -111,7 +112,8 @@ class EmergencySessionNotifier extends _$EmergencySessionNotifier {
     String? triggerId,
     int? intensity,
   }) async {
-    state = AsyncValue.data(state.value!.copyWith(isLoading: true, errorMessage: null));
+    state = AsyncValue.data(
+        state.value!.copyWith(isLoading: true, errorMessage: null));
 
     try {
       final session = await _startUseCase.execute(
@@ -120,7 +122,8 @@ class EmergencySessionNotifier extends _$EmergencySessionNotifier {
       );
 
       // Refresh recent sessions
-      final recentSessions = await _getSessionsUseCase.getSessionsForCurrentWeek();
+      final recentSessions =
+          await _getSessionsUseCase.getSessionsForCurrentWeek();
 
       state = AsyncValue.data(state.value!.copyWith(
         activeSession: session,
@@ -150,7 +153,8 @@ class EmergencySessionNotifier extends _$EmergencySessionNotifier {
       return;
     }
 
-    state = AsyncValue.data(state.value!.copyWith(isLoading: true, errorMessage: null));
+    state = AsyncValue.data(
+        state.value!.copyWith(isLoading: true, errorMessage: null));
 
     try {
       final success = await _endUseCase.execute(
@@ -163,17 +167,19 @@ class EmergencySessionNotifier extends _$EmergencySessionNotifier {
       );
 
       if (success) {
-        // Refresh active session (should be null now)
-        final activeSession = await _getActiveUseCase.execute();
-
+        // Explicitly set active session to null
         // Refresh recent sessions
-        final recentSessions = await _getSessionsUseCase.getSessionsForCurrentWeek();
+        final recentSessions =
+            await _getSessionsUseCase.getSessionsForCurrentWeek();
 
         state = AsyncValue.data(state.value!.copyWith(
-          activeSession: activeSession,
+          activeSession: null, // Explicitly set to null
           recentSessions: recentSessions,
           isLoading: false,
         ));
+
+        // Force a rebuild to ensure the UI updates
+        ref.invalidateSelf();
       } else {
         state = AsyncValue.data(state.value!.copyWith(
           isLoading: false,
@@ -196,7 +202,8 @@ class EmergencySessionNotifier extends _$EmergencySessionNotifier {
       return;
     }
 
-    state = AsyncValue.data(state.value!.copyWith(isLoading: true, errorMessage: null));
+    state = AsyncValue.data(
+        state.value!.copyWith(isLoading: true, errorMessage: null));
 
     try {
       final success = await _repository.addTriggerToSession(

@@ -2,17 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/services/notification_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/emergency_session_provider_refactored.dart';
 import '../../widgets/emergency/floating_help_button.dart';
 import '../triggers/trigger_collection_screen.dart';
 
 /// Main home screen of the app
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   /// Constructor
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Check for active emergency sessions after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForActiveEmergencySessions();
+    });
+  }
+
+  /// Check for active emergency sessions and show notification if needed
+  Future<void> _checkForActiveEmergencySessions() async {
+    // Get the emergency repository
+    final emergencyRepository = ref.read(emergencyRepositoryProvider);
+
+    // Check if there's an active session
+    final activeSession = await emergencyRepository.getActiveSession();
+
+    if (!mounted) return;
+
+    if (activeSession != null) {
+      // Show notification about active session
+      final notificationService = NotificationService();
+      await notificationService.showActiveSessionNotification(context);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
 

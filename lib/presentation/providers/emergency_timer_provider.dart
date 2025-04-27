@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'emergency_session_provider.dart';
+import 'emergency_session_provider_refactored.dart';
 import '../../domain/usecases/emergency/get_active_session_usecase.dart';
 
 /// State for the emergency timer
@@ -67,16 +67,18 @@ class EmergencyTimerNotifier extends StateNotifier<EmergencyTimerState> {
 
   void _setupListeners() {
     // Listen to changes in the emergency session state
-    _ref.listen(emergencySessionProvider, (previous, next) {
-      // If we have an active session but the timer isn't running, start it
-      if (next.activeSession != null && !state.isRunning) {
-        startTimer();
-      }
+    _ref.listen(emergencySessionNotifierProvider, (previous, next) {
+      if (next.hasValue && next.value != null) {
+        // If we have an active session but the timer isn't running, start it
+        if (next.value!.activeSession != null && !state.isRunning) {
+          startTimer();
+        }
 
-      // If we don't have an active session but the timer is running, stop it
-      if (next.activeSession == null && state.isRunning) {
-        stopTimer();
-        resetTimer();
+        // If we don't have an active session but the timer is running, stop it
+        if (next.value!.activeSession == null && state.isRunning) {
+          stopTimer();
+          resetTimer();
+        }
       }
     });
   }
@@ -140,14 +142,3 @@ class EmergencyTimerNotifier extends StateNotifier<EmergencyTimerState> {
     super.dispose();
   }
 }
-
-/// Provider for the emergency timer
-final emergencyTimerProvider =
-    StateNotifierProvider<EmergencyTimerNotifier, EmergencyTimerState>((ref) {
-  final getActiveUseCase = ref.watch(getActiveSessionUseCaseProvider);
-
-  return EmergencyTimerNotifier(
-    getActiveUseCase: getActiveUseCase,
-    ref: ref,
-  );
-});

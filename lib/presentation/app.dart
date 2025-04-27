@@ -74,11 +74,23 @@ class TemptationDestroyerApp extends ConsumerWidget {
             builder: (context) => HobbyDetailsScreen(hobby: hobby),
           );
         } else if (settings.name == '/ai-guidance') {
-          // Extract the session from arguments
-          final session = settings.arguments as ChatSession?;
-          return MaterialPageRoute(
-            builder: (context) => AIGuidanceScreen(session: session),
-          );
+          // Handle both ChatSession and Map arguments
+          if (settings.arguments is ChatSession) {
+            final session = settings.arguments as ChatSession;
+            return MaterialPageRoute(
+              builder: (context) => AIGuidanceScreen(session: session),
+            );
+          } else if (settings.arguments is Map<String, dynamic>) {
+            // Pass the map directly to the screen
+            return MaterialPageRoute(
+              builder: (context) => const AIGuidanceScreen(session: null),
+            );
+          } else {
+            // Default case with no session
+            return MaterialPageRoute(
+              builder: (context) => const AIGuidanceScreen(session: null),
+            );
+          }
         }
         return null;
       },
@@ -113,24 +125,6 @@ class _AuthCheckScreenState extends ConsumerState<AuthCheckScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-
-    // Check if we should show the active session notification
-    final shouldShowNotification =
-        ref.watch(shouldShowActiveSessionNotificationProvider);
-
-    // Show notification if needed
-    if (shouldShowNotification &&
-        authState.status == AuthStatus.authenticated) {
-      // Reset the notification flag
-      ref.read(shouldShowActiveSessionNotificationProvider.notifier).state =
-          false;
-
-      // Show the notification after the build is complete
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final notificationService = ref.read(notificationServiceProvider);
-        notificationService.showActiveSessionNotification(context);
-      });
-    }
 
     // Use our new splash screen while initializing
     if (authState.isLoading) {

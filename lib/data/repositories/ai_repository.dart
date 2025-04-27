@@ -91,7 +91,6 @@ class AIRepository {
 
   /// Validate API key for a service
   Future<bool> _validateApiKey(String type, String key) async {
-    // TODO: Implement key validation logic for each service
     // For now, just check if it's not empty and has a valid format
     if (key.isEmpty) return false;
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../presentation/providers/emergency_session_provider_refactored.dart';
 
 /// Service for showing in-app notifications
 class NotificationService {
@@ -52,27 +53,50 @@ class NotificationService {
   Future<void> showActiveSessionNotification(BuildContext context) async {
     await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Active Emergency Session'),
-        content: const Text(
-          'You have an active emergency session. Would you like to continue it or end it?',
+      barrierDismissible: false, // User must make a choice
+      builder: (context) => Consumer(
+        builder: (context, ref, _) => AlertDialog(
+          title: const Text('Active Emergency Session'),
+          content: const Text(
+            'You have an active emergency session. Would you like to continue it or end it?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/emergency');
+              },
+              child: const Text('Continue Session'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Get the navigator and scaffold messenger before async operations
+                final navigator = Navigator.of(context);
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                // End the session
+                final notifier =
+                    ref.read(emergencySessionNotifierProvider.notifier);
+
+                // Close the dialog first
+                navigator.pop();
+
+                // Then perform the async operations
+                Future.microtask(() async {
+                  await notifier.endEmergencySession(wasSuccessful: true);
+                  // Show confirmation
+                  scaffoldMessenger.showSnackBar(
+                    const SnackBar(
+                      content: Text('Emergency session ended successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                });
+              },
+              child: const Text('End Session'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pushNamed('/emergency');
-            },
-            child: const Text('Continue Session'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // TODO: Implement end session functionality
-            },
-            child: const Text('End Session'),
-          ),
-        ],
       ),
     );
   }

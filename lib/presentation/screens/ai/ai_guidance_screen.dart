@@ -80,9 +80,6 @@ class _AIGuidanceScreenState extends ConsumerState<AIGuidanceScreen> {
         }
       }
 
-      // Set the session parameter for the chat provider
-      ref.read(chatSessionParam.notifier).state = _session;
-
       _isInitialized = true;
     }
   }
