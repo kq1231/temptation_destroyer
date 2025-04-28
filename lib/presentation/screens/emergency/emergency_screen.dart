@@ -7,7 +7,7 @@ import '../../providers/emergency_session_provider_refactored.dart';
 import '../../providers/chat_provider.dart';
 import '../../widgets/emergency/emergency_widgets.dart';
 import '../../widgets/emergency/emergency_timer_widget.dart';
-import '../../widgets/emergency_chat_widget.dart';
+import '../ai/ai_guidance_screen.dart';
 import 'emergency_resolution_form.dart';
 
 /// Screen that displays when the user is in an active emergency session
@@ -169,19 +169,54 @@ class EmergencyScreen extends ConsumerWidget {
                 // Clear any existing chat session
                 ref.invalidate(chatProvider);
 
-                // Navigate to AI guidance screen with emergency mode activated
+                // Navigate to AI guidance screen with emergency context
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => Consumer(
                       builder: (context, ref, _) {
-                        // Activate emergency mode directly
+                        // Use the normal AI guidance screen with emergency context
                         return Scaffold(
-                          body: EmergencyChatWidget(
-                            triggerMessage:
-                                'Emergency Session: ${activeSession?.sessionId ?? "Active"}',
-                            onExit: () {
-                              Navigator.of(context).pop();
-                            },
+                          appBar: AppBar(
+                            title: const Text('Emergency Guidance'),
+                            backgroundColor: AppColors.emergencyRed,
+                            foregroundColor: Colors.white,
+                            leading: IconButton(
+                              icon: const Icon(Icons.arrow_back),
+                              onPressed: () => Navigator.of(context).pop(),
+                            ),
+                          ),
+                          body: Column(
+                            children: [
+                              // Emergency banner
+                              Container(
+                                color: AppColors.emergencyRed
+                                    .withValues(alpha: 25),
+                                padding: const EdgeInsets.all(12),
+                                child: const Row(
+                                  children: [
+                                    Icon(Icons.warning_amber_rounded,
+                                        color: AppColors.emergencyRed),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Emergency Mode: Get guidance to overcome this challenge',
+                                        style: TextStyle(
+                                          color: AppColors.emergencyRed,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Use the normal AI guidance screen
+                              const Expanded(
+                                child: AIGuidanceScreen(
+                                  session: null, // Create a new session
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       },

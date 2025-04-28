@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/models/statistics_model.dart';
+import '../../providers/statistics_provider.dart';
 
-class WeeklyProgressChart extends StatelessWidget {
+class WeeklyProgressChart extends ConsumerWidget {
   final StatisticsModel statistics;
 
   const WeeklyProgressChart({
@@ -10,7 +12,9 @@ class WeeklyProgressChart extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final weeklyProgressAsync = ref.watch(weeklyProgressProvider);
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -31,7 +35,14 @@ class WeeklyProgressChart extends StatelessWidget {
             const SizedBox(height: 16),
             SizedBox(
               height: 150,
-              child: _buildWeeklyChart(context),
+              child: weeklyProgressAsync.when(
+                data: (data) => _buildWeeklyChart(context, data),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, stack) => Center(
+                  child: Text('Error: $error',
+                      style: const TextStyle(color: Colors.red)),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             _buildLegend(),
@@ -41,22 +52,18 @@ class WeeklyProgressChart extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyChart(BuildContext context) {
-    // For MVP, we're using a simple representation
-    // In a real app, we would use a chart library
-    // like fl_chart, charts_flutter or syncfusion_flutter_charts
+  Widget _buildWeeklyChart(
+      BuildContext context, Map<String, dynamic> weeklyData) {
+    final List<String> labels = List<String>.from(weeklyData['labels']);
+    final List<int> values = List<int>.from(weeklyData['values']);
 
-    // This is hard-coded for demonstration
-    // Eventually this would come from actual user data
-    final weekData = [
-      {'day': 'Mon', 'success': true},
-      {'day': 'Tue', 'success': true},
-      {'day': 'Wed', 'success': true},
-      {'day': 'Thu', 'success': false},
-      {'day': 'Fri', 'success': true},
-      {'day': 'Sat', 'success': true},
-      {'day': 'Sun', 'success': true},
-    ];
+    final weekData = List.generate(
+      7,
+      (index) => {
+        'day': labels[index],
+        'success': values[index] == 1,
+      },
+    );
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,

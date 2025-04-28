@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../../core/utils/object_box_manager.dart';
 import '../../core/security/secure_storage_service.dart';
 import '../../core/utils/encryption_service.dart';
+import '../../core/utils/encoding_helper.dart';
 import '../models/ai_models.dart';
 import '../models/chat_session_model.dart';
 import '../../objectbox.g.dart';
@@ -378,7 +379,9 @@ class AIRepository {
             ),
           );
 
-          final responseData = response.data;
+          // Convert Dio response to a format we can use with EncodingHelper
+          final responseData = json
+              .decode(EncodingHelper.encodeText(json.encode(response.data)));
           return responseData['choices'][0]['message']['content'] as String;
         } on DioException catch (e) {
           if (e.response?.statusCode == 429 || e.response?.statusCode == 500) {
@@ -481,7 +484,9 @@ class AIRepository {
             ),
           );
 
-          final responseData = response.data;
+          // Convert Dio response to a format we can use with EncodingHelper
+          final responseData = json
+              .decode(EncodingHelper.encodeText(json.encode(response.data)));
           return responseData['content'][0]['text'] as String;
         } on DioException catch (e) {
           if (e.response?.statusCode == 429 || e.response?.statusCode == 500) {
@@ -577,7 +582,9 @@ class AIRepository {
             ),
           );
 
-          final responseData = response.data;
+          // Convert Dio response to a format we can use with EncodingHelper
+          final responseData = json
+              .decode(EncodingHelper.encodeText(json.encode(response.data)));
           return responseData['choices'][0]['message']['content'] as String;
         } on DioException catch (e) {
           if (e.response?.statusCode == 429 || e.response?.statusCode == 500) {
@@ -1191,7 +1198,8 @@ class AIRepository {
     // Don't check for API key if we're in offline mode
     if (serviceConfig.serviceType == AIServiceType.offline) {
       AppLogger.debug('Using offline mode');
-      yield 'I am currently in offline mode. Please switch to an online AI service for more personalized guidance.';
+      yield EncodingHelper.encodeText(
+          'I am currently in offline mode. Please switch to an online AI service for more personalized guidance.');
       return;
     }
 
@@ -1200,7 +1208,8 @@ class AIRepository {
       final apiKey = await _getSecureApiKey(serviceConfig.serviceType);
       if (apiKey == null || apiKey.isEmpty) {
         AppLogger.debug('No API key found, returning error message');
-        yield "⚠️ Error: No API key found for ${serviceConfig.serviceType}. Please add your API key in the settings.";
+        yield EncodingHelper.encodeText(
+            "⚠️ Error: No API key found for ${serviceConfig.serviceType}. Please add your API key in the settings.");
         return;
       }
 
@@ -1208,14 +1217,16 @@ class AIRepository {
       final isValid = await _validateApiKey(serviceConfig.serviceType, apiKey);
       if (!isValid) {
         AppLogger.debug('Invalid API key, returning error message');
-        yield "⚠️ Error: Invalid API key format for ${serviceConfig.serviceType}. Please check your API key in the settings.";
+        yield EncodingHelper.encodeText(
+            "⚠️ Error: Invalid API key format for ${serviceConfig.serviceType}. Please check your API key in the settings.");
         return;
       }
 
       // Check rate limiting
       if (!_canMakeRequest(serviceConfig.serviceType)) {
         AppLogger.debug('Rate limit exceeded');
-        yield "⚠️ Error: Rate limit exceeded for ${serviceConfig.serviceType}. Please try again in a minute.";
+        yield EncodingHelper.encodeText(
+            "⚠️ Error: Rate limit exceeded for ${serviceConfig.serviceType}. Please try again in a minute.");
         return;
       }
 
@@ -1233,12 +1244,12 @@ class AIRepository {
           yield chunk;
         }
       } catch (e) {
-        // If there's an error during streaming, yield an error message
-        yield "⚠️ Error: ${e.toString()}";
+        // If there's an error during streaming, yield a sanitized error message
+        yield EncodingHelper.encodeText("⚠️ Error: ${e.toString()}");
       }
     } catch (e) {
       AppLogger.debug('Error generating AI response: $e');
-      yield "⚠️ Error: ${e.toString()}";
+      yield EncodingHelper.encodeText("⚠️ Error: ${e.toString()}");
     }
   }
 
@@ -1273,7 +1284,8 @@ class AIRepository {
         }
       } else if (config.serviceType == AIServiceType.offline) {
         AppLogger.debug('Using offline mode');
-        yield "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.";
+        yield EncodingHelper.encodeText(
+            "I'm currently in offline mode. Please switch to an online AI service for more personalized guidance.");
       } else {
         AppLogger.debug('Unknown AI service type');
         yield "Unknown AI service type. Please switch to a supported AI service.";
@@ -1281,9 +1293,9 @@ class AIRepository {
     } catch (e) {
       AppLogger.debug('Error in streaming request: $e');
       if (e is AIServiceException) {
-        yield "⚠️ Error: ${e.message}";
+        yield EncodingHelper.encodeText("⚠️ Error: ${e.message}");
       } else {
-        yield "⚠️ Error: ${e.toString()}";
+        yield EncodingHelper.encodeText("⚠️ Error: ${e.toString()}");
       }
     }
   }
@@ -1346,7 +1358,10 @@ class AIRepository {
               if (data['choices'] != null &&
                   data['choices'][0]['delta'] != null &&
                   data['choices'][0]['delta']['content'] != null) {
-                yield data['choices'][0]['delta']['content'] as String;
+                // Sanitize the chunk with EncodingHelper before yielding
+                final content =
+                    data['choices'][0]['delta']['content'] as String;
+                yield EncodingHelper.encodeText(content);
               }
             } catch (e) {
               AppLogger.debug('Error parsing SSE chunk: $e');
@@ -1424,7 +1439,9 @@ class AIRepository {
               if (data['type'] == 'content_block_delta' &&
                   data['delta'] != null &&
                   data['delta']['text'] != null) {
-                yield data['delta']['text'] as String;
+                // Sanitize the chunk with EncodingHelper before yielding
+                final content = data['delta']['text'] as String;
+                yield EncodingHelper.encodeText(content);
               }
             } catch (e) {
               AppLogger.debug('Error parsing Anthropic SSE chunk: $e');
@@ -1522,7 +1539,10 @@ class AIRepository {
               if (data['choices'] != null &&
                   data['choices'][0]['delta'] != null &&
                   data['choices'][0]['delta']['content'] != null) {
-                yield data['choices'][0]['delta']['content'] as String;
+                // Sanitize the chunk with EncodingHelper before yielding
+                final content =
+                    data['choices'][0]['delta']['content'] as String;
+                yield EncodingHelper.encodeText(content);
               }
             } catch (e) {
               AppLogger.debug('Error parsing OpenRouter SSE chunk: $e');
